@@ -1,0 +1,337 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>9장 보조기억장치</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F6FB; --surface:#FFFFFF; --ink:#17263C; --muted:#50637C; --line:#CBD8E8;
+  --green:#1456A0; --greenbg:#E8F1FE; --blue:#087C88; --bluebg:#E2F6F5;
+  --amber:#915710; --amberbg:#FFF3DF; --head:#EAF0F9; --grayfill:#DFE9F5;
+  --sans:"IBM Plex Sans KR","Noto Sans KR",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans);word-break:keep-all;overflow-wrap:break-word;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 96px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+/* 상단 */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.series{font:500 11px var(--mono);letter-spacing:.09em;color:var(--green);text-transform:uppercase}
+.theme-btn{font:500 11px var(--mono);padding:4px 10px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--muted);cursor:pointer}
+.chaps{display:flex;flex-wrap:wrap;gap:4px}
+.chaps a{font:500 11px var(--mono);padding:3px 8px;border-radius:3px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.chaps a.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+
+
+.chaps a{text-decoration:none}.chaps a:hover{border-color:var(--green);color:var(--green);background:var(--greenbg)}
+.chaps a.on:hover{background:var(--green);color:var(--surface)}
+.chaps a.back-index{font-weight:700;color:var(--green);border-color:var(--green)}
+/* 페이지 */
+.pg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px clamp(16px,4vw,40px) 32px;display:flex;flex-direction:column;gap:18px;min-height:600px}
+.pg[hidden]{display:none!important}
+.pg-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+.pg-no{font:600 11px var(--mono);color:var(--green);letter-spacing:.06em;white-space:nowrap}
+h1{margin:0;font-size:clamp(26px,5vw,40px);line-height:1.2;text-wrap:balance}
+h2{margin:0;font-size:clamp(19px,3vw,24px);line-height:1.3;text-wrap:balance}
+h3{margin:4px 0 0;font-size:14px}
+p{margin:0}
+.lead{color:var(--muted);font-size:15.5px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;align-items:start}
+.cols>*{min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+ul.pts{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+
+/* 카드·표 */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--surface)}
+.card b{color:var(--green);font-size:13px}
+.card span{font-size:13px;color:var(--muted)}
+.card .num{font:600 22px/1.3 var(--mono);color:var(--ink)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--head);font-weight:500;font-size:11.5px;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+code{font-family:var(--mono);font-size:12px;background:var(--head);padding:1px 4px;border-radius:3px}
+
+pre{margin:0;padding:14px 16px;overflow-x:auto;background:var(--head);border:1px solid var(--line);border-radius:6px;font:400 12.5px/1.6 var(--mono);min-width:0;word-break:normal}
+pre code{background:none;padding:0;font-size:inherit}
+/* 콜아웃 */
+.note,.tip,.warn{padding:10px 14px;border-radius:4px;font-size:13.5px}
+.note{background:var(--greenbg)}
+.tip{background:var(--bluebg);border-left:3px solid var(--blue)}
+.warn{background:var(--amberbg);border-left:3px solid var(--amber)}
+.lbl{font:600 10.5px var(--mono);letter-spacing:.05em;margin-right:6px}
+.note .lbl{color:var(--green)} .tip .lbl{color:var(--blue)} .warn .lbl{color:var(--amber)}
+
+/* 그림 */
+figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.fig{overflow-x:auto;border:1px solid var(--line);border-radius:6px;padding:16px;background:var(--surface)}
+.fig svg{display:block;width:100%;height:auto}
+figcaption{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+figcaption .src{font:400 11px var(--mono)}
+figcaption a{color:var(--blue)}
+.redraw{display:inline-block;font:600 10px var(--mono);color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:0 4px;margin-right:6px;vertical-align:1px}
+
+/* SVG */
+.box{fill:var(--surface);stroke:var(--ink);stroke-width:1.4}
+.boxg{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.2}
+.boxn{fill:var(--greenbg);stroke:var(--green);stroke-width:1.6}
+.boxb{fill:var(--bluebg);stroke:var(--blue);stroke-width:1.4}
+.boxd{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+.ln{fill:none;stroke:var(--ink);stroke-width:1.4}
+.lg{fill:none;stroke:var(--green);stroke-width:1.6}
+.lb{fill:none;stroke:var(--blue);stroke-width:1.6}
+.lm{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 3}
+.t{fill:var(--ink);font:500 13px var(--sans)}
+.tc{text-anchor:middle}
+.ts{fill:var(--muted);font:400 11px var(--mono);text-anchor:middle}
+.tg{fill:var(--green);font:600 13px var(--sans);text-anchor:middle}
+.tb{fill:var(--blue);font:600 12px var(--sans);text-anchor:middle}
+.chipc{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.4}
+.pin rect{fill:var(--amber)}
+.trace{stroke:var(--muted);stroke-width:2;opacity:.6}
+.die{fill:#20262E;stroke:var(--muted);stroke-width:1.2} .mem{fill:#4B545F;stroke:var(--muted);stroke-width:1}
+.dt{fill:#F1F3F6;font:700 16px var(--sans);text-anchor:middle}
+.dts{fill:#D9DEE4;font:500 12px var(--sans);text-anchor:middle}
+.ah{fill:var(--ink)} .ag{fill:var(--green)} .ab{fill:var(--blue)}
+
+/* 넘김 */
+.pager{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.pager-in{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pager button{font:500 13px var(--sans);padding:7px 14px;border-radius:5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pager button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.dots button{width:26px;height:26px;padding:0;font:500 11px var(--mono);border-radius:50%}
+.dots button.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+.pos{display:none;font:600 13px var(--mono);color:var(--ink)}
+@media (max-width:600px){.dots{display:none}.pos{display:block}.pager button{padding:6px 12px;white-space:nowrap}}
+</style>
+<div class="wrap">
+  <div class="top"><span class="series">컴퓨터시스템구조 · MicroBlaze V SoC 도입 이론</span><button class="theme-btn" id="theme">다크 / 라이트</button></div>
+  <div class="chaps"><a class="back-index" href="index.html">⌂ 전체 목차</a><a class="" href="01%EC%9E%A5%20%EC%BB%B4%ED%93%A8%ED%84%B0%EA%B5%AC%EC%A1%B0%EC%9D%98%20%ED%81%B0%EA%B7%B8%EB%A6%BC.html" >1 큰그림</a><a class="" href="02%EC%9E%A5%20%EB%8D%B0%EC%9D%B4%ED%84%B0.html" >2 데이터</a><a class="" href="03%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4.html" >3 명령어</a><a class="" href="04%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%EC%9D%98%20%EA%B5%AC%EC%A1%B0.html" >4 명령어 구조</a><a class="" href="05%EC%9E%A5%20CPU%20%EA%B5%AC%EC%84%B1.html" >5 CPU 구성</a><a class="" href="06%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%20%EC%82%AC%EC%9D%B4%ED%81%B4%EA%B3%BC%20%EC%9D%B8%ED%84%B0%EB%9F%BD%ED%8A%B8.html" >6 명령어 사이클</a><a class="" href="07%EC%9E%A5%20CPU%20%EC%84%B1%EB%8A%A5%20%ED%96%A5%EC%83%81.html" >7 성능 향상</a><a class="" href="08%EC%9E%A5%20%EB%A9%94%EB%AA%A8%EB%A6%AC.html" >8 메모리</a><a class="on" href="09%EC%9E%A5%20%EB%B3%B4%EC%A1%B0%EA%B8%B0%EC%96%B5%EC%9E%A5%EC%B9%98.html" aria-current="page">9 보조기억</a><a class="" href="10%EC%9E%A5%20%EC%9E%85%EC%B6%9C%EB%A0%A5%EC%9E%A5%EC%B9%98.html" >10 입출력</a></div>
+<!-- 9장 보조기억장치 : 10페이지 (gen_ch09.py로 생성) -->
+<section class="pg">
+  <div class="pg-head"><span class="pg-no">9장 · 1 / 10</span><span class="pg-no">표지</span></div>
+  <h1>보조기억장치</h1>
+  <p class="lead">전원을 끄면 레지스터·BRAM의 내용과 FPGA의 구성 정보는 사라진다. HDD·플래시의 비휘발성 원리를 배우고, Basys3가 QSPI 플래시의 비트스트림을 읽어 MicroBlaze V 프로그램을 실행하는 흐름을 따라간다.</p>
+  <div class="cards"><div class="card"><b>학습 목표 1</b><span>휘발성과 비휘발성 메모리를 구분할 수 있다.</span></div><div class="card"><b>학습 목표 2</b><span>하드디스크와 플래시 메모리의 원리를 설명할 수 있다.</span></div><div class="card"><b>학습 목표 3</b><span>FPGA 구성과 SoC 부팅 순서를 말할 수 있다.</span></div></div>
+  <figure><div class="fig"><svg viewBox="0 0 720 165" style="min-width:560px" role="img" aria-label="10개 장 테크트리">
+<defs><marker id="at" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+<rect x="10" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="72" y="42" class="t tc">1 큰그림</text><text x="72" y="60" class="ts">CPU·메모리·I/O</text>
+<rect x="152" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="214" y="42" class="t tc">2 데이터</text><text x="214" y="60" class="ts">2진수·16진수</text>
+<rect x="294" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="356" y="42" class="t tc">3 명령어</text><text x="356" y="60" class="ts">소스→실행파일</text>
+<rect x="436" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="498" y="42" class="t tc">4 명령어 구조</text><text x="498" y="60" class="ts">오퍼랜드·스택</text>
+<rect x="578" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="640" y="42" class="t tc">5 CPU 구성</text><text x="640" y="60" class="ts">ALU·레지스터</text>
+<rect x="10" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="72" y="127" class="t tc">6 명령어 사이클</text><text x="72" y="145" class="ts">인출·인터럽트</text>
+<rect x="152" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="214" y="127" class="t tc">7 성능 향상</text><text x="214" y="145" class="ts">파이프라인·RISC</text>
+<rect x="294" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="356" y="127" class="t tc">8 메모리</text><text x="356" y="145" class="ts">주소공간·캐시</text>
+<rect x="436" y="105" width="124" height="52" rx="5" class="boxn"/>
+<text x="498" y="127" class="tg">9 보조기억</text><text x="498" y="145" class="ts">플래시·부팅</text>
+<rect x="578" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="640" y="127" class="t tc">10 입출력</text><text x="640" y="145" class="ts">폴링·인터럽트</text>
+<line x1="134" y1="46" x2="151" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="46" x2="293" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="46" x2="435" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="46" x2="577" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="134" y1="131" x2="151" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="131" x2="293" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="131" x2="435" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="131" x2="577" y2="131" class="ln" marker-end="url(#at)"/>
+<path d="M640 72 V88 H72 V104" class="ln" marker-end="url(#at)"/></svg></div><figcaption>그림 9-1 · 10개 장 테크트리</figcaption></figure>
+  <div class="scroll"><table><tr><th>페이지</th><th>내용</th><th>페이지</th><th>내용</th></tr><tr><td>1</td><td>표지 · 학습 목표</td><td>6</td><td>SSD</td></tr><tr><td>2</td><td>보조기억장치란</td><td>7</td><td>SPI · QSPI 연결</td></tr><tr><td>3</td><td>하드디스크(HDD)</td><td>8</td><td>FPGA 구성</td></tr><tr><td>4</td><td>플래시 메모리의 원리</td><td>9</td><td>SoC 부팅</td></tr><tr><td>5</td><td>NAND와 NOR</td><td>10</td><td>정리</td></tr></table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>보조기억장치란 — 꺼도 남는 저장</h2><span class="pg-no">9장 · 2 / 10</span></div>
+  <p>8장의 주기억장치(RAM)는 빠르지만 전원을 끄면 내용이 사라진다(<strong>휘발성</strong>). 프로그램과 데이터를 오래 보관하려면 전원 없이도 내용이 남는(<strong>비휘발성</strong>) 저장장치가 필요하다. 이것이 <strong>보조기억장치</strong>다. 일반 PC는 보통 저장된 프로그램을 RAM으로 적재해 실행한다. Basys3 FPGA 구성에서는 비휘발성 플래시의 구성 데이터를 내부 SRAM으로 로드하며, 이것이 CPU 프로그램 적재와는 구별된다.</p>
+  <div class="scroll"><table>
+    <tr><th>장치</th><th>저장 원리</th><th>용량 (일반적)</th><th>읽기 속도</th><th>움직이는 부품</th></tr>
+    <tr><td>HDD</td><td>원판의 자성</td><td>수 TB</td><td>느림 (ms 단위 대기)</td><td>있음</td></tr>
+    <tr><td>SSD</td><td>NAND 플래시</td><td>수백 GB ~ 수 TB</td><td>빠름</td><td>없음</td></tr>
+    <tr><td>SD · USB 메모리</td><td>NAND 플래시</td><td>수 GB ~ 수백 GB</td><td>중간</td><td>없음</td></tr>
+    <tr><td>SPI 플래시</td><td>주로 NOR 플래시 (제품별 확인)</td><td>수 MB부터 다양</td><td>인터페이스·클록·명령 방식에 따라 변동</td><td>없음</td></tr>
+    <tr><td>광디스크</td><td>표면의 홈 · 반사</td><td>수 GB</td><td>느림</td><td>있음</td></tr>
+  </table></div>
+  <div class="cards">
+    <div class="card"><b>휘발성</b><span>레지스터 · 캐시 · SRAM · DRAM · FPGA 구성 메모리</span></div>
+    <div class="card"><b>비휘발성</b><span>HDD · SSD · 플래시 · ROM</span></div>
+    <div class="card"><b>Basys3 보드</b><span>32 Mbit(4 MiB) 직렬 플래시 — 프로그램의 BRAM 초기값을 포함한 FPGA 비트스트림을 보관 가능</span></div>
+  </div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>하드디스크(HDD) — 도는 원판</h2><span class="pg-no">9장 · 3 / 10</span></div>
+  <p><strong>하드디스크</strong>는 자성 물질을 입힌 원판(플래터)을 빠르게 돌리고, 팔 끝의 헤드로 자기 방향을 읽고 쓴다. 원판은 동심원(<strong>트랙</strong>)으로, 트랙은 조각(<strong>섹터</strong>)으로 나뉜다. 원하는 데이터를 읽으려면 헤드가 트랙으로 가고(탐색), 섹터가 헤드 아래로 돌아올 때까지 기다려야 한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 280" style="min-width:560px" role="img" aria-label="하드디스크 구조"><defs><marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><circle cx="200" cy="140" r="120" class="boxg"/><circle cx="200" cy="140" r="95" class="lm" style="fill:none"/><circle cx="200" cy="140" r="70" class="lm" style="fill:none"/><circle cx="200" cy="140" r="45" class="lm" style="fill:none"/><circle cx="200" cy="140" r="16" class="box"/><path d="M295 140 A95 95 0 0 0 267.2 72.8 L249.5 90.5 A70 70 0 0 1 270 140 Z" class="boxn" style="opacity:.8"/><circle cx="200" cy="140" r="70" class="lb" style="fill:none;stroke-width:3"/><path d="M420 40 L250 92" class="ln" style="stroke-width:6;stroke-linecap:round"/><circle cx="420" cy="40" r="10" class="box"/><rect x="242" y="86" width="14" height="10" rx="2" class="boxb"/><path d="M370 250 A20 20 0 1 0 330 250" class="lm" marker-end="url(#m3)"/><text x="350" y="272" class="ts">회전 (7200 rpm)</text><text x="470" y="60" class="t" style="text-anchor:start;font-size:13px;font-weight:600">헤드 · 암</text><text x="470" y="78" class="ts" style="text-anchor:start">원하는 트랙으로 움직인다 (탐색)</text><text x="470" y="120" class="t" style="text-anchor:start;font-size:13px;font-weight:600">트랙</text><text x="470" y="138" class="ts" style="text-anchor:start">같은 반지름의 원 (파란 원)</text><text x="470" y="180" class="t" style="text-anchor:start;font-size:13px;font-weight:600">섹터</text><text x="470" y="198" class="ts" style="text-anchor:start">트랙의 한 조각 (녹색) · 읽기 단위</text><text x="470" y="240" class="t" style="text-anchor:start;font-size:13px;font-weight:600">플래터</text><text x="470" y="258" class="ts" style="text-anchor:start">자성을 띤 원판, 여러 장</text></svg></div><figcaption>그림 9-2 · 하드디스크의 구조 (섹터는 트랙의 일부이며 그림은 원리 설명용)</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>걸리는 시간</th><th>뜻</th><th>크기 (예)</th></tr>
+    <tr><td>탐색 시간</td><td>헤드가 트랙으로 움직이는 시간</td><td>수 ms</td></tr>
+    <tr><td>회전 지연</td><td>섹터가 헤드 아래로 오는 시간</td><td>7200 rpm: 한 바퀴 8.33 ms, 평균 반 바퀴 4.17 ms</td></tr>
+    <tr><td>전송 시간</td><td>실제로 읽는 시간</td><td>짧다</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>예를 들어 메모리 접근 10 ns와 HDD 접근 10 ms를 비교하면 시간 비율은 100만 배다. 수치는 원리 설명용이며 실제 접근 시간은 요청·캐시·저장장치에 따라 다르다. 운영체제는 자주 쓰는 데이터를 RAM에 보관하여 디스크 접근을 줄인다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>플래시 메모리의 원리 — 갇힌 전자</h2><span class="pg-no">9장 · 4 / 10</span></div>
+  <p><strong>플래시 메모리</strong>의 대표적인 저장 셀은 절연막으로 전자를 가둔 <strong>플로팅 게이트</strong>를 사용한다. 저장된 전하가 트랜지스터의 문턱전압을 바꾸므로, 읽기 회로는 이 차이를 감지해 데이터를 구분한다. 현대 NAND에서는 전하 트랩(Charge Trap) 등 다른 셀 구조도 사용한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 250" style="min-width:560px" role="img" aria-label="플로팅 게이트 트랜지스터"><rect x="80" y="160" width="400" height="60" rx="3" class="boxg"/><text x="280" y="196" class="ts">실리콘 기판</text><rect x="100" y="150" width="80" height="22" rx="3" class="box"/><text x="140" y="166" class="ts">소스</text><rect x="380" y="150" width="80" height="22" rx="3" class="box"/><text x="420" y="166" class="ts">드레인</text><rect x="190" y="132" width="180" height="10" class="boxd"/><text x="378" y="141" class="ts" style="text-anchor:start;font-size:10px">얇은 절연막</text><rect x="190" y="98" width="180" height="32" rx="3" class="boxn"/><text x="280" y="112" class="tg" style="font-size:12px">플로팅 게이트</text><circle cx="212" cy="123" r="3" class="ab"/><circle cx="240" cy="123" r="3" class="ab"/><circle cx="268" cy="123" r="3" class="ab"/><circle cx="296" cy="123" r="3" class="ab"/><circle cx="324" cy="123" r="3" class="ab"/><circle cx="352" cy="123" r="3" class="ab"/><rect x="190" y="84" width="180" height="12" class="boxd"/><rect x="190" y="44" width="180" height="38" rx="3" class="box"/><text x="280" y="68" class="t tc" style="font-size:12px">제어 게이트</text><text x="530" y="70" class="t" style="text-anchor:start;font-size:13px;font-weight:600">쓰기(프로그램)</text><text x="530" y="88" class="ts" style="text-anchor:start">높은 전압으로 전자를 가둔다</text><text x="530" y="130" class="t" style="text-anchor:start;font-size:13px;font-weight:600">지우기</text><text x="530" y="148" class="ts" style="text-anchor:start">반대 전압으로 전자를 뺀다</text><text x="530" y="164" class="ts" style="text-anchor:start">블록 단위로 한꺼번에</text><text x="530" y="206" class="t" style="text-anchor:start;font-size:13px;font-weight:600">읽기</text><text x="530" y="224" class="ts" style="text-anchor:start">전자 유무로 전류가 달라짐</text><text x="280" y="242" class="ts">절연막에 둘러싸인 전자는 전원을 꺼도 빠져나가지 못한다 → 비휘발성</text></svg></div><figcaption>그림 9-3 · 플로팅 게이트 방식의 저장 원리 (교육용 단면 개념도, 실제 셀의 치수·배선은 다름)</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>특징</th><th>내용</th><th>결과</th></tr>
+    <tr><td>지우기 단위</td><td>일반적으로 섹터·블록처럼 여러 바이트를 묶어서 지움</td><td>임의의 기존 값을 덮어쓰려면 읽기·지우기·재프로그램이 필요할 수 있음</td></tr>
+    <tr><td>프로그램 방향</td><td>일반 NOR 플래시는 지운 상태의 1비트를 0으로 프로그램</td><td>0을 다시 1로 바꾸려면 해당 지우기 단위를 지워야 함</td></tr>
+    <tr><td>쓰기 수명</td><td>지우기 · 쓰기를 반복하면 절연막이 닳는다</td><td>블록마다 쓰기 횟수에 한계가 있다</td></tr>
+    <tr><td>속도</td><td>읽기는 빠르고, 지우기 · 쓰기는 느리다</td><td>L10의 플래시 굽기에 시간이 걸리는 이유</td></tr>
+  </table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>NAND와 NOR — 플래시의 두 종류</h2><span class="pg-no">9장 · 5 / 10</span></div>
+  <p>플래시 셀을 연결하는 방법에 따라 <strong>NOR 플래시</strong>와 <strong>NAND 플래시</strong>로 나뉜다. NOR는 상대적으로 임의 주소 읽기에 유리하고, NAND는 높은 집적도로 대용량 저장에 유리하다. 다만 <strong>직렬 NOR(QSPI)</strong> 역시 읽기 명령과 주소 전송이 필요하며, 병렬 NOR와 같은 핀 인터페이스로 오해해서는 안 된다.</p>
+  <div class="scroll"><table>
+    <tr><th></th><th>NOR 플래시</th><th>NAND 플래시</th></tr>
+    <tr><td>셀 연결</td><td>병렬</td><td>직렬 (여러 셀을 한 줄로)</td></tr>
+    <tr><td>읽기</td><td>임의 주소 읽기에 유리 (직렬 NOR는 명령·주소 필요)</td><td>페이지 기반 읽기·내부 버퍼 활용</td></tr>
+    <tr><td>쓰기 · 지우기</td><td>느리다</td><td>빠르다</td></tr>
+    <tr><td>집적도 · 가격</td><td>낮다 · 비싸다</td><td>높다 · 싸다</td></tr>
+    <tr><td>오류</td><td>적다</td><td>있어서 오류 정정(ECC)이 필요</td></tr>
+    <tr><td>쓰는 곳</td><td>부팅 코드, FPGA 비트스트림, 마이크로컨트롤러 펌웨어</td><td>SSD, SD 카드, USB 메모리, 스마트폰 저장공간</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">SoC 연결</span>Basys3의 32 Mbit 플래시는 NOR 계열 직렬 장치다. Digilent 매뉴얼에는 <strong>Spansion S25FL032</strong>와 <strong>Macronix MX25L3233FMI-08G</strong> 두 실장 사례가 기록되어 있다. 실제 부품은 보드의 플래시 IC 마킹 또는 Vivado의 장치 인식 결과로 확인한다.</div>
+  <p class="src" style="font:400 11px var(--mono);color:var(--muted)">출처: <a href="https://digilent.com/reference/_media/reference/programmable-logic/basys-3/basys3_rm.pdf" target="_blank" rel="noopener">Digilent Basys 3 FPGA Board Reference Manual</a> · §3 Memory</p>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>SSD — 플래시를 하드디스크처럼</h2><span class="pg-no">9장 · 6 / 10</span></div>
+  <p><strong>SSD(Solid State Drive)</strong>는 NAND 플래시 칩 여러 개와 이를 관리하는 컨트롤러로 이루어진다. 움직이는 부품이 없어 빠르고 충격에 강하다. SSD 컨트롤러의 펌웨어·주소 변환 계층(FTL)이 NAND의 페이지 읽기·쓰기와 블록 지우기를 관리한다. 운영체제에는 논리 블록 주소(LBA)로 읽고 쓰는 저장장치로 제공된다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 230" style="min-width:560px" role="img" aria-label="SSD 구조"><defs><marker id="m6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="80" width="110" height="60" rx="5" class="box"/><text x="75" y="106" class="t tc">PC</text><text x="75" y="124" class="ts">운영체제</text><line x1="130" y1="110" x2="196" y2="110" class="ln" marker-end="url(#m6)"/><text x="163" y="100" class="ts" style="font-size:10px">NVMe · SATA</text><rect x="200" y="20" width="500" height="190" rx="8" class="boxd"/><text x="690" y="38" class="ts" style="text-anchor:end">SSD</text><rect x="220" y="60" width="180" height="110" rx="5" class="boxb"/><text x="310" y="88" class="tb">컨트롤러</text><text x="310" y="110" class="ts">FTL — 주소 변환</text><text x="310" y="128" class="ts">웨어 레벨링</text><text x="310" y="146" class="ts">오류 정정 (ECC)</text><rect x="440" y="60" width="72" height="46" rx="3" class="boxg"/><text x="476" y="88" class="ts">NAND</text><rect x="525" y="60" width="72" height="46" rx="3" class="boxg"/><text x="561" y="88" class="ts">NAND</text><rect x="610" y="60" width="72" height="46" rx="3" class="boxg"/><text x="646" y="88" class="ts">NAND</text><rect x="440" y="120" width="72" height="46" rx="3" class="boxg"/><text x="476" y="148" class="ts">NAND</text><rect x="525" y="120" width="72" height="46" rx="3" class="boxg"/><text x="561" y="148" class="ts">NAND</text><rect x="610" y="120" width="72" height="46" rx="3" class="boxg"/><text x="646" y="148" class="ts">NAND</text><line x1="400" y1="115" x2="436" y2="115" class="ln" marker-end="url(#m6)"/><text x="450" y="200" class="ts" style="text-anchor:start">플래시 칩 여러 개를 동시에 읽고 쓴다</text></svg></div><figcaption>그림 9-4 · SSD의 구성</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>컨트롤러 기능</th><th>하는 일</th></tr>
+    <tr><td>FTL (Flash Translation Layer)</td><td>PC가 말하는 주소를 실제 플래시 위치로 바꾼다. 고쳐 쓸 때는 빈 곳에 새로 쓰고 주소표만 바꾼다</td></tr>
+    <tr><td>웨어 레벨링</td><td>특정 블록만 닳지 않게 쓰기를 고르게 나눈다</td></tr>
+    <tr><td>가비지 컬렉션</td><td>쓰지 않게 된 칸을 모아 블록째 지워 빈 블록을 만든다</td></tr>
+    <tr><td>ECC · 병렬 접근</td><td>오류를 고치고, 여러 칩을 동시에 써서 속도를 높인다</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>SSD는 컨트롤러와 펌웨어를 가진 독립적인 저장 시스템이다. 외부 DRAM 유무와 내부 버퍼 구조는 SSD 제품에 따라 다르다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>SPI · QSPI — 선 몇 개로 잇는 플래시</h2><span class="pg-no">9장 · 7 / 10</span></div>
+  <p>작은 플래시는 핀 수를 줄이려고 데이터를 한 비트씩 순서대로 보내는 직렬 방식으로 연결한다. 가장 흔한 것이 <strong>SPI(Serial Peripheral Interface)</strong>다. <strong>QSPI(Quad SPI)</strong>는 플래시가 지원하는 모드에서 DQ0~DQ3 네 선을 데이터 전송에 활용한다. 읽기 명령·주소·더미 사이클의 폭은 명령 모드마다 다르므로 항상 모든 구간을 4비트씩 전송하는 것은 아니다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 240" style="min-width:560px" role="img" aria-label="SPI와 QSPI 연결"><defs><marker id="m7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="30" y="30" width="170" height="180" rx="6" class="boxn"/><text x="115" y="60" class="tg">FPGA</text><text x="115" y="78" class="ts">XC7A35T</text><rect x="520" y="30" width="170" height="180" rx="6" class="boxb"/><text x="605" y="60" class="tb">QSPI 플래시</text><text x="605" y="78" class="ts">32 Mbit</text><line x1="200" y1="100" x2="516" y2="100" class="ln" marker-end="url(#m7)"/><text x="360" y="96" class="ts" style="font-size:10px">CS (칩 선택)</text><line x1="200" y1="124" x2="516" y2="124" class="ln" marker-end="url(#m7)"/><text x="360" y="120" class="ts" style="font-size:10px">SCLK (클록)</text><line x1="200" y1="148" x2="520" y2="148" class="lg"/><text x="360" y="144" class="ts" style="font-size:10px">DQ0 (MOSI)</text><line x1="200" y1="166" x2="520" y2="166" class="lg"/><text x="360" y="162" class="ts" style="font-size:10px">DQ1 (MISO)</text><line x1="200" y1="184" x2="520" y2="184" class="lg"/><text x="360" y="180" class="ts" style="font-size:10px">DQ2</text><line x1="200" y1="202" x2="520" y2="202" class="lg"/><text x="360" y="198" class="ts" style="font-size:10px">DQ3</text><text x="360" y="22" class="ts">일반 SPI: FPGA→DQ0, DQ1→FPGA / Quad 읽기: DQ0~DQ3 (모드 의존)</text></svg></div><figcaption>그림 9-5 · Basys3 FPGA와 QSPI NOR 플래시의 논리적 연결 (제어 신호 방향과 실제 핀은 Digilent 보드 매뉴얼 참조)</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>순서</th><th>FPGA가 하는 일</th><th>선</th></tr>
+    <tr><td>1</td><td>CS를 낮춰 플래시를 고른다</td><td>CS</td></tr>
+    <tr><td>2</td><td>플래시가 요구하는 읽기 명령을 보낸다</td><td>일반 SPI는 DQ0, 일부 Quad 명령은 4선 사용</td></tr>
+    <tr><td>3</td><td>읽을 시작 주소를 전송한다</td><td>명령 방식에 따라 DQ0 또는 DQ0~3</td></tr>
+    <tr><td>4</td><td>필요한 더미 사이클 뒤 데이터를 수신한다</td><td>x1 읽기: DQ1 / Quad 읽기: DQ0~3</td></tr>
+    <tr><td>5</td><td>CS를 올려 끝낸다</td><td>CS</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">SoC 연결</span>이 페이지의 QSPI는 <strong>FPGA 구성 비트스트림을 읽는 인터페이스</strong>를 설명한다. MicroBlaze V 프로그램이 실행 중 직접 플래시를 읽고 쓰려면 별도 SPI 제어 로직과 소프트웨어 접근 경로가 필요하다. I²C 센서 통신은 이후 독립 응용에서 다룬다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>FPGA 구성 — 회로를 불러오기</h2><span class="pg-no">9장 · 8 / 10</span></div>
+  <p>FPGA의 회로 정보(어느 LUT가 무슨 논리를 하고, 어느 선이 연결되는지)는 칩 안의 SRAM에 저장된다. 그래서 FPGA도 전원을 끄면 회로가 사라진다. 전원을 켜면 FPGA는 정해진 곳에서 <strong>비트스트림</strong>을 읽어 회로를 다시 만드는데, 이것을 <strong>구성(configuration)</strong>이라 한다. Basys3는 JP1으로 전원 인가 시의 구성 모드(SPI Flash·USB·JTAG 대기)를 선택한다. 다만 <strong>JTAG 직접 구성은 JP1 위치와 관계없이 가능</strong>하다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 250" style="min-width:560px" role="img" aria-label="FPGA 구성 방법"><defs><marker id="m8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="20" width="170" height="56" rx="5" class="box"/><text x="105" y="44" class="t tc">PC · JTAG</text><text x="105" y="62" class="ts">USB-JTAG 포트</text><path d="M190 48 H392 V83 H418" class="ln" marker-end="url(#m8)"/><rect x="20" y="96" width="170" height="56" rx="5" class="boxb"/><text x="105" y="120" class="tb">QSPI 플래시</text><text x="105" y="138" class="ts">보드 위 32 Mbit</text><line x1="190" y1="124" x2="276" y2="124" class="lb"/><rect x="20" y="172" width="170" height="56" rx="5" class="box"/><text x="105" y="196" class="t tc">USB 메모리</text><text x="105" y="214" class="ts">J2 · USB Host</text><line x1="190" y1="200" x2="276" y2="142" class="ln"/><rect x="276" y="96" width="70" height="56" rx="8" class="boxg"/><text x="311" y="120" class="ts">JP1</text><text x="311" y="136" class="ts">부팅 모드</text><line x1="346" y1="124" x2="418" y2="124" class="ln" marker-end="url(#m8)"/><rect x="420" y="70" width="180" height="108" rx="6" class="boxn"/><text x="510" y="98" class="tg">FPGA</text><text x="510" y="118" class="ts">구성 메모리(SRAM)에</text><text x="510" y="134" class="ts">비트스트림 적재</text><text x="510" y="160" class="ts">→ 회로가 생긴다</text><line x1="600" y1="124" x2="640" y2="124" class="ln" marker-end="url(#m8)"/><text x="680" y="120" class="t tc" style="font-size:12px">DONE</text><text x="680" y="136" class="ts">LED 켜짐</text><text x="360" y="240" class="ts">FPGA의 회로 정보도 SRAM에 있어 전원을 끄면 사라진다 — 그래서 켤 때마다 다시 읽는다</text></svg></div><figcaption>그림 9-6 · Basys3의 JTAG 직접 구성과 JP1을 통한 자동 구성 경로<span class="src">출처: <a href="https://digilent.com/reference/_media/reference/programmable-logic/basys-3/basys3_rm.pdf" target="_blank" rel="noopener">Digilent Basys 3 FPGA Board Reference Manual</a> · §2 FPGA Configuration</span></figcaption></figure>
+  <div class="cards">
+    <div class="card"><b>비트스트림 크기</b><span class="num">약 2.09 MiB</span><span>보드 매뉴얼의 구성 데이터 17,536,096비트 기준 (약 2,192,012바이트)</span></div>
+    <div class="card"><b>플래시 용량</b><span class="num">32 Mbit</span><span>4 MiB(4,194,304바이트)</span></div>
+    <div class="card"><b>공칭 잔여 공간</b><span class="num">약 48%</span><span>Digilent 참고값 · 사용자 데이터 사용에는 별도 주소 배치와 플래시 제어 필요</span></div>
+  </div>
+  <div class="scroll"><table>
+    <tr><th>방법</th><th>언제 쓰나</th><th>전원을 끄면</th></tr>
+    <tr><td>JTAG (PC · Vivado)</td><td>개발 중 — 빠르게 바꿔 보기</td><td>사라짐</td></tr>
+    <tr><td>QSPI 플래시</td><td>완성 후 — 전원만 켜면 동작</td><td>남음, 켤 때마다 자동 구성</td></tr>
+    <tr><td>USB 메모리</td><td>J2에 FAT32 USB 메모리 연결, 루트에 해당 FPGA용 .bit 파일 1개 배치</td><td>파일은 USB 저장장치에 유지</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">구성 확인</span>PROG 버튼은 FPGA 구성 메모리를 다시 초기화하고, 선택한 구성 경로로 재구성을 시도한다. DONE LED는 구성 성공을 의미하며 MicroBlaze V 응용프로그램의 정상 동작까지 보장하지는 않는다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>SoC 부팅 — 전원을 켜면 일어나는 일</h2><span class="pg-no">9장 · 9 / 10</span></div>
+  <p>L10에서 우리 SoC는 PC 없이 스스로 일어나게 된다. 로컬 BRAM에서 실행할 프로그램의 ELF 데이터 부분을 <strong>BRAM 초기값</strong>으로 반영한 비트스트림을 플래시에 저장하는 방식이다. FPGA 구성 시 BRAM 내용도 초기화되며, 리셋이 해제된 MicroBlaze V는 설정된 <strong>리셋 벡터 주소</strong>에서 명령어를 인출한다. 이 과정은 CPU가 QSPI 플래시에서 ELF 파일을 직접 해석·실행하는 부팅과 다르다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 740 300" style="min-width:580px" role="img" aria-label="SoC 부팅 순서"><defs><marker id="m9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="20" y="20" class="t" style="text-anchor:start;font-weight:600">한 번 — PC에서 만들고 굽기 (L10)</text><rect x="20" y="32" width="150" height="52" rx="5" class="box"/><text x="95" y="54" class="t tc" style="font-size:12px">soc_top.bit</text><text x="95" y="72" class="ts">하드웨어</text><rect x="200" y="32" width="150" height="52" rx="5" class="box"/><text x="275" y="54" class="t tc" style="font-size:12px">app.elf</text><text x="275" y="72" class="ts">프로그램</text><rect x="380" y="32" width="150" height="52" rx="5" class="boxn"/><text x="455" y="54" class="tg" style="font-size:12px">초기값 반영 .bit</text><text x="455" y="72" class="ts">ELF 데이터 → BRAM 구성값</text><rect x="560" y="32" width="150" height="52" rx="5" class="boxb"/><text x="635" y="54" class="tb" style="font-size:12px">QSPI 플래시</text><text x="635" y="72" class="ts">.mcs/.bin 기록</text><path d="M95 84 V98 H455 V88" class="ln" marker-end="url(#m9)"/><line x1="350" y1="58" x2="378" y2="58" class="ln" marker-end="url(#m9)"/><line x1="530" y1="58" x2="558" y2="58" class="ln" marker-end="url(#m9)"/><text x="20" y="130" class="t" style="text-anchor:start;font-weight:600">전원을 켤 때마다 — 자동</text><rect x="20" y="142" width="128" height="62" rx="5" class="box"/><text x="84" y="166" class="t tc" style="font-size:12px">① 전원</text><text x="84" y="186" class="ts" style="font-size:10px">보드 켜기</text><line x1="148" y1="173" x2="160" y2="173" class="ln" marker-end="url(#m9)"/><rect x="162" y="142" width="128" height="62" rx="5" class="box"/><text x="226" y="166" class="t tc" style="font-size:12px">② 구성</text><text x="226" y="186" class="ts" style="font-size:10px">QSPI → FPGA</text><line x1="290" y1="173" x2="302" y2="173" class="ln" marker-end="url(#m9)"/><rect x="304" y="142" width="128" height="62" rx="5" class="box"/><text x="368" y="166" class="t tc" style="font-size:12px">③ DONE</text><text x="368" y="186" class="ts" style="font-size:10px">회로 + 프로그램 준비</text><line x1="432" y1="173" x2="444" y2="173" class="ln" marker-end="url(#m9)"/><rect x="446" y="142" width="128" height="62" rx="5" class="box"/><text x="510" y="166" class="t tc" style="font-size:12px">④ 리셋 해제</text><text x="510" y="186" class="ts" style="font-size:10px">MicroBlaze V 시작</text><line x1="574" y1="173" x2="586" y2="173" class="ln" marker-end="url(#m9)"/><rect x="588" y="142" width="128" height="62" rx="5" class="boxn"/><text x="652" y="166" class="tg" style="font-size:12px">⑤ 실행</text><text x="652" y="186" class="ts" style="font-size:10px">설정된 리셋 벡터</text><path d="M635 86 V114 H226 V140" class="lb" style="stroke-dasharray:5 3" marker-end="url(#m9)"/><text x="370" y="240" class="ts">조건: 플래시 기록 · JP1 SPI 설정 · BRAM 초기값 · 리셋 벡터가 모두 정확할 것</text><text x="370" y="262" class="ts">큰 시스템은 ②~③ 뒤에 부트로더가 플래시의 프로그램을 DDR로 복사한 다음 실행한다</text></svg></div><figcaption>그림 9-7 · Basys3의 구성·실행 흐름 (BRAM 실행 방식의 교육용 목표 구성)</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>단계</th><th>실습</th><th>도구</th></tr>
+    <tr><td>BRAM 프로그램 내용 반영</td><td>L10 실습</td><td>Vivado ELF 연결(Associate ELF) 또는 UpdateMEM으로 ELF·MMI·BIT를 연결</td></tr>
+    <tr><td>플래시에 기록</td><td>L10 실습</td><td>Vivado에서 SPI용 .mcs/.bin 생성 → Hardware Manager로 대상 플래시 선택·프로그램·검증</td></tr>
+    <tr><td>JP1을 SPI Flash 모드로</td><td>L10 실습</td><td>Basys3 보드 JP1 점퍼 · 사용 보드의 마킹 확인</td></tr>
+    <tr><td>재전원 인가 후 확인</td><td>L10·L11 실습</td><td>DONE LED → UART·LED 등 실제 응용 동작 확인 (실행 성공 여부 별도 검증)</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">Vivado 확인</span><a href="https://docs.amd.com/r/2023.2-English/ug1580-updatemem/Using-UpdateMEM" target="_blank" rel="noopener">AMD UG1580(UpdateMEM)</a>은 ELF와 BRAM 주소·물리 배치(MMI)를 비트스트림에 반영하는 흐름을 설명한다. <a href="https://docs.amd.com/r/en-US/ug908-vivado-programming-debugging/Adding-a-Configuration-Memory-Device" target="_blank" rel="noopener">UG908(2026.1)</a>은 Vivado에서 구성 메모리 장치를 추가하는 절차를 설명한다. 실제 도구 메뉴와 파일 생성 방법은 실습 프로젝트에서 확인한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>9장 정리</h2><span class="pg-no">9장 · 10 / 10</span></div>
+  <p>보조기억장치는 속도 대신 "꺼도 남는다"를 얻는다. Basys3는 QSPI 플래시에 비트스트림을 보관하고, 구성 과정에서 FPGA 회로와 BRAM의 초기 내용을 재구성할 수 있다. 실행 파일의 데이터가 BRAM 초기값에 포함된 경우에만 MicroBlaze V가 전원 인가 후 해당 프로그램을 실행한다.</p>
+  <div class="scroll"><table>
+    <tr><th>이번 장 개념</th><th>한 줄 정리</th><th>우리 SoC에서</th></tr>
+    <tr><td>휘발성 · 비휘발성</td><td>전원을 끄면 사라짐 / 남음</td><td>BRAM · FPGA 구성은 휘발성, QSPI는 비휘발성</td></tr>
+    <tr><td>HDD</td><td>도는 원판 · 헤드 · 트랙 · 섹터</td><td>—</td></tr>
+    <tr><td>플래시</td><td>전하를 저장해 문턱전압 변화로 판독 · 섹터/블록 지우기</td><td>QSPI 플래시</td></tr>
+    <tr><td>NOR · NAND</td><td>임의 읽기 · 부팅용 / 대용량 · 저장용</td><td>NOR 계열 SPI 플래시</td></tr>
+    <tr><td>SSD</td><td>NAND + 컨트롤러(FTL · 웨어 레벨링)</td><td>—</td></tr>
+    <tr><td>SPI · QSPI</td><td>일반 SPI·Quad 읽기 데이터선 사용은 명령 모드에 따라 다름</td><td>FPGA ↔ 플래시</td></tr>
+    <tr><td>FPGA 구성</td><td>비트스트림으로 FPGA SRAM 구성</td><td>JP1의 SPI·USB·JTAG 모드 / JTAG 직접 구성은 언제든 가능</td></tr>
+    <tr><td>부팅</td><td>FPGA 구성 → BRAM 초기값 적용 → CPU 리셋 해제 → 실행</td><td>L10: ELF 데이터의 BRAM 초기화 반영 확인</td></tr>
+  </table></div>
+  <div class="cards">
+    <div class="card"><b>기억 장치 전체 지도</b><span>CPU 레지스터(5장) → FPGA BRAM(8장) → 보드 QSPI 플래시(9장). QSPI 플래시는 비휘발성 구성 저장소이며 CPU 일반 RAM과는 용도가 다름</span></div>
+    <div class="card"><b>속도 감각</b><span>레지스터·BRAM 접근은 클록 수준, 플래시 프로그램·지우기는 상대적으로 매우 느림. 정확한 지연은 구성·메모리 부품·도구 설정에 따름</span></div>
+  </div>
+  <div class="note"><span class="lbl">다음 장</span>10장 입출력장치 — 폴링 · 인터럽트 · DMA, 그리고 GPIO · UART · I²C · 사용자 IP로 바깥 세계와 연결하기.</div>
+</section>
+
+</div>
+<nav class="pager"><div class="pager-in"><button id="prev">← 이전</button><div class="dots"></div><span class="pos"></span><button id="next">다음 →</button></div></nav>
+<script>
+(function(){
+  var pages=[].slice.call(document.querySelectorAll('.pg'));
+  var dots=document.querySelector('.dots'), prev=document.getElementById('prev'), next=document.getElementById('next');
+  pages.forEach(function(_,i){var b=document.createElement('button');b.textContent=i+1;b.setAttribute('aria-label',(i+1)+'페이지');b.onclick=function(){go(i)};dots.appendChild(b)});
+  var cur=0;
+  function go(i){
+    cur=Math.max(0,Math.min(pages.length-1,i));
+    pages.forEach(function(p,k){p.hidden=k!==cur});
+    [].forEach.call(dots.children,function(b,k){b.classList.toggle('on',k===cur)});
+    var pos=document.querySelector('.pos'); if(pos) pos.textContent=(cur+1)+' / '+pages.length;
+    prev.disabled=cur===0; next.disabled=cur===pages.length-1;
+    try{history.replaceState(null,'','#p'+(cur+1))}catch(e){}
+    window.scrollTo(0,0);
+  }
+  prev.onclick=function(){go(cur-1)}; next.onclick=function(){go(cur+1)};
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+  var m=/^#p(\d+)$/.exec(location.hash||''); go(m?parseInt(m[1],10)-1:0);
+  document.getElementById('theme').onclick=function(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d?d==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.setAttribute('data-theme',dark?'light':'dark')};
+})();
+</script>
+
+</body></html>

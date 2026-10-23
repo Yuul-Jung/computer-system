@@ -1,0 +1,406 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>6장 명령어 사이클과 인터럽트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F6FB; --surface:#FFFFFF; --ink:#17263C; --muted:#50637C; --line:#CBD8E8;
+  --green:#1456A0; --greenbg:#E8F1FE; --blue:#087C88; --bluebg:#E2F6F5;
+  --amber:#915710; --amberbg:#FFF3DF; --head:#EAF0F9; --grayfill:#DFE9F5;
+  --sans:"IBM Plex Sans KR","Noto Sans KR",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans);word-break:keep-all;overflow-wrap:break-word;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 96px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+/* 상단 */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.series{font:500 11px var(--mono);letter-spacing:.09em;color:var(--green);text-transform:uppercase}
+.theme-btn{font:500 11px var(--mono);padding:4px 10px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--muted);cursor:pointer}
+.chaps{display:flex;flex-wrap:wrap;gap:4px}
+.chaps a{font:500 11px var(--mono);padding:3px 8px;border-radius:3px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.chaps a.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+
+
+.chaps a{text-decoration:none}.chaps a:hover{border-color:var(--green);color:var(--green);background:var(--greenbg)}
+.chaps a.on:hover{background:var(--green);color:var(--surface)}
+.chaps a.back-index{font-weight:700;color:var(--green);border-color:var(--green)}
+/* 페이지 */
+.pg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px clamp(16px,4vw,40px) 32px;display:flex;flex-direction:column;gap:18px;min-height:600px}
+.pg[hidden]{display:none!important}
+.pg-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+.pg-no{font:600 11px var(--mono);color:var(--green);letter-spacing:.06em;white-space:nowrap}
+h1{margin:0;font-size:clamp(26px,5vw,40px);line-height:1.2;text-wrap:balance}
+h2{margin:0;font-size:clamp(19px,3vw,24px);line-height:1.3;text-wrap:balance}
+h3{margin:4px 0 0;font-size:14px}
+p{margin:0}
+.lead{color:var(--muted);font-size:15.5px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;align-items:start}
+.cols>*{min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+ul.pts{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+
+/* 카드·표 */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--surface)}
+.card b{color:var(--green);font-size:13px}
+.card span{font-size:13px;color:var(--muted)}
+.card .num{font:600 22px/1.3 var(--mono);color:var(--ink)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--head);font-weight:500;font-size:11.5px;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+code{font-family:var(--mono);font-size:12px;background:var(--head);padding:1px 4px;border-radius:3px}
+
+pre{margin:0;padding:14px 16px;overflow-x:auto;background:var(--head);border:1px solid var(--line);border-radius:6px;font:400 12.5px/1.6 var(--mono);min-width:0;word-break:normal}
+pre code{background:none;padding:0;font-size:inherit}
+/* 콜아웃 */
+.note,.tip,.warn{padding:10px 14px;border-radius:4px;font-size:13.5px}
+.note{background:var(--greenbg)}
+.tip{background:var(--bluebg);border-left:3px solid var(--blue)}
+.warn{background:var(--amberbg);border-left:3px solid var(--amber)}
+.lbl{font:600 10.5px var(--mono);letter-spacing:.05em;margin-right:6px}
+.note .lbl{color:var(--green)} .tip .lbl{color:var(--blue)} .warn .lbl{color:var(--amber)}
+
+/* 그림 */
+figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.fig{overflow-x:auto;border:1px solid var(--line);border-radius:6px;padding:16px;background:var(--surface)}
+.fig svg{display:block;width:100%;height:auto}
+figcaption{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+figcaption .src{font:400 11px var(--mono)}
+figcaption a{color:var(--blue)}
+.redraw{display:inline-block;font:600 10px var(--mono);color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:0 4px;margin-right:6px;vertical-align:1px}
+
+/* SVG */
+.box{fill:var(--surface);stroke:var(--ink);stroke-width:1.4}
+.boxg{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.2}
+.boxn{fill:var(--greenbg);stroke:var(--green);stroke-width:1.6}
+.boxb{fill:var(--bluebg);stroke:var(--blue);stroke-width:1.4}
+.boxd{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+.ln{fill:none;stroke:var(--ink);stroke-width:1.4}
+.lg{fill:none;stroke:var(--green);stroke-width:1.6}
+.lb{fill:none;stroke:var(--blue);stroke-width:1.6}
+.lm{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 3}
+.t{fill:var(--ink);font:500 13px var(--sans)}
+.tc{text-anchor:middle}
+.ts{fill:var(--muted);font:400 11px var(--mono);text-anchor:middle}
+.tg{fill:var(--green);font:600 13px var(--sans);text-anchor:middle}
+.tb{fill:var(--blue);font:600 12px var(--sans);text-anchor:middle}
+.chipc{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.4}
+.pin rect{fill:var(--amber)}
+.trace{stroke:var(--muted);stroke-width:2;opacity:.6}
+.die{fill:#20262E;stroke:var(--muted);stroke-width:1.2} .mem{fill:#4B545F;stroke:var(--muted);stroke-width:1}
+.dt{fill:#F1F3F6;font:700 16px var(--sans);text-anchor:middle}
+.dts{fill:#D9DEE4;font:500 12px var(--sans);text-anchor:middle}
+.ah{fill:var(--ink)} .ag{fill:var(--green)} .ab{fill:var(--blue)}
+
+/* 넘김 */
+.pager{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.pager-in{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pager button{font:500 13px var(--sans);padding:7px 14px;border-radius:5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pager button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.dots button{width:26px;height:26px;padding:0;font:500 11px var(--mono);border-radius:50%}
+.dots button.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+.pos{display:none;font:600 13px var(--mono);color:var(--ink)}
+@media (max-width:600px){.dots{display:none}.pos{display:block}.pager button{padding:6px 12px;white-space:nowrap}}
+</style>
+<div class="wrap">
+  <div class="top"><span class="series">컴퓨터시스템구조 · MicroBlaze V SoC 도입 이론</span><button class="theme-btn" id="theme">다크 / 라이트</button></div>
+  <div class="chaps"><a class="back-index" href="index.html">⌂ 전체 목차</a><a class="" href="01%EC%9E%A5%20%EC%BB%B4%ED%93%A8%ED%84%B0%EA%B5%AC%EC%A1%B0%EC%9D%98%20%ED%81%B0%EA%B7%B8%EB%A6%BC.html" >1 큰그림</a><a class="" href="02%EC%9E%A5%20%EB%8D%B0%EC%9D%B4%ED%84%B0.html" >2 데이터</a><a class="" href="03%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4.html" >3 명령어</a><a class="" href="04%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%EC%9D%98%20%EA%B5%AC%EC%A1%B0.html" >4 명령어 구조</a><a class="" href="05%EC%9E%A5%20CPU%20%EA%B5%AC%EC%84%B1.html" >5 CPU 구성</a><a class="on" href="06%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%20%EC%82%AC%EC%9D%B4%ED%81%B4%EA%B3%BC%20%EC%9D%B8%ED%84%B0%EB%9F%BD%ED%8A%B8.html" aria-current="page">6 명령어 사이클</a><a class="" href="07%EC%9E%A5%20CPU%20%EC%84%B1%EB%8A%A5%20%ED%96%A5%EC%83%81.html" >7 성능 향상</a><a class="" href="08%EC%9E%A5%20%EB%A9%94%EB%AA%A8%EB%A6%AC.html" >8 메모리</a><a class="" href="09%EC%9E%A5%20%EB%B3%B4%EC%A1%B0%EA%B8%B0%EC%96%B5%EC%9E%A5%EC%B9%98.html" >9 보조기억</a><a class="" href="10%EC%9E%A5%20%EC%9E%85%EC%B6%9C%EB%A0%A5%EC%9E%A5%EC%B9%98.html" >10 입출력</a></div>
+<!-- 6장 명령어 사이클과 인터럽트 -->
+<section class="pg">
+  <div class="pg-head"><span class="pg-no">6장 · 1 / 10</span><span class="pg-no">표지</span></div>
+  <h1>명령어 사이클과 인터럽트</h1>
+  <p class="lead">CPU는 명령어를 인출하고 해석해 실행하며, 필요하면 메모리에 접근하고 결과를 기록한다. 인터럽트가 승인되면 정상 실행 흐름을 전환해 장치의 요청을 처리한다. RISC-V CSR과 MicroBlaze V의 외부 인터럽트 연결을 함께 살펴본다.</p>
+  <div class="cards"><div class="card"><b>학습 목표 1</b><span>명령어 사이클의 다섯 단계를 말할 수 있다.</span></div><div class="card"><b>학습 목표 2</b><span>폴링과 인터럽트의 차이와 쓰임을 안다.</span></div><div class="card"><b>학습 목표 3</b><span>mtvec · mepc · mcause · mstatus · mie의 역할을 설명할 수 있다.</span></div></div>
+  <figure><div class="fig"><svg viewBox="0 0 720 165" style="min-width:560px" role="img" aria-label="10개 장 테크트리">
+<defs><marker id="at" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+<rect x="10" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="72" y="42" class="t tc">1 큰그림</text><text x="72" y="60" class="ts">CPU·메모리·I/O</text>
+<rect x="152" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="214" y="42" class="t tc">2 데이터</text><text x="214" y="60" class="ts">2진수·16진수</text>
+<rect x="294" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="356" y="42" class="t tc">3 명령어</text><text x="356" y="60" class="ts">소스→실행파일</text>
+<rect x="436" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="498" y="42" class="t tc">4 명령어 구조</text><text x="498" y="60" class="ts">오퍼랜드·스택</text>
+<rect x="578" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="640" y="42" class="t tc">5 CPU 구성</text><text x="640" y="60" class="ts">ALU·레지스터</text>
+<rect x="10" y="105" width="124" height="52" rx="5" class="boxn"/>
+<text x="72" y="127" class="tg">6 명령어 사이클</text><text x="72" y="145" class="ts">인출·인터럽트</text>
+<rect x="152" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="214" y="127" class="t tc">7 성능 향상</text><text x="214" y="145" class="ts">파이프라인·RISC</text>
+<rect x="294" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="356" y="127" class="t tc">8 메모리</text><text x="356" y="145" class="ts">주소공간·캐시</text>
+<rect x="436" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="498" y="127" class="t tc">9 보조기억</text><text x="498" y="145" class="ts">플래시·부팅</text>
+<rect x="578" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="640" y="127" class="t tc">10 입출력</text><text x="640" y="145" class="ts">폴링·인터럽트</text>
+<line x1="134" y1="46" x2="151" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="46" x2="293" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="46" x2="435" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="46" x2="577" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="134" y1="131" x2="151" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="131" x2="293" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="131" x2="435" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="131" x2="577" y2="131" class="ln" marker-end="url(#at)"/>
+<path d="M640 72 V88 H72 V104" class="ln" marker-end="url(#at)"/></svg></div><figcaption>그림 6-1 · 10개 장 테크트리</figcaption></figure>
+  <div class="scroll"><table><tr><th>페이지</th><th>내용</th><th>페이지</th><th>내용</th></tr><tr><td>1</td><td>표지 · 학습 목표</td><td>6</td><td>폴링과 인터럽트</td></tr><tr><td>2</td><td>명령어 사이클</td><td>7</td><td>인터럽트 처리 순서</td></tr><tr><td>3</td><td>인출과 해석</td><td>8</td><td>인터럽트 CSR</td></tr><tr><td>4</td><td>실행 · 메모리 · 쓰기</td><td>9</td><td>INTC와 함께 쓰기</td></tr><tr><td>5</td><td>클록과 사이클</td><td>10</td><td>처리 함수 · 정리</td></tr></table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>명령어 사이클 — 다섯 단계의 반복</h2><span class="pg-no">6장 · 2 / 10</span></div>
+  <p>CPU가 명령어 하나를 처리하는 과정을 <strong>명령어 사이클(instruction cycle)</strong>이라 한다. CPU 동작을 이해하기 위한 대표적인 교육용 모델은 IF·ID·EX·MEM·WB의 다섯 단계로 나눈다. 실제 MicroBlaze V의 파이프라인 단계 수는 IP 구성에 따라 달라지고 여러 명령어의 처리가 겹칠 수 있다. PC 갱신 시점도 반드시 WB 단계의 끝은 아니다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 175" style="min-width:560px" role="img" aria-label="명령어 사이클 다섯 단계"><defs><marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="40" width="112" height="70" rx="6" class="boxn"/><text x="76" y="66" class="tg" style="font-weight:700">IF</text><text x="76" y="84" class="t tc" style="font-size:12px">인출</text><text x="76" y="100" class="ts" style="font-size:10px">Instruction Fetch</text><line x1="134" y1="75" x2="158" y2="75" class="ln" marker-end="url(#m2)"/><rect x="160" y="40" width="112" height="70" rx="6" class="box"/><text x="216" y="66" class="t tc" style="font-weight:700">ID</text><text x="216" y="84" class="t tc" style="font-size:12px">해석</text><text x="216" y="100" class="ts" style="font-size:10px">Instruction Decode</text><line x1="274" y1="75" x2="298" y2="75" class="ln" marker-end="url(#m2)"/><rect x="300" y="40" width="112" height="70" rx="6" class="box"/><text x="356" y="66" class="t tc" style="font-weight:700">EX</text><text x="356" y="84" class="t tc" style="font-size:12px">실행</text><text x="356" y="100" class="ts" style="font-size:10px">Execute</text><line x1="414" y1="75" x2="438" y2="75" class="ln" marker-end="url(#m2)"/><rect x="440" y="40" width="112" height="70" rx="6" class="box"/><text x="496" y="66" class="t tc" style="font-weight:700">MEM</text><text x="496" y="84" class="t tc" style="font-size:12px">메모리</text><text x="496" y="100" class="ts" style="font-size:10px">Memory Access</text><line x1="554" y1="75" x2="578" y2="75" class="ln" marker-end="url(#m2)"/><rect x="580" y="40" width="112" height="70" rx="6" class="box"/><text x="636" y="66" class="t tc" style="font-weight:700">WB</text><text x="636" y="84" class="t tc" style="font-size:12px">쓰기</text><text x="636" y="100" class="ts" style="font-size:10px">Write Back</text><path d="M664 110 V140 H76 V113" class="lm" marker-end="url(#m2)"/><text x="370" y="160" class="ts">명령어 처리 흐름 반복(PC 갱신 시점은 구현별 차이)</text><text x="370" y="24" class="ts">한 명령어가 거치는 다섯 단계</text></svg></div><figcaption>그림 6-2 · 교육용 5단계 명령어 처리 흐름(실제 클록 배치와는 별개)</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>단계</th><th>하는 일</th><th>쓰는 부품 (5장)</th></tr>
+    <tr><td>IF 인출</td><td>PC 주소의 명령어를 읽어 온다</td><td>PC, 명령어 메모리</td></tr>
+    <tr><td>ID 해석</td><td>opcode를 보고 제어 신호를 만든다, 레지스터를 읽는다</td><td>제어장치, 레지스터 파일, 즉시값 생성</td></tr>
+    <tr><td>EX 실행</td><td>계산하거나 주소를 만들거나 비교한다</td><td>ALU</td></tr>
+    <tr><td>MEM 메모리</td><td>lw · sw일 때만 메모리 또는 MMIO(메모리 매핑 입출력)에 접근한다</td><td>데이터 메모리, M_AXI_DP</td></tr>
+    <tr><td>WB 쓰기</td><td>결과를 rd 레지스터에 쓴다</td><td>레지스터 파일</td></tr>
+  </table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>인출과 해석 — 무엇을 할지 알아내기</h2><span class="pg-no">6장 · 3 / 10</span></div>
+  <p>처음 두 단계는 모든 명령어가 똑같이 거친다. <strong>인출(IF)</strong>에서 PC가 가리키는 주소의 명령어를 가져온다. 32비트 기본 명령어라면 순차 실행 주소는 PC + 4이며, C 확장의 16비트 압축 명령어라면 PC + 2다. <strong>해석(ID)</strong>에서는 opcode · funct3 · funct7로 명령어 종류를 알아내고, rs1 · rs2 레지스터를 읽고, 즉시값을 32비트로 늘려 둔다.</p>
+  <div class="scroll"><table>
+    <tr><th colspan="3">예: PC = 0x0000_0000에서 <code>lui a0, 0x40000</code>을 처리할 때</th></tr>
+    <tr><th>단계</th><th>일어나는 일</th><th>값</th></tr>
+    <tr><td>IF</td><td>BRAM 주소 0~3을 읽는다</td><td><code>37 05 00 40</code> → <code>0x4000_0537</code></td></tr>
+    <tr><td>IF</td><td>다음 PC 후보 계산</td><td>0x0000_0004</td></tr>
+    <tr><td>ID</td><td>opcode <code>0110111</code> → LUI, rd = 10(a0)</td><td>레지스터 읽기 없음</td></tr>
+    <tr><td>ID</td><td>즉시값 생성: 상위 20비트에 놓고 아래 12비트는 0</td><td><code>0x4000_0000</code></td></tr>
+  </table></div>
+  <div class="cards">
+    <div class="card"><b>부호 확장</b><span>12비트 즉시값 <code>0xFFF</code>은 −1이다. 32비트로 늘릴 때 맨 앞 비트(1)를 위쪽에 채워 <code>0xFFFF_FFFF</code>로 만든다(2장 2의 보수).</span></div>
+    <div class="card"><b>16비트 명령어</b><span>C 확장 명령어는 16비트 인코딩을 해석해 그에 대응하는 연산을 수행한다. 내부적으로 32비트 형식으로 확장하는지는 CPU 구현에 따라 다르며, 순차 실행 PC는 +2가 된다.</span></div>
+    <div class="card"><b>인출할 수 없으면</b><span>명령어 주소 정렬 오류(압축 확장 사용 여부에 따라 기준이 다름), 접근 오류, 잘못된 명령어 등에서는 <strong>예외(exception)</strong>가 발생할 수 있다. 일반 트랩 모드에서는 mtvec의 처리 코드로 진입한다.</span></div>
+  </div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>실행 · 메모리 · 쓰기 — 명령어마다 다르게</h2><span class="pg-no">6장 · 4 / 10</span></div>
+  <p>뒤의 세 단계는 명령어 종류에 따라 하는 일이 다르고, 필요 없는 단계는 그냥 지나간다. 예를 들어 <code>add</code>는 메모리에 갈 일이 없고, <code>sw</code>는 레지스터에 쓸 결과가 없다.</p>
+  <div class="scroll"><table>
+    <tr><th>명령어</th><th>EX 실행</th><th>MEM 메모리</th><th>WB 쓰기</th></tr>
+    <tr><td><code>add a0, a0, a1</code></td><td>a0 + a1</td><td>—</td><td>a0 ← 합</td></tr>
+    <tr><td><code>addi a0, a0, 5</code></td><td>a0 + 5</td><td>—</td><td>a0 ← 합</td></tr>
+    <tr><td><code>lw a5, 8(a4)</code></td><td>주소 = a4 + 8</td><td>그 주소 읽기</td><td>a5 ← 읽은 값</td></tr>
+    <tr><td><code>sw a1, 4(a0)</code></td><td>주소 = a0 + 4</td><td>그 주소에 a1 쓰기</td><td>—</td></tr>
+    <tr><td><code>beq a0, a1, L</code></td><td>a0 − a1 = 0 ? · 목표 = PC + 오프셋</td><td>—</td><td>— (같으면 PC ← 목표)</td></tr>
+    <tr><td><code>jal ra, f</code></td><td>목표 = PC + 오프셋</td><td>—</td><td>ra ← PC + 4, PC ← 목표</td></tr>
+    <tr><td><code>csrrs a0, mstatus, x0</code></td><td>CSR 값을 읽음 · x0 때문에 비트 변경 없음</td><td>—</td><td>a0 ← 원래 CSR 값</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">SoC 연결</span>주변장치 레지스터 접근(<code>REG32()</code>)은 MEM 단계에서 일어난다. BRAM과 AXI 주변장치의 응답 지연은 실제 IP 구성·클록·버스 상태에 따라 다르다. AXI 응답이 지연되면 명령어 완료가 지연되거나 파이프라인이 정지할 수 있다. 실제 지연 클록 수는 타이밍·성능 측정으로 확인한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>클록과 사이클 — 시간으로 보기</h2><span class="pg-no">6장 · 5 / 10</span></div>
+  <p>동기식 레지스터는 설계에서 지정한 활성 클록 에지에 상태를 저장한다. <strong>100 MHz로 구동한다고 가정하면</strong> 한 클록은 10 ns다. 그림처럼 단계를 겹치지 않고 한 단계에 한 클록씩 할당한 교육용 CPU라면 다섯 클록(50 ns)이 걸린다. 명령어당 평균 소요 클록 수는 <strong>CPI(Cycles Per Instruction, 명령어당 클록 수)</strong>라 한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 210" style="min-width:560px" role="img" aria-label="클록과 명령어 사이클"><path d="M80 60 V30 H110 V60 H140 V30 H170 V60 H200 V30 H230 V60 H260 V30 H290 V60 H320 V30 H350 V60 H380 V30 H410 V60 H440 V30 H470 V60 H500 V30 H530 V60 H560 V30 H590 V60 H620 V30 H650 V60 H680" class="ln"/><text x="70" y="50" class="ts" style="text-anchor:end">클록</text><text x="80" y="80" class="ts" style="font-size:10px">0 ns</text><text x="140" y="80" class="ts" style="font-size:10px">10 ns</text><text x="200" y="80" class="ts" style="font-size:10px">20 ns</text><text x="260" y="80" class="ts" style="font-size:10px">30 ns</text><text x="320" y="80" class="ts" style="font-size:10px">40 ns</text><text x="380" y="80" class="ts" style="font-size:10px">50 ns</text><text x="440" y="80" class="ts" style="font-size:10px">60 ns</text><text x="500" y="80" class="ts" style="font-size:10px">70 ns</text><text x="560" y="80" class="ts" style="font-size:10px">80 ns</text><text x="620" y="80" class="ts" style="font-size:10px">90 ns</text><text x="680" y="80" class="ts" style="font-size:10px">100 ns</text><text x="70" y="118" class="ts" style="text-anchor:end">명령어 1</text><text x="70" y="160" class="ts" style="text-anchor:end">명령어 2</text><rect x="82" y="100" width="56" height="28" rx="3" class="boxn"/><text x="110" y="119" class="t tc" style="font-size:12px">IF</text><rect x="382" y="142" width="56" height="28" rx="3" class="boxn"/><text x="410" y="161" class="t tc" style="font-size:12px">IF</text><rect x="142" y="100" width="56" height="28" rx="3" class="box"/><text x="170" y="119" class="t tc" style="font-size:12px">ID</text><rect x="442" y="142" width="56" height="28" rx="3" class="box"/><text x="470" y="161" class="t tc" style="font-size:12px">ID</text><rect x="202" y="100" width="56" height="28" rx="3" class="box"/><text x="230" y="119" class="t tc" style="font-size:12px">EX</text><rect x="502" y="142" width="56" height="28" rx="3" class="box"/><text x="530" y="161" class="t tc" style="font-size:12px">EX</text><rect x="262" y="100" width="56" height="28" rx="3" class="box"/><text x="290" y="119" class="t tc" style="font-size:12px">MEM</text><rect x="562" y="142" width="56" height="28" rx="3" class="box"/><text x="590" y="161" class="t tc" style="font-size:12px">MEM</text><rect x="322" y="100" width="56" height="28" rx="3" class="box"/><text x="350" y="119" class="t tc" style="font-size:12px">WB</text><rect x="622" y="142" width="56" height="28" rx="3" class="box"/><text x="650" y="161" class="t tc" style="font-size:12px">WB</text><text x="380" y="198" class="ts">100 MHz → 한 클록 10 ns · 단계마다 한 클록이면 명령어 하나에 50 ns</text></svg></div><figcaption>그림 6-3 · 100 MHz, 단계별 1클록, 명령어 중첩 없음으로 가정한 타이밍 예</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>구분</th><th>클록 주기</th><th>CPI</th><th>명령어 하나에 걸리는 시간</th></tr>
+    <tr><td>단일 사이클 (5장 모델)</td><td>모든 조합 경로를 수용할 만큼 길게</td><td>1</td><td>명령어 하나를 1클록에 완료</td></tr>
+    <tr><td>다중 사이클 (위 그림)</td><td>10 ns (예시)</td><td>예시: 5</td><td>그림에서는 50 ns</td></tr>
+    <tr><td>파이프라인 (7장)</td><td>10 ns (예시)</td><td>이상적으로 약 1</td><td>처리량은 높지만 개별 지연은 여러 클록</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>프로그램 실행 시간은 대체로 명령어 수 × 평균 CPI × 클록 주기로 계산한다. 파이프라인은 명령어의 완료 간격(처리량)을 개선하지만, 개별 명령어가 꼭 한 클록에 완료되는 것은 아니다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>폴링과 인터럽트</h2><span class="pg-no">6장 · 6 / 10</span></div>
+  <p>버튼이 눌렸는지 알아내는 방법은 두 가지다. CPU가 상태 레지스터를 계속 읽어 보는 <strong>폴링(polling)</strong>, 그리고 장치가 신호선으로 CPU에 알려 주는 <strong>인터럽트(interrupt)</strong>다. 인터럽트를 쓰면 CPU는 다른 일을 실행하다가, 허용된 요청을 정해진 경계에서 받아 처리 함수로 진입한다. 폴링도 검사 간격을 두고 다른 작업과 병행하도록 구현할 수 있다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 210" style="min-width:560px" role="img" aria-label="폴링과 인터럽트 비교"><defs><marker id="m6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="20" y="24" class="t" style="text-anchor:start;font-weight:600">폴링 — CPU가 계속 물어본다</text><rect x="20" y="34" width="70" height="32" rx="3" class="boxg"/><text x="55" y="55" class="ts" style="font-size:11px">왔나?</text><rect x="96" y="34" width="70" height="32" rx="3" class="boxg"/><text x="131" y="55" class="ts" style="font-size:11px">왔나?</text><rect x="172" y="34" width="70" height="32" rx="3" class="boxg"/><text x="207" y="55" class="ts" style="font-size:11px">왔나?</text><rect x="248" y="34" width="70" height="32" rx="3" class="boxg"/><text x="283" y="55" class="ts" style="font-size:11px">왔나?</text><rect x="324" y="34" width="70" height="32" rx="3" class="boxg"/><text x="359" y="55" class="ts" style="font-size:11px">왔나?</text><rect x="400" y="34" width="70" height="32" rx="3" class="boxg"/><text x="435" y="55" class="ts" style="font-size:11px">왔나?</text><rect x="476" y="34" width="70" height="32" rx="3" class="boxn"/><text x="511" y="55" class="tg" style="font-size:11px">있다! 처리</text><rect x="552" y="34" width="70" height="32" rx="3" class="boxg"/><text x="587" y="55" class="ts" style="font-size:11px">왔나?</text><rect x="628" y="34" width="70" height="32" rx="3" class="boxg"/><text x="663" y="55" class="ts" style="font-size:11px">왔나?</text><text x="360" y="84" class="ts">그림은 상태를 계속 검사하는 바쁜 대기 예시</text><text x="20" y="120" class="t" style="text-anchor:start;font-weight:600">인터럽트 — 장치가 알려 준다</text><rect x="20" y="130" width="446" height="32" rx="3" class="box"/><text x="243" y="151" class="t tc" style="font-size:12px">main: 다른 일 (콘솔 · 계산 …)</text><rect x="476" y="130" width="90" height="32" rx="3" class="boxn"/><text x="521" y="151" class="tg" style="font-size:11px">처리 함수</text><rect x="576" y="130" width="124" height="32" rx="3" class="box"/><text x="638" y="151" class="t tc" style="font-size:12px">main 계속</text><line x1="476" y1="196" x2="476" y2="166" class="lg" marker-end="url(#m6)"/><text x="486" y="196" class="tg" style="text-anchor:start;font-size:11px">인터럽트 신호</text></svg></div><figcaption>그림 6-4 · 같은 일을 두 방식으로 처리</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th></th><th>폴링</th><th>인터럽트</th></tr>
+    <tr><td>알아내는 쪽</td><td>CPU가 주기적으로 확인</td><td>장치가 신호로 알림</td></tr>
+    <tr><td>CPU 시간</td><td>검사 주기·방법만큼 사용</td><td>진입·복귀 및 처리에 시간 사용</td></tr>
+    <tr><td>반응 시간</td><td>확인 간격에 따라 늦을 수 있다</td><td>우선순위·마스킹·처리 지연에 좌우</td></tr>
+    <tr><td>만들기</td><td>쉽다</td><td>CSR · 처리 함수 · 클리어 순서가 필요하다</td></tr>
+    <tr><td>우리 실습</td><td>UART·타이머 상태 검사 예</td><td>타이머·버튼 인터럽트 예</td></tr>
+  </table></div>
+  <div class="cards">
+    <div class="card"><b>인터럽트</b><span>외부 장치의 요청 신호는 명령어 실행과 무관하게 발생할 수 있다. CPU는 허용 비트 및 인터럽트 조건을 확인해 트랩을 받아들인다.</span></div>
+    <div class="card"><b>예외</b><span>명령어 실행 중에 생긴 문제(없는 명령어, 정렬 오류 등). 그 명령어가 원인이다.</span></div>
+    <div class="card"><b>트랩(trap)</b><span>인터럽트와 예외를 함께 부르는 말. 일반 M-mode 직접 트랩에서는 mtvec을 통해 진입하고 mcause로 원인을 구분한다.</span></div>
+  </div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>인터럽트 처리 순서</h2><span class="pg-no">6장 · 7 / 10</span></div>
+  <p>일반 외부 인터럽트가 허용되면 MicroBlaze V는 실행 단계의 명령어를 완료한 뒤, 다음에 실행할 명령어의 주소를 보존하고 트랩 처리 코드로 분기한다. 이 일부는 <strong>하드웨어가 자동으로</strong> 하고, 나머지(레지스터 저장, 원인 확인)는 <strong>처리 함수(소프트웨어)</strong>가 한다. 처리가 끝나면 <code>mret</code> 명령어 하나로 원래 자리로 돌아간다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 740 300" style="min-width:580px" role="img" aria-label="인터럽트 처리 순서"><defs><marker id="m7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="20" y="22" class="ts" style="text-anchor:start">main</text><rect x="20" y="30" width="108" height="34" rx="3" class="box"/><text x="74" y="52" class="t tc" style="font-size:12px">명령어 A</text><rect x="140" y="30" width="108" height="34" rx="3" class="box"/><text x="194" y="52" class="t tc" style="font-size:12px">명령어 B</text><rect x="260" y="30" width="108" height="34" rx="3" class="boxg"/><text x="314" y="52" class="t tc" style="font-size:12px">명령어 C</text><rect x="500" y="30" width="108" height="34" rx="3" class="boxg"/><text x="554" y="52" class="t tc" style="font-size:12px">명령어 D</text><rect x="620" y="30" width="108" height="34" rx="3" class="box"/><text x="674" y="52" class="t tc" style="font-size:12px">명령어 E</text><line x1="380" y1="120" x2="380" y2="66" class="lg" marker-end="url(#m7)"/><text x="390" y="100" class="tg" style="text-anchor:start;font-size:11px">① 인터럽트 도착 (C를 끝낸 뒤)</text><rect x="140" y="124" width="470" height="70" rx="5" class="boxb"/><text x="152" y="142" class="tb" style="text-anchor:start;font-size:12px">② 하드웨어가 자동으로</text><text x="152" y="162" class="ts" style="text-anchor:start">mepc ← D의 주소 · mcause ← 0x8000_000B (외부 인터럽트)</text><text x="152" y="180" class="ts" style="text-anchor:start">MPIE ← MIE · MIE ← 0 (중복 금지) · PC ← mtvec.BASE</text><rect x="140" y="218" width="470" height="40" rx="5" class="boxn"/><text x="375" y="243" class="tg" style="font-size:12px">③ 처리 함수: 레지스터 저장 → 원인 처리 → 복원 → mret</text><line x1="375" y1="196" x2="375" y2="216" class="ln" marker-end="url(#m7)"/><path d="M612 238 H640 V100 H554 V68" class="lg" marker-end="url(#m7)"/><text x="648" y="170" class="tg" style="text-anchor:start;font-size:11px">④ mret</text><text x="375" y="286" class="ts">④ mret: PC ← mepc (D부터), MIE ← MPIE · MPIE ← 1</text></svg></div><figcaption>그림 6-5 · M-mode 일반 외부 인터럽트 처리(Direct 모드, 교육용 순서도)<span class="src">참조: <a href="https://docs.riscv.org/reference/isa/priv/machine.html" target="_blank" rel="noopener noreferrer">RISC-V Privileged ISA</a> · <a href="https://docs.amd.com/r/en-US/ug1629-microblaze-v-user-guide/External-Interrupt" target="_blank" rel="noopener noreferrer">AMD UG1629 External Interrupt</a> · 교육용 재구성</span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>순서</th><th>누가</th><th>하는 일</th></tr>
+    <tr><td>① 도착</td><td>INTC → CPU</td><td><code>Interrupt</code> 신호가 올라간다. MIE · MEIE가 켜져 있으면 받아들인다</td></tr>
+    <tr><td>② 진입</td><td>하드웨어</td><td>mepc · mcause 기록, MIE를 0으로 하여 일반 M-mode 인터럽트 중첩을 막고, PC를 mtvec.BASE로</td></tr>
+    <tr><td>③ 처리</td><td>소프트웨어</td><td>쓸 레지스터를 스택에 저장 → 원인 장치를 찾아 처리하고 클리어 → 복원</td></tr>
+    <tr><td>④ 복귀</td><td>mret 명령어</td><td>PC ← mepc, MIE ← MPIE (복귀 처리 완료 후 MPIE도 갱신). 미실행 명령어 D부터 재개</td></tr>
+  </table></div>
+  <div class="warn"><span class="lbl">주의</span>레벨 감지 인터럽트에서 원인 장치의 요청이 해제되지 않으면 <code>mret</code> 뒤 재진입할 수 있다. 에지 감지 방식과 ACK 동작은 MicroBlaze V의 <code>C_INTERRUPT_IS_EDGE</code> 및 INTC 설정에 따라 확인한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>인터럽트 CSR — 설정과 기록</h2><span class="pg-no">6장 · 8 / 10</span></div>
+  <p>인터럽트 설정과 기록은 <strong>CSR(Control and Status Register, 제어 상태 레지스터)</strong>이라는 특별한 레지스터에 있다. x0~x31과 별개이며 소프트웨어는 <code>csrr</code> · <code>csrw</code> · <code>csrs</code> · <code>csrc</code> 같은 CSR 명령어로 접근한다. 트랩 진입·복귀 때는 하드웨어가 관련 비트를 자동으로 갱신한다. MicroBlaze V는 표준 RISC-V Machine 모드 CSR을 쓴다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 760 210" style="min-width:600px" role="img" aria-label="mstatus와 mie의 비트"><text x="50" y="72" class="t" style="text-anchor:end;font-family:var(--mono);font-size:12px">mstatus</text><rect x="60" y="54" width="20" height="28" class="box"/><rect x="80" y="54" width="20" height="28" class="box"/><rect x="100" y="54" width="20" height="28" class="box"/><rect x="120" y="54" width="20" height="28" class="box"/><rect x="140" y="54" width="20" height="28" class="box"/><rect x="160" y="54" width="20" height="28" class="box"/><rect x="180" y="54" width="20" height="28" class="box"/><rect x="200" y="54" width="20" height="28" class="box"/><rect x="220" y="54" width="20" height="28" class="box"/><rect x="240" y="54" width="20" height="28" class="box"/><rect x="260" y="54" width="20" height="28" class="box"/><rect x="280" y="54" width="20" height="28" class="box"/><rect x="300" y="54" width="20" height="28" class="box"/><rect x="320" y="54" width="20" height="28" class="box"/><rect x="340" y="54" width="20" height="28" class="box"/><rect x="360" y="54" width="20" height="28" class="box"/><rect x="380" y="54" width="20" height="28" class="box"/><rect x="400" y="54" width="20" height="28" class="box"/><rect x="420" y="54" width="20" height="28" class="box"/><rect x="440" y="54" width="20" height="28" class="box"/><rect x="460" y="54" width="20" height="28" class="box"/><rect x="480" y="54" width="20" height="28" class="box"/><rect x="500" y="54" width="20" height="28" class="box"/><rect x="520" y="54" width="20" height="28" class="box"/><rect x="540" y="54" width="20" height="28" class="boxn"/><text x="550" y="46" class="tg" style="font-size:11px">MPIE</text><text x="550" y="73" class="ts" style="font-size:9px">7</text><rect x="560" y="54" width="20" height="28" class="box"/><rect x="580" y="54" width="20" height="28" class="box"/><rect x="600" y="54" width="20" height="28" class="box"/><rect x="620" y="54" width="20" height="28" class="boxn"/><text x="630" y="46" class="tg" style="font-size:11px">MIE</text><text x="630" y="73" class="ts" style="font-size:9px">3</text><rect x="640" y="54" width="20" height="28" class="box"/><rect x="660" y="54" width="20" height="28" class="box"/><rect x="680" y="54" width="20" height="28" class="box"/><text x="70" y="100" class="ts" style="font-size:9px">31</text><text x="690" y="100" class="ts" style="font-size:9px">0</text><text x="50" y="162" class="t" style="text-anchor:end;font-family:var(--mono);font-size:12px">mie</text><rect x="60" y="144" width="20" height="28" class="box"/><rect x="80" y="144" width="20" height="28" class="box"/><rect x="100" y="144" width="20" height="28" class="box"/><rect x="120" y="144" width="20" height="28" class="box"/><rect x="140" y="144" width="20" height="28" class="box"/><rect x="160" y="144" width="20" height="28" class="box"/><rect x="180" y="144" width="20" height="28" class="box"/><rect x="200" y="144" width="20" height="28" class="box"/><rect x="220" y="144" width="20" height="28" class="box"/><rect x="240" y="144" width="20" height="28" class="box"/><rect x="260" y="144" width="20" height="28" class="box"/><rect x="280" y="144" width="20" height="28" class="box"/><rect x="300" y="144" width="20" height="28" class="box"/><rect x="320" y="144" width="20" height="28" class="box"/><rect x="340" y="144" width="20" height="28" class="box"/><rect x="360" y="144" width="20" height="28" class="box"/><rect x="380" y="144" width="20" height="28" class="box"/><rect x="400" y="144" width="20" height="28" class="box"/><rect x="420" y="144" width="20" height="28" class="box"/><rect x="440" y="144" width="20" height="28" class="box"/><rect x="460" y="144" width="20" height="28" class="boxn"/><text x="470" y="136" class="tg" style="font-size:11px">MEIE</text><text x="470" y="163" class="ts" style="font-size:9px">11</text><rect x="480" y="144" width="20" height="28" class="box"/><rect x="500" y="144" width="20" height="28" class="box"/><rect x="520" y="144" width="20" height="28" class="box"/><rect x="540" y="144" width="20" height="28" class="boxn"/><text x="550" y="136" class="tg" style="font-size:11px">MTIE</text><text x="550" y="163" class="ts" style="font-size:9px">7</text><rect x="560" y="144" width="20" height="28" class="box"/><rect x="580" y="144" width="20" height="28" class="box"/><rect x="600" y="144" width="20" height="28" class="box"/><rect x="620" y="144" width="20" height="28" class="boxn"/><text x="630" y="136" class="tg" style="font-size:11px">MSIE</text><text x="630" y="163" class="ts" style="font-size:9px">3</text><rect x="640" y="144" width="20" height="28" class="box"/><rect x="660" y="144" width="20" height="28" class="box"/><rect x="680" y="144" width="20" height="28" class="box"/><text x="70" y="190" class="ts" style="font-size:9px">31</text><text x="690" y="190" class="ts" style="font-size:9px">0</text></svg></div><figcaption>그림 6-6 · 인터럽트를 켜는 비트<span class="src">참조: <a href="https://docs.riscv.org/reference/isa/priv/machine.html" target="_blank" rel="noopener noreferrer">RISC-V Privileged ISA</a> · <a href="https://docs.amd.com/r/en-US/ug1629-microblaze-v-user-guide/External-Interrupt" target="_blank" rel="noopener noreferrer">AMD UG1629 External Interrupt</a> · 교육용 재구성</span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>CSR</th><th>뜻</th><th>우리가 쓰는 것</th></tr>
+    <tr><td><code>mstatus</code></td><td>CPU 상태. MIE = 전역 인터럽트 허용, MPIE = 진입 전 MIE 값</td><td>MIE(비트 3)를 1로</td></tr>
+    <tr><td><code>mie</code></td><td>종류별 허용: MEIE 외부 · MTIE 타이머 · MSIE 소프트웨어</td><td>MEIE(비트 11)를 1로</td></tr>
+    <tr><td><code>mtvec</code></td><td>일반 트랩 진입 주소. MicroBlaze V는 MODE가 읽기 전용 0(Direct)</td><td>BASE에 4바이트 정렬 주소 등록</td></tr>
+    <tr><td><code>mepc</code></td><td>복귀 주소. 트랩 진입 때 하드웨어가 기록</td><td>보통 읽기(필요 시 소프트웨어 쓰기 가능)</td></tr>
+    <tr><td><code>mcause</code></td><td>RV32 원인 코드. 비트 31이 인터럽트 구분, 코드 11은 M-mode 외부 인터럽트</td><td>보통 읽기(필요 시 소프트웨어 쓰기 가능)</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">SoC 연결</span>일반 외부 인터럽트 경로에서 AXI INTC의 출력이 MicroBlaze V의 <code>Interrupt</code> 포트에 연결되면, M-mode 외부 인터럽트의 <code>mcause</code>는 <code>0x8000_000B</code>가 된다. 예외·다른 인터럽트 원인은 다른 값이며, 어느 주변장치인지 INTC 상태 레지스터로 판별한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>INTC와 함께 쓰기 — 장치에서 CPU까지</h2><span class="pg-no">6장 · 9 / 10</span></div>
+  <p>MicroBlaze V의 일반 외부 인터럽트 입력 <code>Interrupt</code>는 하나다. 여러 장치의 요청을 쓸 경우 <strong>AXI INTC(인터럽트 제어기)</strong>로 모아 연결할 수 있다. INTC는 어떤 입력이 왔는지 기록해 두므로, 처리 함수는 INTC의 대기 레지스터(IPR)를 읽어 원인 장치를 찾는다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 760 250" style="min-width:600px" role="img" aria-label="인터럽트 신호의 길"><defs><marker id="m9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="20" width="130" height="38" rx="4" class="box"/><text x="85" y="44" class="t tc" style="font-size:12px">Timer</text><line x1="150" y1="39" x2="208" y2="39" class="lg" marker-end="url(#m9)"/><text x="180" y="33" class="ts" style="font-size:10px">In0</text><rect x="20" y="72" width="130" height="38" rx="4" class="boxg"/><text x="85" y="96" class="t tc" style="font-size:12px">UART (예시)</text><line x1="150" y1="91" x2="208" y2="91" class="lg" marker-end="url(#m9)"/><text x="180" y="85" class="ts" style="font-size:10px">In1</text><rect x="20" y="124" width="130" height="38" rx="4" class="box"/><text x="85" y="148" class="t tc" style="font-size:12px">확장 입력</text><line x1="150" y1="143" x2="208" y2="143" class="lg" marker-end="url(#m9)"/><text x="180" y="137" class="ts" style="font-size:10px">In2</text><rect x="20" y="176" width="130" height="38" rx="4" class="box"/><text x="85" y="200" class="t tc" style="font-size:12px">GPIO · BTN (예)</text><line x1="150" y1="195" x2="208" y2="195" class="lg" marker-end="url(#m9)"/><text x="180" y="189" class="ts" style="font-size:10px">In3</text><rect x="210" y="20" width="70" height="194" rx="5" class="boxg"/><text x="245" y="112" class="t tc" style="font-size:12px">Concat</text><text x="245" y="130" class="ts">4비트로</text><line x1="280" y1="117" x2="328" y2="117" class="lg" marker-end="url(#m9)"/><rect x="330" y="72" width="140" height="90" rx="5" class="boxb"/><text x="400" y="100" class="tb">AXI INTC</text><text x="400" y="120" class="ts">IER로 골라 받고</text><text x="400" y="136" class="ts">ISR · IPR에 기록</text><line x1="470" y1="117" x2="538" y2="117" class="lg" marker-end="url(#m9)"/><text x="504" y="108" class="ts" style="font-size:10px">Interrupt</text><rect x="540" y="60" width="200" height="114" rx="6" class="boxn"/><text x="640" y="84" class="tg">MicroBlaze V</text><text x="640" y="108" class="ts">mie.MEIE = 1 ?</text><text x="640" y="126" class="ts">mstatus.MIE = 1 ?</text><text x="640" y="150" class="tg" style="font-size:12px">→ PC ← mtvec.BASE</text><text x="380" y="240" class="ts">장치 요청·INTC IER/MER·CPU mie.MEIE/mstatus.MIE 설정이 함께 맞아야 진입</text></svg></div><figcaption>그림 6-7 · AXI INTC를 이용한 4입력 예시 배선(실제 Vivado 연결과 대조 필요)<span class="src">참조: <a href="https://docs.amd.com/api/khub/documents/dxFxD3WjWxF7Xen1NcGKcw/content" target="_blank" rel="noopener noreferrer">AMD PG099 AXI INTC</a> · 개념도 재구성</span></figcaption></figure>
+  <div class="scroll"><table>
+      <tr><th>INTC 레지스터</th><th>오프셋</th><th>뜻</th></tr>
+      <tr><td><code>ISR</code></td><td>0x00</td><td>들어온 인터럽트 (Interrupt Status Register — 처리 함수를 뜻하는 ISR과 다른 말)</td></tr>
+      <tr><td><code>IPR</code></td><td>0x04</td><td>대기 중 = ISR &amp; IER</td></tr>
+      <tr><td><code>IER</code></td><td>0x08</td><td>입력별 허용</td></tr>
+      <tr><td><code>IAR</code></td><td>0x0C</td><td>쓴 비트를 ISR에서 지움</td></tr>
+      <tr><td><code>MER</code></td><td>0x1C</td><td>INTC 전체 허용(대표적으로 ME 비트 0)</td></tr>
+  </table></div>
+  <h3>처리 함수의 구조 (주소·비트 정의는 별도 헤더 및 Vivado 연결에 따름)</h3><pre><code>static void handle_interrupt(void)
+{
+    uint32_t pending = INTC_IPR;             /* 대기 중인 인터럽트 = ISR &amp; IER */
+
+    if (pending &amp; (1u &lt;&lt; INTC_BIT_TIMER)) {
+        timer_ack();                         /* 1) 소스(Timer)에서 먼저 클리어 */
+        timer_tick_count++;
+        INTC_IAR = (1u &lt;&lt; INTC_BIT_TIMER);   /* 2) 컨트롤러 쪽도 클리어 */
+    }
+    /* 다른 입력도 실제 연결과 감지 방식에 맞춰 별도 처리 */
+}</code></pre>
+  <div class="note"><span class="lbl">핵심</span>레벨 인터럽트에서는 보통 <strong>소스 장치의 요청을 먼저 해제하고 INTC에서 ACK</strong>한다. 단, 에지 감지·자동 해제 여부와 각 IP의 레지스터 동작을 확인해야 한다. INTC 자체의 IER·MER 설정도 별도로 필요하다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>처리 함수 · 6장 정리</h2><span class="pg-no">6장 · 10 / 10</span></div>
+  <p>다음은 RISC-V M-mode 외부 인터럽트 처리의 <strong>교육용 C 예제</strong>다. <code>interrupt("machine")</code> 속성이 트랩 처리에 필요한 저장·복원 코드와 <code>mret</code>을 생성한다. 실제 구현에서는 <code>mcause</code>를 구분하고, INTC·소스 장치 초기화 및 인터럽트 확인/해제 코드를 결합한다.</p>
+  <h3>cpu_irq_mbv.c (개념 예제 · 실제 프로젝트 전체본 아님)</h3>
+  <pre><code>#include &lt;stdint.h&gt;
+#include "cpu_irq.h"
+
+#define CSR_MSTATUS_MIE   (1u &lt;&lt; 3)   /* M-mode 전체 인터럽트 허용 */
+#define CSR_MIE_MEIE      (1u &lt;&lt; 11)  /* M-mode 외부 인터럽트 허용 */
+#define MCAUSE_M_EXT      0x8000000Bu /* RV32 M-mode 외부 인터럽트 */
+
+static void (*s_isr)(void) = 0;
+
+/* GCC RISC-V의 interrupt 속성이 레지스터 저장·복원과 mret을 자동 생성한다.
+   mtvec은 4바이트 정렬이어야 하므로 함수도 4바이트 정렬로 고정한다. */
+static void trap_handler(void) __attribute__((interrupt("machine"), aligned(4)));
+
+static void trap_handler(void)
+{
+    uint32_t cause;
+    __asm__ volatile ("csrr %0, mcause" : "=r" (cause));
+
+    // (추가) 예외와 외부 인터럽트를 구분한다.
+    if (cause != MCAUSE_M_EXT) {
+        // 예상하지 못한 예외에서는 같은 명령어로 무한 복귀하지 않는다.
+        for (;;) { __asm__ volatile ("nop"); }
+    }
+
+    if (s_isr) s_isr();    /* 외부 인터럽트 원인 확인·해제 콜백 */
+}
+
+void cpu_irq_register(void (*handler)(void))
+{
+    s_isr = handler;
+}
+
+void cpu_irq_enable(void)
+{
+    uintptr_t vec = (uintptr_t)trap_handler;
+
+    __asm__ volatile ("csrw mtvec, %0" :: "r" (vec));               /* 트랩 벡터 등록 */
+    __asm__ volatile ("csrs mie, %0"   :: "r" (CSR_MIE_MEIE));      /* 외부 인터럽트 허용 */
+    __asm__ volatile ("csrs mstatus, %0" :: "r" (CSR_MSTATUS_MIE)); /* 전역 허용 */
+    /* 장치·AXI INTC의 IER/MER 및 ACK 설정은 별도로 필요 */
+}</code></pre>
+  <h3>trap_handler 어셈블리 주요 구간 (Clang 17 · RV32IMC + Zicsr · -O2)</h3>
+  <pre><code>trap_handler:
+    addi sp, sp, -64      # 스택 64바이트 확보
+    sw   ra, 60(sp)       # ra 등 caller-saved 레지스터 저장
+    sw   t0, 56(sp)
+    ...                   # t1~t6, a0~a7 저장(총 16개)
+    csrr a0, mcause      # 트랩 원인 확인
+    lui  a1, 524288
+    addi a1, a1, 11      # 0x8000000B
+    bne  a0, a1, .LBB2_4 # 외부 인터럽트가 아니면 예외 정지
+    ...
+    jalr a0               # 등록된 s_isr 콜백 호출
+    ...                   # 저장했던 레지스터 16개 복원
+    addi sp, sp, 64
+    mret                  # mepc로 복귀
+.LBB2_4:
+    nop                   # 예상하지 못한 예외
+    j .LBB2_4</code></pre>
+  <p class="src" style="font:400 11px var(--mono);color:var(--muted)">재현: Clang 17.0.0, -target riscv32 -march=rv32imc_zicsr -mabi=ilp32 -O2 · 중간 저장/복원 명령만 생략. 실제 Vitis GCC 결과는 최적화·ABI에 따라 달라질 수 있음. <a href="https://gcc.gnu.org/onlinedocs/gcc/RISC-V-Function-Attributes.html" target="_blank" rel="noopener noreferrer">GCC 인터럽트 함수 속성</a></p>
+  <div class="scroll"><table>
+    <tr><th>이번 장 개념</th><th>한 줄 정리</th><th>우리 SoC에서</th></tr>
+    <tr><td>명령어 사이클</td><td>IF → ID → EX → MEM → WB</td><td>교육용 5단계 모델, 실제 단계 수는 IP 설정에 따름</td></tr>
+    <tr><td>클록 · CPI</td><td>시간 = 명령어 수 × CPI × 주기</td><td>100 MHz 가정 시 10 ns</td></tr>
+    <tr><td>폴링 · 인터럽트</td><td>상태를 검사 / 허용된 요청이 처리 흐름을 바꿈</td><td>상태검사 또는 외부 인터럽트 기반으로 구현</td></tr>
+    <tr><td>트랩 진입 · 복귀</td><td>mepc · mcause 기록 → mtvec / mret</td><td><code>trap_handler</code></td></tr>
+    <tr><td>CSR</td><td>mstatus.MIE · mie.MEIE · mtvec</td><td><code>cpu_irq_enable()</code></td></tr>
+    <tr><td>INTC</td><td>여러 신호를 하나로, IPR로 원인 찾기</td><td>입력 순서와 장치는 Vivado 설정에 따름</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">다음 장</span>7장 성능 향상 — 다섯 단계를 겹쳐 실행하는 파이프라인, 그리고 CISC와 RISC.</div>
+</section>
+
+</div>
+<nav class="pager"><div class="pager-in"><button id="prev">← 이전</button><div class="dots"></div><span class="pos"></span><button id="next">다음 →</button></div></nav>
+<script>
+(function(){
+  var pages=[].slice.call(document.querySelectorAll('.pg'));
+  var dots=document.querySelector('.dots'), prev=document.getElementById('prev'), next=document.getElementById('next');
+  pages.forEach(function(_,i){var b=document.createElement('button');b.textContent=i+1;b.setAttribute('aria-label',(i+1)+'페이지');b.onclick=function(){go(i)};dots.appendChild(b)});
+  var cur=0;
+  function go(i){
+    cur=Math.max(0,Math.min(pages.length-1,i));
+    pages.forEach(function(p,k){p.hidden=k!==cur});
+    [].forEach.call(dots.children,function(b,k){b.classList.toggle('on',k===cur)});
+    var pos=document.querySelector('.pos'); if(pos) pos.textContent=(cur+1)+' / '+pages.length;
+    prev.disabled=cur===0; next.disabled=cur===pages.length-1;
+    try{history.replaceState(null,'','#p'+(cur+1))}catch(e){}
+    window.scrollTo(0,0);
+  }
+  prev.onclick=function(){go(cur-1)}; next.onclick=function(){go(cur+1)};
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+  var m=/^#p(\d+)$/.exec(location.hash||''); go(m?parseInt(m[1],10)-1:0);
+  document.getElementById('theme').onclick=function(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d?d==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.setAttribute('data-theme',dark?'light':'dark')};
+})();
+</script>
+
+</body></html>

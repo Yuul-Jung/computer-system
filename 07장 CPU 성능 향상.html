@@ -1,0 +1,348 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>7장 CPU 성능 향상</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F6FB; --surface:#FFFFFF; --ink:#17263C; --muted:#50637C; --line:#CBD8E8;
+  --green:#1456A0; --greenbg:#E8F1FE; --blue:#087C88; --bluebg:#E2F6F5;
+  --amber:#915710; --amberbg:#FFF3DF; --head:#EAF0F9; --grayfill:#DFE9F5;
+  --sans:"IBM Plex Sans KR","Noto Sans KR",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans);word-break:keep-all;overflow-wrap:break-word;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 96px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+/* 상단 */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.series{font:500 11px var(--mono);letter-spacing:.09em;color:var(--green);text-transform:uppercase}
+.theme-btn{font:500 11px var(--mono);padding:4px 10px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--muted);cursor:pointer}
+.chaps{display:flex;flex-wrap:wrap;gap:4px}
+.chaps a{font:500 11px var(--mono);padding:3px 8px;border-radius:3px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.chaps a.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+
+
+.chaps a{text-decoration:none}.chaps a:hover{border-color:var(--green);color:var(--green);background:var(--greenbg)}
+.chaps a.on:hover{background:var(--green);color:var(--surface)}
+.chaps a.back-index{font-weight:700;color:var(--green);border-color:var(--green)}
+/* 페이지 */
+.pg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px clamp(16px,4vw,40px) 32px;display:flex;flex-direction:column;gap:18px;min-height:600px}
+.pg[hidden]{display:none!important}
+.pg-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+.pg-no{font:600 11px var(--mono);color:var(--green);letter-spacing:.06em;white-space:nowrap}
+h1{margin:0;font-size:clamp(26px,5vw,40px);line-height:1.2;text-wrap:balance}
+h2{margin:0;font-size:clamp(19px,3vw,24px);line-height:1.3;text-wrap:balance}
+h3{margin:4px 0 0;font-size:14px}
+p{margin:0}
+.lead{color:var(--muted);font-size:15.5px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;align-items:start}
+.cols>*{min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+ul.pts{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+
+/* 카드·표 */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--surface)}
+.card b{color:var(--green);font-size:13px}
+.card span{font-size:13px;color:var(--muted)}
+.card .num{font:600 22px/1.3 var(--mono);color:var(--ink)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--head);font-weight:500;font-size:11.5px;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+code{font-family:var(--mono);font-size:12px;background:var(--head);padding:1px 4px;border-radius:3px}
+
+pre{margin:0;padding:14px 16px;overflow-x:auto;background:var(--head);border:1px solid var(--line);border-radius:6px;font:400 12.5px/1.6 var(--mono);min-width:0;word-break:normal}
+pre code{background:none;padding:0;font-size:inherit}
+/* 콜아웃 */
+.note,.tip,.warn{padding:10px 14px;border-radius:4px;font-size:13.5px}
+.note{background:var(--greenbg)}
+.tip{background:var(--bluebg);border-left:3px solid var(--blue)}
+.warn{background:var(--amberbg);border-left:3px solid var(--amber)}
+.lbl{font:600 10.5px var(--mono);letter-spacing:.05em;margin-right:6px}
+.note .lbl{color:var(--green)} .tip .lbl{color:var(--blue)} .warn .lbl{color:var(--amber)}
+
+/* 그림 */
+figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.fig{overflow-x:auto;border:1px solid var(--line);border-radius:6px;padding:16px;background:var(--surface)}
+.fig svg{display:block;width:100%;height:auto}
+figcaption{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+figcaption .src{font:400 11px var(--mono)}
+figcaption a{color:var(--blue)}
+.redraw{display:inline-block;font:600 10px var(--mono);color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:0 4px;margin-right:6px;vertical-align:1px}
+
+/* SVG */
+.box{fill:var(--surface);stroke:var(--ink);stroke-width:1.4}
+.boxg{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.2}
+.boxn{fill:var(--greenbg);stroke:var(--green);stroke-width:1.6}
+.boxb{fill:var(--bluebg);stroke:var(--blue);stroke-width:1.4}
+.boxd{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+.ln{fill:none;stroke:var(--ink);stroke-width:1.4}
+.lg{fill:none;stroke:var(--green);stroke-width:1.6}
+.lb{fill:none;stroke:var(--blue);stroke-width:1.6}
+.lm{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 3}
+.t{fill:var(--ink);font:500 13px var(--sans)}
+.tc{text-anchor:middle}
+.ts{fill:var(--muted);font:400 11px var(--mono);text-anchor:middle}
+.tg{fill:var(--green);font:600 13px var(--sans);text-anchor:middle}
+.tb{fill:var(--blue);font:600 12px var(--sans);text-anchor:middle}
+.chipc{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.4}
+.pin rect{fill:var(--amber)}
+.trace{stroke:var(--muted);stroke-width:2;opacity:.6}
+.die{fill:#20262E;stroke:var(--muted);stroke-width:1.2} .mem{fill:#4B545F;stroke:var(--muted);stroke-width:1}
+.dt{fill:#F1F3F6;font:700 16px var(--sans);text-anchor:middle}
+.dts{fill:#D9DEE4;font:500 12px var(--sans);text-anchor:middle}
+.ah{fill:var(--ink)} .ag{fill:var(--green)} .ab{fill:var(--blue)}
+
+/* 넘김 */
+.pager{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.pager-in{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pager button{font:500 13px var(--sans);padding:7px 14px;border-radius:5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pager button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.dots button{width:26px;height:26px;padding:0;font:500 11px var(--mono);border-radius:50%}
+.dots button.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+.pos{display:none;font:600 13px var(--mono);color:var(--ink)}
+@media (max-width:600px){.dots{display:none}.pos{display:block}.pager button{padding:6px 12px;white-space:nowrap}}
+</style>
+<div class="wrap">
+  <div class="top"><span class="series">컴퓨터시스템구조 · MicroBlaze V SoC 도입 이론</span><button class="theme-btn" id="theme">다크 / 라이트</button></div>
+  <div class="chaps"><a class="back-index" href="index.html">⌂ 전체 목차</a><a class="" href="01%EC%9E%A5%20%EC%BB%B4%ED%93%A8%ED%84%B0%EA%B5%AC%EC%A1%B0%EC%9D%98%20%ED%81%B0%EA%B7%B8%EB%A6%BC.html" >1 큰그림</a><a class="" href="02%EC%9E%A5%20%EB%8D%B0%EC%9D%B4%ED%84%B0.html" >2 데이터</a><a class="" href="03%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4.html" >3 명령어</a><a class="" href="04%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%EC%9D%98%20%EA%B5%AC%EC%A1%B0.html" >4 명령어 구조</a><a class="" href="05%EC%9E%A5%20CPU%20%EA%B5%AC%EC%84%B1.html" >5 CPU 구성</a><a class="" href="06%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%20%EC%82%AC%EC%9D%B4%ED%81%B4%EA%B3%BC%20%EC%9D%B8%ED%84%B0%EB%9F%BD%ED%8A%B8.html" >6 명령어 사이클</a><a class="on" href="07%EC%9E%A5%20CPU%20%EC%84%B1%EB%8A%A5%20%ED%96%A5%EC%83%81.html" aria-current="page">7 성능 향상</a><a class="" href="08%EC%9E%A5%20%EB%A9%94%EB%AA%A8%EB%A6%AC.html" >8 메모리</a><a class="" href="09%EC%9E%A5%20%EB%B3%B4%EC%A1%B0%EA%B8%B0%EC%96%B5%EC%9E%A5%EC%B9%98.html" >9 보조기억</a><a class="" href="10%EC%9E%A5%20%EC%9E%85%EC%B6%9C%EB%A0%A5%EC%9E%A5%EC%B9%98.html" >10 입출력</a></div>
+<!-- 7장 CPU 성능 향상 : 10페이지 -->
+<section class="pg">
+  <div class="pg-head"><span class="pg-no">7장 · 1 / 10</span><span class="pg-no">표지</span></div>
+  <h1>CPU 성능 향상</h1>
+  <p class="lead">CPU 성능은 명령어 수·명령어당 평균 클록 수·클록 주기의 영향을 받는다. 파이프라인으로 여러 명령어를 겹쳐 처리하고, 해저드를 해결하며, CISC와 RISC의 실제 명령어를 비교한다.</p>
+  <div class="cards"><div class="card"><b>학습 목표 1</b><span>실행 시간을 결정하는 세 요소를 말할 수 있다.</span></div><div class="card"><b>학습 목표 2</b><span>파이프라인과 해저드(데이터 · 제어)를 설명할 수 있다.</span></div><div class="card"><b>학습 목표 3</b><span>CISC와 RISC의 차이를 실제 기계어로 비교할 수 있다.</span></div></div>
+  <figure><div class="fig"><svg viewBox="0 0 720 165" style="min-width:560px" role="img" aria-label="10개 장 테크트리">
+<defs><marker id="at" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+<rect x="10" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="72" y="42" class="t tc">1 큰그림</text><text x="72" y="60" class="ts">CPU·메모리·I/O</text>
+<rect x="152" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="214" y="42" class="t tc">2 데이터</text><text x="214" y="60" class="ts">2진수·16진수</text>
+<rect x="294" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="356" y="42" class="t tc">3 명령어</text><text x="356" y="60" class="ts">소스→실행파일</text>
+<rect x="436" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="498" y="42" class="t tc">4 명령어 구조</text><text x="498" y="60" class="ts">오퍼랜드·스택</text>
+<rect x="578" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="640" y="42" class="t tc">5 CPU 구성</text><text x="640" y="60" class="ts">ALU·레지스터</text>
+<rect x="10" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="72" y="127" class="t tc">6 명령어 사이클</text><text x="72" y="145" class="ts">인출·인터럽트</text>
+<rect x="152" y="105" width="124" height="52" rx="5" class="boxn"/>
+<text x="214" y="127" class="tg">7 성능 향상</text><text x="214" y="145" class="ts">파이프라인·RISC</text>
+<rect x="294" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="356" y="127" class="t tc">8 메모리</text><text x="356" y="145" class="ts">주소공간·캐시</text>
+<rect x="436" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="498" y="127" class="t tc">9 보조기억</text><text x="498" y="145" class="ts">플래시·부팅</text>
+<rect x="578" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="640" y="127" class="t tc">10 입출력</text><text x="640" y="145" class="ts">폴링·인터럽트</text>
+<line x1="134" y1="46" x2="151" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="46" x2="293" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="46" x2="435" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="46" x2="577" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="134" y1="131" x2="151" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="131" x2="293" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="131" x2="435" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="131" x2="577" y2="131" class="ln" marker-end="url(#at)"/>
+<path d="M640 72 V88 H72 V104" class="ln" marker-end="url(#at)"/></svg></div><figcaption>그림 7-1 · 10개 장 테크트리</figcaption></figure>
+  <div class="scroll"><table><tr><th>페이지</th><th>내용</th><th>페이지</th><th>내용</th></tr><tr><td>1</td><td>표지 · 학습 목표</td><td>6</td><td>제어 해저드 · 구조 해저드</td></tr><tr><td>2</td><td>성능을 정하는 세 가지</td><td>7</td><td>더 많은 병렬성</td></tr><tr><td>3</td><td>파이프라인</td><td>8</td><td>CISC와 RISC</td></tr><tr><td>4</td><td>파이프라인 레지스터</td><td>9</td><td>명령어 길이와 코드 크기</td></tr><tr><td>5</td><td>데이터 해저드</td><td>10</td><td>MicroBlaze V의 선택 · 정리</td></tr></table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>성능을 정하는 세 가지</h2><span class="pg-no">7장 · 2 / 10</span></div>
+  <p>6장에서 본 식이 이 장의 출발점이다. 프로그램을 빨리 끝내려면 세 가지 중 하나를 줄이면 된다. 셋은 서로 얽혀 있어서, 하나를 줄이면 다른 것이 늘어나기도 한다.</p>
+  <div class="cards">
+    <div class="card"><b>명령어 수</b><span class="num">N</span><span>프로그램 실행 중 실제 수행한 명령어 수. 소스·컴파일러·ISA·입력 데이터 등에 따라 달라진다.</span></div>
+    <div class="card"><b>명령어당 클록</b><span class="num">CPI</span><span>완료한 명령어당 평균 클록 수. 해저드·메모리 지연 등도 영향을 준다.</span></div>
+    <div class="card"><b>클록 주기</b><span class="num">T</span><span>한 클록의 길이. 임계 경로와 구현·타이밍 제약의 영향을 받는다.</span></div>
+  </div>
+  <div class="note"><span class="lbl">실행 시간</span> ≈ N × CPI × T &nbsp;·&nbsp; 예: 100만 개 × 1.2 × 10 ns(100 MHz) → 12 ms. 평균값이 일정하다고 가정한 계산 예시</div>
+  <div class="scroll"><table>
+    <tr><th>방법</th><th>줄이는 것</th><th>대가</th><th>이 장에서</th></tr>
+    <tr><td>파이프라인</td><td>명령어 처리량 증가, 평균 CPI 개선 가능</td><td>해저드 처리 회로·레지스터가 필요</td><td>3~6쪽</td></tr>
+    <tr><td>단계를 잘게 나누기</td><td>클록 주기 T 단축 가능</td><td>단계 간 레지스터 비용·분기 손실 증가 가능</td><td>10쪽 8단</td></tr>
+    <tr><td>슈퍼스칼라 · 멀티코어</td><td>코어 처리량 / 전체 작업 병렬화</td><td>하드웨어·소프트웨어 비용 증가</td><td>7쪽</td></tr>
+    <tr><td>복합 명령어</td><td>같은 작업의 ISA 명령어 수 감소 가능</td><td>명령어 해석과 내부 실행 방식에 따라 성능 상이</td><td>8쪽</td></tr>
+    <tr><td>M · C 확장</td><td>M: 연산 명령어 수 감소 가능 / C: 코드 바이트 수 절약</td><td>지원 회로·명령어 해석 기능 필요</td><td>9쪽</td></tr>
+  </table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>파이프라인 — 명령어를 겹쳐 실행</h2><span class="pg-no">7장 · 3 / 10</span></div>
+  <p>세탁기 · 건조기 · 다림질을 차례로 하는 일이라면, 첫 빨래가 건조기에 들어간 동안 두 번째 빨래를 세탁기에 넣을 수 있다. <strong>파이프라인(pipeline)</strong>도 같다. 교육용 5단 모델에서는 단계마다 필요한 자원을 적절히 분리하여, 명령어 1이 ID 단계에 있는 동안 명령어 2를 IF 할 수 있다. 실제 MicroBlaze V의 단계 구성은 선택한 최적화 설정에 따라 다르다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 270" style="min-width:560px" role="img" aria-label="5단 파이프라인"><text x="380" y="16" class="ts">클록</text><text x="170.0" y="32" class="ts" style="font-size:10px">1</text><text x="230.0" y="32" class="ts" style="font-size:10px">2</text><text x="290.0" y="32" class="ts" style="font-size:10px">3</text><text x="350.0" y="32" class="ts" style="font-size:10px">4</text><text x="410.0" y="32" class="ts" style="font-size:10px">5</text><text x="470.0" y="32" class="ts" style="font-size:10px">6</text><text x="530.0" y="32" class="ts" style="font-size:10px">7</text><text x="590.0" y="32" class="ts" style="font-size:10px">8</text><text x="650.0" y="32" class="ts" style="font-size:10px">9</text><text x="130" y="59.0" class="ts" style="text-anchor:end;font-size:11px">명령어 1</text><rect x="142" y="40" width="56" height="30" rx="3" class="box"/><text x="170.0" y="59.0" class="t tc" style="font-size:11px">IF</text><rect x="202" y="40" width="56" height="30" rx="3" class="box"/><text x="230.0" y="59.0" class="t tc" style="font-size:11px">ID</text><rect x="262" y="40" width="56" height="30" rx="3" class="boxn"/><text x="290.0" y="59.0" class="tg" style="font-size:11px">EX</text><rect x="322" y="40" width="56" height="30" rx="3" class="box"/><text x="350.0" y="59.0" class="t tc" style="font-size:11px">MEM</text><rect x="382" y="40" width="56" height="30" rx="3" class="box"/><text x="410.0" y="59.0" class="t tc" style="font-size:11px">WB</text><text x="130" y="93.0" class="ts" style="text-anchor:end;font-size:11px">명령어 2</text><rect x="202" y="74" width="56" height="30" rx="3" class="box"/><text x="230.0" y="93.0" class="t tc" style="font-size:11px">IF</text><rect x="262" y="74" width="56" height="30" rx="3" class="box"/><text x="290.0" y="93.0" class="t tc" style="font-size:11px">ID</text><rect x="322" y="74" width="56" height="30" rx="3" class="boxn"/><text x="350.0" y="93.0" class="tg" style="font-size:11px">EX</text><rect x="382" y="74" width="56" height="30" rx="3" class="box"/><text x="410.0" y="93.0" class="t tc" style="font-size:11px">MEM</text><rect x="442" y="74" width="56" height="30" rx="3" class="box"/><text x="470.0" y="93.0" class="t tc" style="font-size:11px">WB</text><text x="130" y="127.0" class="ts" style="text-anchor:end;font-size:11px">명령어 3</text><rect x="262" y="108" width="56" height="30" rx="3" class="box"/><text x="290.0" y="127.0" class="t tc" style="font-size:11px">IF</text><rect x="322" y="108" width="56" height="30" rx="3" class="box"/><text x="350.0" y="127.0" class="t tc" style="font-size:11px">ID</text><rect x="382" y="108" width="56" height="30" rx="3" class="boxn"/><text x="410.0" y="127.0" class="tg" style="font-size:11px">EX</text><rect x="442" y="108" width="56" height="30" rx="3" class="box"/><text x="470.0" y="127.0" class="t tc" style="font-size:11px">MEM</text><rect x="502" y="108" width="56" height="30" rx="3" class="box"/><text x="530.0" y="127.0" class="t tc" style="font-size:11px">WB</text><text x="130" y="161.0" class="ts" style="text-anchor:end;font-size:11px">명령어 4</text><rect x="322" y="142" width="56" height="30" rx="3" class="box"/><text x="350.0" y="161.0" class="t tc" style="font-size:11px">IF</text><rect x="382" y="142" width="56" height="30" rx="3" class="box"/><text x="410.0" y="161.0" class="t tc" style="font-size:11px">ID</text><rect x="442" y="142" width="56" height="30" rx="3" class="boxn"/><text x="470.0" y="161.0" class="tg" style="font-size:11px">EX</text><rect x="502" y="142" width="56" height="30" rx="3" class="box"/><text x="530.0" y="161.0" class="t tc" style="font-size:11px">MEM</text><rect x="562" y="142" width="56" height="30" rx="3" class="box"/><text x="590.0" y="161.0" class="t tc" style="font-size:11px">WB</text><text x="130" y="195.0" class="ts" style="text-anchor:end;font-size:11px">명령어 5</text><rect x="382" y="176" width="56" height="30" rx="3" class="box"/><text x="410.0" y="195.0" class="t tc" style="font-size:11px">IF</text><rect x="442" y="176" width="56" height="30" rx="3" class="box"/><text x="470.0" y="195.0" class="t tc" style="font-size:11px">ID</text><rect x="502" y="176" width="56" height="30" rx="3" class="boxn"/><text x="530.0" y="195.0" class="tg" style="font-size:11px">EX</text><rect x="562" y="176" width="56" height="30" rx="3" class="box"/><text x="590.0" y="195.0" class="t tc" style="font-size:11px">MEM</text><rect x="622" y="176" width="56" height="30" rx="3" class="box"/><text x="650.0" y="195.0" class="t tc" style="font-size:11px">WB</text><line x1="140" y1="214" x2="680" y2="214" class="lm"/><text x="140" y="238" class="t" style="text-anchor:start;font-size:12px">파이프라인: 5개를 9클록에</text><text x="140" y="258" class="ts" style="text-anchor:start">비파이프라인 25클록 / 파이프라인 9클록 — 5번째 클록부터 매 클록 1개 완료</text></svg></div><figcaption>그림 7-2 · 이상적인 5단 파이프라인 예시 (해저드·추가 지연 없음). 녹색은 EX 단계</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th></th><th>파이프라인 없음</th><th>5단 파이프라인</th></tr>
+    <tr><td>명령어 하나의 지연 시간 (같은 1클록/단계 가정)</td><td>5클록</td><td>5클록 — 처리량만 증가</td></tr>
+    <tr><td>클록마다 끝나는 명령어 수 (처리량)</td><td>0.2개</td><td>최대 1개</td></tr>
+    <tr><td>명령어 5개</td><td>25클록</td><td>9클록</td></tr>
+    <tr><td>명령어 1000개</td><td>5000클록</td><td>1004클록</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>파이프라인의 주된 목적은 명령어 하나의 지연 시간 단축이 아니라, 여러 명령어를 겹쳐 실행해 <strong>처리량</strong>을 높이는 것이다. 단계 분할에 따라 클록 주기도 달라질 수 있다. 이처럼 명령어 여러 개를 겹쳐 처리하는 것을 <strong>명령어 수준 병렬성(ILP)</strong>이라 한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>파이프라인 레지스터 — 단계 사이의 칸막이</h2><span class="pg-no">7장 · 4 / 10</span></div>
+  <p>여러 명령어가 동시에 서로 다른 단계에 있으려면, 각 단계가 자기 명령어의 정보를 따로 들고 있어야 한다. 그래서 단계 사이마다 <strong>파이프라인 레지스터</strong>를 둔다. 정상 진행할 때 클록 경계에서 각 단계의 결과를 다음 레지스터에 저장한다. 해저드가 있으면 일부 단계가 멈추거나 잘못 인출한 명령어를 무효화한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 175" style="min-width:560px" role="img" aria-label="파이프라인 레지스터"><defs><marker id="m4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="40" width="104" height="70" rx="5" class="box"/><text x="72" y="80" class="t tc" style="font-weight:700">IF</text><rect x="132" y="30" width="18" height="90" rx="2" class="boxb"/><text x="141" y="138" class="tb" style="font-size:10px">IF/ID</text><line x1="124" y1="75" x2="132" y2="75" class="ln"/><line x1="150" y1="75" x2="162" y2="75" class="ln" marker-end="url(#m4)"/><rect x="162" y="40" width="104" height="70" rx="5" class="box"/><text x="214" y="80" class="t tc" style="font-weight:700">ID</text><rect x="274" y="30" width="18" height="90" rx="2" class="boxb"/><text x="283" y="138" class="tb" style="font-size:10px">ID/EX</text><line x1="266" y1="75" x2="274" y2="75" class="ln"/><line x1="292" y1="75" x2="304" y2="75" class="ln" marker-end="url(#m4)"/><rect x="304" y="40" width="104" height="70" rx="5" class="box"/><text x="356" y="80" class="t tc" style="font-weight:700">EX</text><rect x="416" y="30" width="18" height="90" rx="2" class="boxb"/><text x="425" y="138" class="tb" style="font-size:10px">EX/MEM</text><line x1="408" y1="75" x2="416" y2="75" class="ln"/><line x1="434" y1="75" x2="446" y2="75" class="ln" marker-end="url(#m4)"/><rect x="446" y="40" width="104" height="70" rx="5" class="box"/><text x="498" y="80" class="t tc" style="font-weight:700">MEM</text><rect x="558" y="30" width="18" height="90" rx="2" class="boxb"/><text x="567" y="138" class="tb" style="font-size:10px">MEM/WB</text><line x1="550" y1="75" x2="558" y2="75" class="ln"/><line x1="576" y1="75" x2="588" y2="75" class="ln" marker-end="url(#m4)"/><rect x="588" y="40" width="104" height="70" rx="5" class="box"/><text x="640" y="80" class="t tc" style="font-weight:700">WB</text><text x="360" y="20" class="ts">단계 사이에 레지스터를 두어, 클록마다 결과를 다음 단계로 넘긴다</text><text x="360" y="164" class="ts">파란 막대 = 파이프라인 레지스터 묶음 (클록 경계에서 값 저장)</text></svg></div><figcaption>그림 7-3 · 5단 파이프라인과 파이프라인 레지스터 4묶음(교육용 모델)</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>레지스터</th><th>담는 것 (예)</th></tr>
+    <tr><td>IF/ID</td><td>인출한 명령어, 그 명령어의 PC</td></tr>
+    <tr><td>ID/EX</td><td>읽은 rs1 · rs2 값, 즉시값, rd 번호, 제어 신호</td></tr>
+    <tr><td>EX/MEM</td><td>ALU 결과(또는 주소), sw로 쓸 값, rd 번호, 제어 신호</td></tr>
+    <tr><td>MEM/WB</td><td>메모리에서 읽은 값 또는 ALU 결과, rd 번호</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">클록 주기</span>클록 주기는 단계별 조합 경로, 레지스터 지연, 배선 지연 등에 의해 제한된다. 단계 분할은 높은 주파수 달성에 도움이 될 수 있지만, 실제 최대 주파수는 구현과 타이밍 분석으로 확인한다(10쪽).</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>데이터 해저드 — 결과가 준비되기 전의 사용</h2><span class="pg-no">7장 · 5 / 10</span></div>
+  <p>겹쳐 실행하다 보면 뒤 명령어가 앞 명령어의 결과를 필요로 할 때가 있다. 앞 명령어의 결과가 아직 준비되지 않았는데 뒤 명령어가 이를 사용하면 데이터 의존성이 생긴다. 전달 회로나 정지 처리가 없다면 이전 값을 사용할 수 있다. 이처럼 파이프라인이 그대로 진행할 수 없는 상황을 <strong>해저드(hazard)</strong>라 하고, 값 때문에 생기는 것을 <strong>데이터 해저드</strong>라 한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 285" style="min-width:560px" role="img" aria-label="데이터 해저드"><defs><marker id="m5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="20" y="18" class="t" style="text-anchor:start;font-weight:600">전달(forwarding) 예시</text><text x="160" y="63.0" class="ts" style="text-anchor:end;font-size:11px">add a5, a0, a1</text><rect x="172" y="44" width="60" height="30" rx="3" class="box"/><text x="202.0" y="63.0" class="t tc" style="font-size:11px">IF</text><rect x="236" y="44" width="60" height="30" rx="3" class="box"/><text x="266.0" y="63.0" class="t tc" style="font-size:11px">ID</text><rect x="300" y="44" width="60" height="30" rx="3" class="boxn"/><text x="330.0" y="63.0" class="tg" style="font-size:11px">EX</text><rect x="364" y="44" width="60" height="30" rx="3" class="box"/><text x="394.0" y="63.0" class="t tc" style="font-size:11px">MEM</text><rect x="428" y="44" width="60" height="30" rx="3" class="box"/><text x="458.0" y="63.0" class="t tc" style="font-size:11px">WB</text><text x="160" y="97.0" class="ts" style="text-anchor:end;font-size:11px">sub a6, a5, a2</text><rect x="236" y="78" width="60" height="30" rx="3" class="box"/><text x="266.0" y="97.0" class="t tc" style="font-size:11px">IF</text><rect x="300" y="78" width="60" height="30" rx="3" class="box"/><text x="330.0" y="97.0" class="t tc" style="font-size:11px">ID</text><rect x="364" y="78" width="60" height="30" rx="3" class="boxn"/><text x="394.0" y="97.0" class="tg" style="font-size:11px">EX</text><rect x="428" y="78" width="60" height="30" rx="3" class="box"/><text x="458.0" y="97.0" class="t tc" style="font-size:11px">MEM</text><rect x="492" y="78" width="60" height="30" rx="3" class="box"/><text x="522.0" y="97.0" class="t tc" style="font-size:11px">WB</text><path d="M330 74 C330 90, 350 93, 364 93" class="lg" style="stroke-width:2" marker-end="url(#m5)"/><text x="560" y="84" class="tg" style="text-anchor:start;font-size:11px">EX 결과를 바로 다음 EX로</text><text x="20" y="160" class="t" style="text-anchor:start;font-weight:600">적재 직후 사용 — 교과서형 1클록 정지 예시</text><text x="160" y="205.0" class="ts" style="text-anchor:end;font-size:11px">lw a5, 0(a0)</text><rect x="172" y="186" width="60" height="30" rx="3" class="box"/><text x="202.0" y="205.0" class="t tc" style="font-size:11px">IF</text><rect x="236" y="186" width="60" height="30" rx="3" class="box"/><text x="266.0" y="205.0" class="t tc" style="font-size:11px">ID</text><rect x="300" y="186" width="60" height="30" rx="3" class="box"/><text x="330.0" y="205.0" class="t tc" style="font-size:11px">EX</text><rect x="364" y="186" width="60" height="30" rx="3" class="boxn"/><text x="394.0" y="205.0" class="tg" style="font-size:11px">MEM</text><rect x="428" y="186" width="60" height="30" rx="3" class="box"/><text x="458.0" y="205.0" class="t tc" style="font-size:11px">WB</text><text x="160" y="239.0" class="ts" style="text-anchor:end;font-size:11px">add a6, a5, a2</text><rect x="236" y="220" width="60" height="30" rx="3" class="box"/><text x="266.0" y="239.0" class="t tc" style="font-size:11px">IF</text><rect x="300" y="220" width="60" height="30" rx="3" class="box"/><text x="330.0" y="239.0" class="t tc" style="font-size:11px">ID</text><rect x="364" y="220" width="60" height="30" rx="3" class="boxd"/><text x="394.0" y="239.0" class="t tc" style="font-size:11px">멈춤</text><rect x="428" y="220" width="60" height="30" rx="3" class="boxn"/><text x="458.0" y="239.0" class="tg" style="font-size:11px">EX</text><rect x="492" y="220" width="60" height="30" rx="3" class="box"/><text x="522.0" y="239.0" class="t tc" style="font-size:11px">MEM</text><rect x="556" y="220" width="60" height="30" rx="3" class="box"/><text x="586.0" y="239.0" class="t tc" style="font-size:11px">WB</text><path d="M394 216 C394 232, 412 235, 428 235" class="lg" style="stroke-width:2" marker-end="url(#m5)"/><text x="500" y="206" class="tg" style="text-anchor:start;font-size:11px">MEM이 끝나야 값이 생김</text><text x="360" y="276" class="ts">뒤 명령어의 EX 자리에 생긴 빈 작업이 버블(bubble) — 앞 명령어는 계속 진행</text></svg></div><figcaption>그림 7-4 · 교육용 5단 모델의 데이터 해저드: 전달과 1클록 정지 예시<span class="src">실제 MicroBlaze V: <a href="https://docs.amd.com/r/en-US/ug1629-microblaze-v-user-guide/5-Stage-Pipeline">AMD UG1629 · 5-Stage Pipeline</a></span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>해결 방법</th><th>하는 일</th><th>손실</th></tr>
+    <tr><td>전달(forwarding, bypassing)</td><td>준비된 결과를 레지스터 파일에 쓰기 전에 후속 연산 입력으로 넘긴다</td><td>조건이 맞으면 정지 없이 진행</td></tr>
+    <tr><td>멈춤(stall)</td><td>값이 준비될 때까지 의존 명령어의 진행을 지연한다</td><td>1클록 이상 가능</td></tr>
+    <tr><td>컴파일러의 순서 바꾸기</td><td><code>lw</code>와 그 값을 쓰는 명령어 사이에 상관없는 명령어를 끼워 넣는다</td><td>없음 (끼울 명령어가 있으면)</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>교과서형 5단 파이프라인에서는 <code>lw</code> 다음에 그 값을 바로 쓰면 보통 1클록의 정지가 필요하다(load-use 해저드). 실제 MicroBlaze V는 3·4·5·8단 설정과 메모리 응답 시간에 따라 정지 횟수가 달라진다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>제어 해저드 · 구조 해저드</h2><span class="pg-no">7장 · 6 / 10</span></div>
+  <p>그림의 교육용 5단 모델은 분기 여부를 EX 단계에서 결정한다고 가정한다. 그동안 파이프라인은 이미 다음 명령어들을 인출해 버렸다. 분기하면 이 명령어들을 버려야(flush) 하므로 그만큼 클록이 낭비된다. 이것이 <strong>제어 해저드</strong>다. 실제 MicroBlaze V에는 선택형 분기 목표 캐시(BTC)가 있어 올바른 예측 시 손실을 줄일 수 있다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 215" style="min-width:560px" role="img" aria-label="제어 해저드"><text x="200.0" y="26" class="ts" style="font-size:10px">1</text><text x="260.0" y="26" class="ts" style="font-size:10px">2</text><text x="320.0" y="26" class="ts" style="font-size:10px">3</text><text x="380.0" y="26" class="ts" style="font-size:10px">4</text><text x="440.0" y="26" class="ts" style="font-size:10px">5</text><text x="500.0" y="26" class="ts" style="font-size:10px">6</text><text x="560.0" y="26" class="ts" style="font-size:10px">7</text><text x="620.0" y="26" class="ts" style="font-size:10px">8</text><text x="680.0" y="26" class="ts" style="font-size:10px">9</text><text x="160" y="53.0" class="ts" style="text-anchor:end;font-size:11px">beq a0, a1, L</text><rect x="172" y="34" width="56" height="30" rx="3" class="box"/><text x="200.0" y="53.0" class="t tc" style="font-size:11px">IF</text><rect x="232" y="34" width="56" height="30" rx="3" class="box"/><text x="260.0" y="53.0" class="t tc" style="font-size:11px">ID</text><rect x="292" y="34" width="56" height="30" rx="3" class="boxn"/><text x="320.0" y="53.0" class="tg" style="font-size:11px">EX</text><rect x="352" y="34" width="56" height="30" rx="3" class="box"/><text x="380.0" y="53.0" class="t tc" style="font-size:11px">MEM</text><rect x="412" y="34" width="56" height="30" rx="3" class="box"/><text x="440.0" y="53.0" class="t tc" style="font-size:11px">WB</text><text x="160" y="87.0" class="ts" style="text-anchor:end;font-size:11px">다음 명령어 1</text><rect x="232" y="68" width="56" height="30" rx="3" class="boxd"/><text x="260.0" y="87.0" class="t tc" style="font-size:11px">IF</text><rect x="292" y="68" width="56" height="30" rx="3" class="boxd"/><text x="320.0" y="87.0" class="t tc" style="font-size:11px">ID</text><rect x="352" y="68" width="56" height="30" rx="3" class="boxg"/><text x="380.0" y="87.0" class="t tc" style="font-size:11px">버림</text><text x="160" y="121.0" class="ts" style="text-anchor:end;font-size:11px">다음 명령어 2</text><rect x="292" y="102" width="56" height="30" rx="3" class="boxd"/><text x="320.0" y="121.0" class="t tc" style="font-size:11px">IF</text><rect x="352" y="102" width="56" height="30" rx="3" class="boxg"/><text x="380.0" y="121.0" class="t tc" style="font-size:11px">버림</text><text x="160" y="155.0" class="ts" style="text-anchor:end;font-size:11px">L의 명령어</text><rect x="352" y="136" width="56" height="30" rx="3" class="box"/><text x="380.0" y="155.0" class="t tc" style="font-size:11px">IF</text><rect x="412" y="136" width="56" height="30" rx="3" class="box"/><text x="440.0" y="155.0" class="t tc" style="font-size:11px">ID</text><rect x="472" y="136" width="56" height="30" rx="3" class="box"/><text x="500.0" y="155.0" class="t tc" style="font-size:11px">EX</text><rect x="532" y="136" width="56" height="30" rx="3" class="box"/><text x="560.0" y="155.0" class="t tc" style="font-size:11px">MEM</text><rect x="592" y="136" width="56" height="30" rx="3" class="box"/><text x="620.0" y="155.0" class="t tc" style="font-size:11px">WB</text><text x="360" y="200" class="ts">EX에서 "분기한다"가 정해지면, 미리 가져온 두 명령어를 버리고 L부터 다시 인출</text></svg></div><figcaption>그림 7-5 · 분기할 때 미리 가져온 명령어 버리기 (EX 결정 가정)<span class="src">실제 MicroBlaze V: <a href="https://docs.amd.com/r/en-US/ug1629-microblaze-v-user-guide/Branches">AMD UG1629 · Branches</a></span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>해저드</th><th>원인</th><th>해결</th></tr>
+    <tr><td>제어 해저드</td><td>분기 결과를 늦게 안다</td><td><strong>분기 예측</strong>: 결과를 미리 짐작해 인출하고, 틀리면 버린다. 정적 예측(뒤로 가는 분기는 반복문이니 "한다"로) · 동적 예측(지난 결과를 기억)</td></tr>
+    <tr><td>구조 해저드</td><td>두 단계가 같은 부품을 동시에 쓰려 한다</td><td>명령어·데이터 경로나 포트를 분리하여 일부 충돌을 줄인다. 다른 공유 자원에서는 여전히 생길 수 있다</td></tr>
+    <tr><td>데이터 해저드</td><td>앞 명령어의 결과가 아직 없다</td><td>전달 · 멈춤 (5쪽)</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">SoC 연결</span>ILMB와 DLMB를 별도로 구성하면 명령어 인출과 데이터 접근에 독립된 경로를 제공할 수 있다. 예를 들어 듀얼 포트 BRAM의 두 포트를 연결하면 동시 접근에 유리하다. 다만 실제 포트 구성·주소 충돌·대기 시간은 Vivado 설계에 따라 확인해야 한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>더 많은 병렬성 — 슈퍼스칼라와 멀티코어</h2><span class="pg-no">7장 · 7 / 10</span></div>
+  <p>단일 발행(single-issue) 파이프라인은 이상적인 조건에서 클록당 최대 명령어 1개를 완료하므로 CPI는 1에 가까워진다. 단일 코어의 처리량을 더 높이는 방법에는 한 클록에 명령어 여러 개를 발행하는 <strong>슈퍼스칼라(superscalar)</strong>, 순서를 바꿔 실행할 수 있는 명령어를 먼저 처리하는 <strong>비순차 실행(out-of-order)</strong>, 아예 CPU를 여러 개 두어 독립적인 작업을 병렬 처리하는 <strong>멀티코어(multicore)</strong>가 있다. 멀티코어는 단일 코어의 CPI를 줄인다는 뜻이 아니다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 220" style="min-width:560px" role="img" aria-label="병렬 처리의 세 단계"><text x="110" y="20" class="t tc" style="font-weight:600">파이프라인</text><text x="110" y="38" class="ts">한 줄로 겹쳐서</text><rect x="20" y="54" width="110" height="22" rx="3" class="boxn"/><rect x="42" y="82" width="110" height="22" rx="3" class="box"/><rect x="64" y="110" width="110" height="22" rx="3" class="box"/><rect x="86" y="138" width="110" height="22" rx="3" class="box"/><text x="360" y="20" class="t tc" style="font-weight:600">슈퍼스칼라</text><text x="360" y="38" class="ts">한 클록에 두 개씩 시작</text><rect x="272" y="54" width="110" height="22" rx="3" class="boxn"/><rect x="272" y="82" width="110" height="22" rx="3" class="boxn"/><rect x="294" y="110" width="110" height="22" rx="3" class="box"/><rect x="294" y="138" width="110" height="22" rx="3" class="box"/><text x="610" y="20" class="t tc" style="font-weight:600">멀티코어</text><text x="610" y="38" class="ts">CPU 자체를 여러 개</text><rect x="510" y="48" width="200" height="60" rx="5" class="boxd"/><text x="702" y="62" class="ts" style="text-anchor:end;font-size:10px">코어 1</text><rect x="520" y="56" width="110" height="22" rx="3" class="boxn"/><rect x="542" y="82" width="110" height="22" rx="3" class="box"/><rect x="510" y="116" width="200" height="60" rx="5" class="boxd"/><text x="702" y="130" class="ts" style="text-anchor:end;font-size:10px">코어 2</text><rect x="520" y="124" width="110" height="22" rx="3" class="boxn"/><rect x="542" y="150" width="110" height="22" rx="3" class="box"/><text x="360" y="200" class="ts">한 코어의 명령어 병렬성(ILP)과 여러 코어의 작업 병렬성은 구분</text></svg></div><figcaption>그림 7-6 · 병렬로 처리하는 세 가지 방식</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>방식</th><th>병렬의 단위</th><th>누가 병렬을 찾나</th><th>쓰이는 곳</th></tr>
+    <tr><td>파이프라인</td><td>명령어의 단계</td><td>하드웨어</td><td>거의 모든 CPU (MicroBlaze V 포함)</td></tr>
+    <tr><td>슈퍼스칼라</td><td>명령어 여러 개</td><td>하드웨어</td><td>PC · 스마트폰 CPU</td></tr>
+    <tr><td>비순차 실행</td><td>기다리는 명령어를 건너뜀</td><td>하드웨어</td><td>고성능 CPU</td></tr>
+    <tr><td>멀티코어</td><td>서로 다른 작업·스레드</td><td>운영체제·응용 소프트웨어</td><td>Apple M1 (8 CPU 코어), 멀티코어 SoC 설계</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>고성능 기법은 회로를 크게 늘린다. FPGA 안의 소프트 CPU는 남은 자원을 주변장치에도 써야 하므로, 단순한 파이프라인 하나를 두고 필요한 일은 전용 하드웨어(사용자 IP)로 넘기는 경우가 많다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>CISC와 RISC — 명령어 집합의 두 철학</h2><span class="pg-no">7장 · 8 / 10</span></div>
+  <p><strong>CISC(Complex Instruction Set Computer)</strong> 계열인 x86은 메모리 피연산자를 직접 사용하는 복합 명령어와 가변 길이 인코딩을 제공한다. <strong>RISC(Reduced Instruction Set Computer)</strong> 계열인 RISC-V는 정수 연산을 레지스터 중심으로 실행하고, 메모리 접근을 적재·저장 명령어로 구분한다. 현대 CPU는 내부 구현이 다양하므로 분류만으로 성능을 판단하지 않는다.</p>
+  <h3>C 소스</h3><pre><code>void inc(int *p)
+{
+    (*p)++;       /* 메모리에 있는 값을 1 늘린다 */
+}</code></pre>
+  <h3>x86-64 (CISC)</h3><pre><code>inc:                        # x86-64 (CISC)
+    inc  dword ptr [rdi]    # 메모리 읽기 + 1 + 메모리 쓰기를 명령어 하나로  (ff 07 · 2바이트)
+    ret</code></pre>
+  <h3>RISC-V (RISC)</h3><pre><code>inc:                        # RV32IMC (RISC)
+    lw   a1, 0(a0)          # ① 메모리 → 레지스터
+    addi a1, a1, 1          # ② 레지스터에서 계산
+    sw   a1, 0(a0)          # ③ 레지스터 → 메모리
+    ret</code></pre>
+  <p class="src" style="font:400 11px var(--mono);color:var(--muted)">예제 확인: Clang 17, -O2 · x86-64 및 RISC-V RV32IMC 목적 파일을 빌드하고 역어셈블한 결과 (표시된 명령어는 출력 형식을 정리)</p>
+  <div class="scroll"><table>
+    <tr><th></th><th>CISC</th><th>RISC</th></tr>
+    <tr><td>명령어 구성</td><td>복합 기능·다양한 인코딩 제공</td><td>단순하고 규칙적인 기본 명령어 중심</td></tr>
+    <tr><td>길이</td><td>가변 (x86: 1~15바이트)</td><td>기본 4바이트, C 확장 사용 시 2·4바이트 혼용</td></tr>
+    <tr><td>메모리 접근</td><td>계산 명령어가 메모리를 직접 다룸</td><td>적재 · 저장 명령어만 (Load/Store 구조)</td></tr>
+    <tr><td>범용 레지스터 예</td><td>x86-64: 16개</td><td>RV32I: x0~x31 (x0는 항상 0)</td></tr>
+    <tr><td>내부 실행</td><td>현대 x86은 일부 명령어를 내부 마이크로연산으로 분해</td><td>규칙적인 디코드에 유리하지만 해저드·다중 사이클 명령어 존재</td></tr>
+    <tr><td>예</td><td>x86 (Intel · AMD PC)</td><td>RISC-V(MicroBlaze V), ARM(Apple M1), MIPS</td></tr>
+  </table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>명령어 길이와 코드 크기</h2><span class="pg-no">7장 · 9 / 10</span></div>
+  <p>명령어 개수와 기계어 코드의 바이트 수는 다르다. M 확장은 곱셈·나눗셈 연산을 하드웨어 명령어로 제공하고, C 확장은 자주 쓰는 명령어를 16비트로 인코딩한다. 8쪽의 <code>inc()</code> 한 함수를 네 가지 ISA로 컴파일하고, 오브젝트 파일의 <code>.text</code> 크기를 측정했다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 680 205" style="min-width:520px" role="img" aria-label="코드 크기 비교"><text x="100" y="40" class="t" style="text-anchor:end;font-size:12px;font-family:var(--mono)">RV32I</text><rect x="110" y="22" width="460" height="28" rx="3" class="box"/><text x="578" y="41" class="ts" style="text-anchor:start;font-size:12px">16 B</text><text x="100" y="80" class="t" style="text-anchor:end;font-size:12px;font-family:var(--mono)">RV32IM</text><rect x="110" y="62" width="460" height="28" rx="3" class="box"/><text x="578" y="81" class="ts" style="text-anchor:start;font-size:12px">16 B</text><text x="100" y="120" class="t" style="text-anchor:end;font-size:12px;font-family:var(--mono)">RV32IMC</text><rect x="110" y="102" width="230" height="28" rx="3" class="boxn"/><text x="348" y="121" class="ts" style="text-anchor:start;font-size:12px">8 B</text><text x="100" y="160" class="t" style="text-anchor:end;font-size:12px;font-family:var(--mono)">x86-64</text><rect x="110" y="142" width="86" height="28" rx="3" class="boxg"/><text x="204" y="161" class="ts" style="text-anchor:start;font-size:12px">3 B</text><text x="340" y="196" class="ts">8쪽 inc(int *p) 함수의 .text 크기 · Clang 17 -O2 · 목적 파일</text></svg></div><figcaption>그림 7-7 · 같은 inc() 함수의 실제 기계어 크기<span class="src">검증: Clang 17, -O2, -ffreestanding, -fno-stack-protector · ELF 오브젝트의 .text 섹션. <a href="https://docs.riscv.org/reference/isa/unpriv/c-st-ext">RISC-V 공식 C 확장 명세</a></span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>구성</th><th>크기</th><th>RV32I 대비</th><th>차이가 나는 이유</th></tr>
+    <tr><td>RV32I</td><td>16 B</td><td>100%</td><td><code>lw/addi/sw/ret</code>, 각각 4바이트</td></tr>
+    <tr><td>RV32IM</td><td>16 B</td><td>100%</td><td>이 함수에는 곱셈이 없어 M 추가 효과 없음</td></tr>
+    <tr><td>RV32IMC</td><td>8 B</td><td>50%</td><td>네 명령어가 각각 16비트로 압축됨</td></tr>
+    <tr><td>x86-64</td><td>3 B</td><td>참고용</td><td><code>incl (%rdi)</code> 2바이트 + <code>ret</code> 1바이트</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">SoC 연결</span>이 예제에서는 C 확장 사용으로 코드가 16 B → 8 B가 되었지만, 작은 함수 하나의 결과를 전체 프로그램에 일반화하면 안 된다. RISC-V 명세는 C 확장이 전형적으로 약 25~30%의 코드 크기 감소를 제공한다고 설명한다. BRAM 크기·배치는 실제 Vivado 설정과 링커 스크립트로 확인한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>MicroBlaze V의 선택 · 7장 정리</h2><span class="pg-no">7장 · 10 / 10</span></div>
+  <p>MicroBlaze V는 설정 화면에서 파이프라인 구성을 고를 수 있다. 지원 ISA 구성과 별개로, 구현 최적화 옵션을 통해 파이프라인 단계를 선택할 수 있다. 단계 수는 면적·클록 주파수·명령어 처리 성능의 절충을 바꾼다. 5단 구성의 단계 이름은 IF · OF(명령어 해석·오퍼랜드 인출) · EX · MEM · WB다. 4단은 IF/OF/EX/WB, 3단은 Fetch/Decode/Execute, 8단은 IF/OF/EX/M0/M1/M2/M3/WB로 구분한다.</p>
+  <div class="scroll"><table>
+    <tr><th>최적화 설정</th><th>파이프라인</th><th>우선하는 것</th></tr>
+    <tr><td>AREA (C_OPTIMIZATION=1)</td><td>3단</td><td>자원 사용 감소 — 일부 명령어는 여러 클록</td></tr>
+    <tr><td>THROUGHPUT (C_OPTIMIZATION=3)</td><td>4단</td><td>연산 처리량 우선</td></tr>
+    <tr><td>PERFORMANCE (C_OPTIMIZATION=0)</td><td>5단</td><td>처리 성능과 주파수의 균형</td></tr>
+    <tr><td>FREQUENCY (C_OPTIMIZATION=2)</td><td>8단</td><td>높은 주파수 목표, 실제 달성 여부는 구현·타이밍 확인</td></tr>
+  </table></div>
+  <p class="src" style="font:400 11px var(--mono);color:var(--muted)">공식 근거: <a href="https://docs.amd.com/r/en-US/ug1629-microblaze-v-user-guide/Pipeline-Architecture">AMD UG1629 · Pipeline Architecture (2026.1)</a> · <a href="https://docs.amd.com/r/en-US/ug1711-microblaze-v-embedded-design/Using-the-MicroBlaze-V-Configuration-Wizard">UG1711 · Configuration Wizard</a></p>
+  <div class="warn"><span class="lbl">확인할 것</span>AMD 문서에서 Microcontroller 프리셋은 AREA 최적화로 소개하지만, 현재 Vivado 프로젝트에서 실제 선택·저장된 구성은 확인되지 않았다. IP 설정의 Optimization과 C_OPTIMIZATION 값, 구현 후 Timing Report를 확인한다.</div>
+  <div class="scroll"><table>
+    <tr><th>이번 장 개념</th><th>한 줄 정리</th><th>우리 SoC에서</th></tr>
+    <tr><td>성능식</td><td>N × CPI × T</td><td>100 MHz → 10 ns는 계산 예시</td></tr>
+    <tr><td>파이프라인</td><td>단계를 겹쳐 처리량 증가</td><td>3 · 4 · 5 · 8단 중 선택</td></tr>
+    <tr><td>데이터 해저드</td><td>전달 · 멈춤</td><td>정지 횟수는 파이프라인·메모리 설정에 의존</td></tr>
+    <tr><td>제어 해저드</td><td>버림 · 분기 예측</td><td>반복문의 분기</td></tr>
+    <tr><td>구조 해저드</td><td>부품·접근 경로 분리</td><td>ILMB · DLMB 분리로 일부 충돌 감소</td></tr>
+    <tr><td>CISC · RISC</td><td>강한 명령어 / 단순한 명령어</td><td>RISC-V = RISC</td></tr>
+    <tr><td>확장과 코드 크기</td><td>M: 연산 / C: 압축</td><td>함수·컴파일 옵션에 따라 감소율 다름</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">다음 장</span>8장 메모리 — SRAM과 DRAM, 주소 공간과 주소맵, 그리고 캐시.</div>
+</section>
+
+</div>
+<nav class="pager"><div class="pager-in"><button id="prev">← 이전</button><div class="dots"></div><span class="pos"></span><button id="next">다음 →</button></div></nav>
+<script>
+(function(){
+  var pages=[].slice.call(document.querySelectorAll('.pg'));
+  var dots=document.querySelector('.dots'), prev=document.getElementById('prev'), next=document.getElementById('next');
+  pages.forEach(function(_,i){var b=document.createElement('button');b.textContent=i+1;b.setAttribute('aria-label',(i+1)+'페이지');b.onclick=function(){go(i)};dots.appendChild(b)});
+  var cur=0;
+  function go(i){
+    cur=Math.max(0,Math.min(pages.length-1,i));
+    pages.forEach(function(p,k){p.hidden=k!==cur});
+    [].forEach.call(dots.children,function(b,k){b.classList.toggle('on',k===cur)});
+    var pos=document.querySelector('.pos'); if(pos) pos.textContent=(cur+1)+' / '+pages.length;
+    prev.disabled=cur===0; next.disabled=cur===pages.length-1;
+    try{history.replaceState(null,'','#p'+(cur+1))}catch(e){}
+    window.scrollTo(0,0);
+  }
+  prev.onclick=function(){go(cur-1)}; next.onclick=function(){go(cur+1)};
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+  var m=/^#p(\d+)$/.exec(location.hash||''); go(m?parseInt(m[1],10)-1:0);
+  document.getElementById('theme').onclick=function(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d?d==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.setAttribute('data-theme',dark?'light':'dark')};
+})();
+</script>
+
+</body></html>

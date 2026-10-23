@@ -1,0 +1,359 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>3장 명령어</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F6FB; --surface:#FFFFFF; --ink:#17263C; --muted:#50637C; --line:#CBD8E8;
+  --green:#1456A0; --greenbg:#E8F1FE; --blue:#087C88; --bluebg:#E2F6F5;
+  --amber:#915710; --amberbg:#FFF3DF; --head:#EAF0F9; --grayfill:#DFE9F5;
+  --sans:"IBM Plex Sans KR","Noto Sans KR",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans);word-break:keep-all;overflow-wrap:break-word;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 96px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+/* 상단 */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.series{font:500 11px var(--mono);letter-spacing:.09em;color:var(--green);text-transform:uppercase}
+.theme-btn{font:500 11px var(--mono);padding:4px 10px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--muted);cursor:pointer}
+.chaps{display:flex;flex-wrap:wrap;gap:4px}
+.chaps a{font:500 11px var(--mono);padding:3px 8px;border-radius:3px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.chaps a.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+
+
+.chaps a{text-decoration:none}.chaps a:hover{border-color:var(--green);color:var(--green);background:var(--greenbg)}
+.chaps a.on:hover{background:var(--green);color:var(--surface)}
+.chaps a.back-index{font-weight:700;color:var(--green);border-color:var(--green)}
+/* 페이지 */
+.pg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px clamp(16px,4vw,40px) 32px;display:flex;flex-direction:column;gap:18px;min-height:600px}
+.pg[hidden]{display:none!important}
+.pg-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+.pg-no{font:600 11px var(--mono);color:var(--green);letter-spacing:.06em;white-space:nowrap}
+h1{margin:0;font-size:clamp(26px,5vw,40px);line-height:1.2;text-wrap:balance}
+h2{margin:0;font-size:clamp(19px,3vw,24px);line-height:1.3;text-wrap:balance}
+h3{margin:4px 0 0;font-size:14px}
+p{margin:0}
+.lead{color:var(--muted);font-size:15.5px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;align-items:start}
+.cols>*{min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+ul.pts{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+
+/* 카드·표 */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--surface)}
+.card b{color:var(--green);font-size:13px}
+.card span{font-size:13px;color:var(--muted)}
+.card .num{font:600 22px/1.3 var(--mono);color:var(--ink)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--head);font-weight:500;font-size:11.5px;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+code{font-family:var(--mono);font-size:12px;background:var(--head);padding:1px 4px;border-radius:3px}
+
+pre{margin:0;padding:14px 16px;overflow-x:auto;background:var(--head);border:1px solid var(--line);border-radius:6px;font:400 12.5px/1.6 var(--mono);min-width:0;word-break:normal}
+pre code{background:none;padding:0;font-size:inherit}
+/* 콜아웃 */
+.note,.tip,.warn{padding:10px 14px;border-radius:4px;font-size:13.5px}
+.note{background:var(--greenbg)}
+.tip{background:var(--bluebg);border-left:3px solid var(--blue)}
+.warn{background:var(--amberbg);border-left:3px solid var(--amber)}
+.lbl{font:600 10.5px var(--mono);letter-spacing:.05em;margin-right:6px}
+.note .lbl{color:var(--green)} .tip .lbl{color:var(--blue)} .warn .lbl{color:var(--amber)}
+
+/* 그림 */
+figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.fig{overflow-x:auto;border:1px solid var(--line);border-radius:6px;padding:16px;background:var(--surface)}
+.fig svg{display:block;width:100%;height:auto}
+figcaption{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+figcaption .src{font:400 11px var(--mono)}
+figcaption a{color:var(--blue)}
+.redraw{display:inline-block;font:600 10px var(--mono);color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:0 4px;margin-right:6px;vertical-align:1px}
+
+/* SVG */
+.box{fill:var(--surface);stroke:var(--ink);stroke-width:1.4}
+.boxg{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.2}
+.boxn{fill:var(--greenbg);stroke:var(--green);stroke-width:1.6}
+.boxb{fill:var(--bluebg);stroke:var(--blue);stroke-width:1.4}
+.boxd{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+.ln{fill:none;stroke:var(--ink);stroke-width:1.4}
+.lg{fill:none;stroke:var(--green);stroke-width:1.6}
+.lb{fill:none;stroke:var(--blue);stroke-width:1.6}
+.lm{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 3}
+.t{fill:var(--ink);font:500 13px var(--sans)}
+.tc{text-anchor:middle}
+.ts{fill:var(--muted);font:400 11px var(--mono);text-anchor:middle}
+.tg{fill:var(--green);font:600 13px var(--sans);text-anchor:middle}
+.tb{fill:var(--blue);font:600 12px var(--sans);text-anchor:middle}
+.chipc{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.4}
+.pin rect{fill:var(--amber)}
+.trace{stroke:var(--muted);stroke-width:2;opacity:.6}
+.die{fill:#20262E;stroke:var(--muted);stroke-width:1.2} .mem{fill:#4B545F;stroke:var(--muted);stroke-width:1}
+.dt{fill:#F1F3F6;font:700 16px var(--sans);text-anchor:middle}
+.dts{fill:#D9DEE4;font:500 12px var(--sans);text-anchor:middle}
+.ah{fill:var(--ink)} .ag{fill:var(--green)} .ab{fill:var(--blue)}
+
+/* 넘김 */
+.pager{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.pager-in{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pager button{font:500 13px var(--sans);padding:7px 14px;border-radius:5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pager button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.dots button{width:26px;height:26px;padding:0;font:500 11px var(--mono);border-radius:50%}
+.dots button.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+.pos{display:none;font:600 13px var(--mono);color:var(--ink)}
+@media (max-width:600px){.dots{display:none}.pos{display:block}.pager button{padding:6px 12px;white-space:nowrap}}
+</style>
+<div class="wrap">
+  <div class="top"><span class="series">컴퓨터시스템구조 · MicroBlaze V SoC 도입 이론</span><button class="theme-btn" id="theme">다크 / 라이트</button></div>
+  <div class="chaps"><a class="back-index" href="index.html">⌂ 전체 목차</a><a class="" href="01%EC%9E%A5%20%EC%BB%B4%ED%93%A8%ED%84%B0%EA%B5%AC%EC%A1%B0%EC%9D%98%20%ED%81%B0%EA%B7%B8%EB%A6%BC.html" >1 큰그림</a><a class="" href="02%EC%9E%A5%20%EB%8D%B0%EC%9D%B4%ED%84%B0.html" >2 데이터</a><a class="on" href="03%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4.html" aria-current="page">3 명령어</a><a class="" href="04%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%EC%9D%98%20%EA%B5%AC%EC%A1%B0.html" >4 명령어 구조</a><a class="" href="05%EC%9E%A5%20CPU%20%EA%B5%AC%EC%84%B1.html" >5 CPU 구성</a><a class="" href="06%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%20%EC%82%AC%EC%9D%B4%ED%81%B4%EA%B3%BC%20%EC%9D%B8%ED%84%B0%EB%9F%BD%ED%8A%B8.html" >6 명령어 사이클</a><a class="" href="07%EC%9E%A5%20CPU%20%EC%84%B1%EB%8A%A5%20%ED%96%A5%EC%83%81.html" >7 성능 향상</a><a class="" href="08%EC%9E%A5%20%EB%A9%94%EB%AA%A8%EB%A6%AC.html" >8 메모리</a><a class="" href="09%EC%9E%A5%20%EB%B3%B4%EC%A1%B0%EA%B8%B0%EC%96%B5%EC%9E%A5%EC%B9%98.html" >9 보조기억</a><a class="" href="10%EC%9E%A5%20%EC%9E%85%EC%B6%9C%EB%A0%A5%EC%9E%A5%EC%B9%98.html" >10 입출력</a></div>
+<!-- 3장 명령어 : 10페이지 -->
+<section class="pg">
+  <div class="pg-head"><span class="pg-no">3장 · 1 / 10</span><span class="pg-no">표지</span></div>
+  <h1>명령어 — 소스파일과 실행파일</h1>
+  <p class="lead">CPU는 C를 모른다. 우리가 쓴 소스파일이 어셈블리어와 기계어를 거쳐 실행파일(ELF)이 되고, BRAM에 들어가 실행되기까지의 길을 따라간다.</p>
+  <div class="cards"><div class="card"><b>학습 목표 1</b><span>소스파일·오브젝트 파일·실행파일의 차이를 말할 수 있다.</span></div><div class="card"><b>학습 목표 2</b><span>C 한 줄이 어떤 어셈블리 명령어와 기계어가 되는지 읽을 수 있다.</span></div><div class="card"><b>학습 목표 3</b><span>ELF의 .text·.data·.bss가 메모리 어디에 놓이는지 안다.</span></div></div>
+  <figure><div class="fig"><svg viewBox="0 0 720 165" style="min-width:560px" role="img" aria-label="10개 장 테크트리">
+<defs><marker id="at" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+<rect x="10" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="72" y="42" class="t tc">1 큰그림</text><text x="72" y="60" class="ts">CPU·메모리·I/O</text>
+<rect x="152" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="214" y="42" class="t tc">2 데이터</text><text x="214" y="60" class="ts">2진수·16진수</text>
+<rect x="294" y="20" width="124" height="52" rx="5" class="boxn"/>
+<text x="356" y="42" class="tg">3 명령어</text><text x="356" y="60" class="ts">소스→실행파일</text>
+<rect x="436" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="498" y="42" class="t tc">4 명령어 구조</text><text x="498" y="60" class="ts">오퍼랜드·스택</text>
+<rect x="578" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="640" y="42" class="t tc">5 CPU 구성</text><text x="640" y="60" class="ts">ALU·레지스터</text>
+<rect x="10" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="72" y="127" class="t tc">6 명령어 사이클</text><text x="72" y="145" class="ts">인출·인터럽트</text>
+<rect x="152" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="214" y="127" class="t tc">7 성능 향상</text><text x="214" y="145" class="ts">파이프라인·RISC</text>
+<rect x="294" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="356" y="127" class="t tc">8 메모리</text><text x="356" y="145" class="ts">주소공간·캐시</text>
+<rect x="436" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="498" y="127" class="t tc">9 보조기억</text><text x="498" y="145" class="ts">플래시·부팅</text>
+<rect x="578" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="640" y="127" class="t tc">10 입출력</text><text x="640" y="145" class="ts">폴링·인터럽트</text>
+<line x1="134" y1="46" x2="151" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="46" x2="293" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="46" x2="435" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="46" x2="577" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="134" y1="131" x2="151" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="131" x2="293" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="131" x2="435" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="131" x2="577" y2="131" class="ln" marker-end="url(#at)"/>
+<path d="M640 72 V88 H72 V104" class="ln" marker-end="url(#at)"/></svg></div><figcaption>그림 3-1 · 10개 장 테크트리</figcaption></figure>
+  <div class="scroll"><table><tr><th>페이지</th><th>내용</th><th>페이지</th><th>내용</th></tr><tr><td>1</td><td>표지 · 학습 목표</td><td>6</td><td>기계어</td></tr><tr><td>2</td><td>프로그램과 명령어</td><td>7</td><td>링커</td></tr><tr><td>3</td><td>소스파일</td><td>8</td><td>실행파일 ELF</td></tr><tr><td>4</td><td>빌드 과정</td><td>9</td><td>메모리 배치</td></tr><tr><td>5</td><td>어셈블리어</td><td>10</td><td>적재와 실행 · 정리</td></tr></table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>프로그램과 명령어</h2><span class="pg-no">3장 · 2 / 10</span></div>
+  <p><strong>명령어(instruction)</strong>는 CPU가 한 번에 하는 일 하나다. "레지스터 두 개를 더하라", "이 주소에서 값을 읽어라" 같은 아주 작은 일이다. <strong>프로그램</strong>은 이 명령어들을 순서대로 늘어놓은 것이다. CPU는 자신의 ISA에 맞는 <strong>기계어</strong>를 해독·실행한다. C 소스는 컴파일러와 어셈블러를 거쳐 기계어로 변환되며, 컴파일 옵션과 최적화에 따라 명령어가 달라질 수 있다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 700 240" style="min-width:540px" role="img" aria-label="언어의 세 단계"><defs><marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="15" width="200" height="55" rx="5" class="box"/><text x="120" y="39" class="t tc">C 소스</text><text x="120" y="58" class="ts">사람이 읽고 쓴다</text><rect x="250" y="15" width="430" height="55" rx="5" class="boxg"/><text x="465" y="48" class="t tc" style="font:500 13px var(--mono)">REG32(0x40000000) = 0xFF;</text><rect x="20" y="95" width="200" height="55" rx="5" class="box"/><text x="120" y="119" class="t tc">어셈블리어</text><text x="120" y="138" class="ts">명령어 하나 = 한 줄</text><rect x="250" y="95" width="430" height="55" rx="5" class="boxg"/><text x="465" y="128" class="t tc" style="font:500 13px var(--mono)">lui a0, 0x40000 │ li a1, 0xff │ sw a1, 0(a0)</text><rect x="20" y="175" width="200" height="55" rx="5" class="boxn"/><text x="120" y="199" class="tg">기계어</text><text x="120" y="218" class="ts">CPU가 실행한다</text><rect x="250" y="175" width="430" height="55" rx="5" class="boxg"/><text x="465" y="208" class="t tc" style="font:500 13px var(--mono)">37 05 00 40 │ 93 05 f0 0f │ 0c c1</text><line x1="120" y1="70" x2="120" y2="93" class="ln" marker-end="url(#m2)"/><text x="130" y="86" class="ts" style="text-anchor:start">컴파일</text><line x1="120" y1="150" x2="120" y2="173" class="ln" marker-end="url(#m2)"/><text x="130" y="166" class="ts" style="text-anchor:start">어셈블</text></svg></div><figcaption>그림 3-2 · 같은 일을 세 단계의 언어로 쓴 모습<span class="src">재현 확인: Clang 17 · RV32IMC · -O2 (4개 명령어 예시)</span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>단계</th><th>누가 읽나</th><th>특징</th></tr>
+    <tr><td>C 소스</td><td>사람</td><td>CPU 종류와 거의 무관하다. 한 줄이 명령어 여러 개가 된다.</td></tr>
+    <tr><td>어셈블리어</td><td>사람(+어셈블러)</td><td>ISA별 명령어의 문자 표현. <code>li</code>·<code>ret</code>처럼 실제 명령어로 확장되는 의사 명령어도 있다.</td></tr>
+    <tr><td>기계어</td><td>CPU</td><td>RV32I 기본 명령어는 32비트이며, C 확장을 활성화하면 16비트 압축 명령어도 사용한다.</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>명령어의 종류와 형식을 정한 약속을 <strong>명령어 집합 구조(ISA, Instruction Set Architecture)</strong>라 한다. MicroBlaze V는 RISC-V 기반 32비트 프로세서로, RV32IMC를 포함한 다양한 ISA 구성을 지원한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>소스파일 — 사람이 쓰는 프로그램</h2><span class="pg-no">3장 · 3 / 10</span></div>
+  <p>소스파일은 텍스트 파일이다. 실습에서는 <code>.c</code>(실제 코드)와 <code>.h</code>(헤더 — 다른 파일과 공유할 이름·주소·함수 선언)를 쓴다. 아래는 LED 16개를 한 칸씩 회전시키는 C 프로그램이다. 주소 <code>0x4000_0000</code>은 설명용 예시이며, 실제 Vivado Address Editor의 AXI GPIO 베이스 주소와 연결 구성을 확인해야 한다. 이 장의 나머지 페이지는 이 코드가 빌드되어 실행되는 과정을 다룬다.</p>
+  <pre><code>#include &lt;stdint.h&gt;
+
+/* 레지스터 직접 접근 매크로 (soc_map.h와 같은 방식) */
+#define REG32(a)   (*(volatile uint32_t *)(a))
+#define GPIO_LED   0x40000000u        /* 예시: AXI GPIO 채널 1 데이터 레지스터 */
+
+uint32_t pattern = 0x01;              /* 초기값 있음 → .data */
+uint32_t count;                       /* 초기값 없음 → .bss  */
+
+/* 바쁜 대기: n번 세는 동안 시간을 보낸다 */
+static void delay(volatile uint32_t n)
+{
+    while (n--)
+        ;
+}
+
+int main(void)
+{
+    /* (추가) AXI GPIO 채널 1 TRI: 0은 출력, 1은 입력 */
+    REG32(GPIO_LED + 4u) = 0u;
+
+    for (;;) {
+        REG32(GPIO_LED) = pattern;                      /* LED에 현재 패턴 출력 */
+        pattern = (pattern &lt;&lt; 1) | (pattern &gt;&gt; 15);     /* 한 칸 왼쪽으로 회전 */
+        pattern &amp;= 0xFFFF;                              /* LED 16개만 사용 */
+        count++;                                        /* 몇 번 돌았는지 */
+        delay(1000000);
+    }
+}</code></pre>
+  <div class="scroll"><table>
+    <tr><th>파일</th><th>담는 것</th><th>우리 SoC 예</th></tr>
+    <tr><td><code>.c</code></td><td>함수 본문, 변수</td><td><code>main.c</code>, <code>uart.c</code>, <code>timer.c</code></td></tr>
+    <tr><td><code>.h</code></td><td>주소 상수, 함수 선언</td><td><code>soc_map.h</code>(주소맵), <code>uart.h</code></td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">보드 연결</span>AXI GPIO 채널 1을 LED 출력에 연결한 예시다. IP의 포트 연결·실제 주소·출력 방향이 맞아야 켜진다. <code>volatile</code>은 MMIO 쓰기 최적화를 방지하며, 단순 지연 루프는 정확한 시간을 보장하지 않는다. 실제 실행에는 Vitis의 시작 코드·링커 설정이 필요하다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>빌드 과정 — 소스에서 실행파일까지</h2><span class="pg-no">3장 · 4 / 10</span></div>
+  <p>소스파일을 실행파일로 만드는 일을 <strong>빌드(build)</strong>라 한다. 개념적으로 네 단계로 나뉜다. <code>.i</code>와 <code>.s</code>는 생성 과정을 보여 주는 중간 파일이며, 일반 빌드에서는 별도 파일로 남지 않을 수 있다. 다른 CPU용 프로그램을 PC에서 만드는 컴파일러를 <strong>크로스 컴파일러(cross compiler)</strong>라 하며, MicroBlaze V용 Vitis 툴체인에는 RISC-V 교차 컴파일러가 포함된다. 도구 실행 파일명은 설치·프로젝트 구성에 따라 다르므로 실제 빌드 로그를 확인한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 225" style="min-width:560px" role="img" aria-label="빌드 과정"><defs><marker id="m4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="10" y="40" width="104" height="52" rx="5" class="box"/><text x="62" y="62" class="t tc" style="font-family:var(--mono)">main.c</text><text x="62" y="80" class="ts">소스</text><line x1="116" y1="66" x2="158" y2="66" class="ln" marker-end="url(#m4)"/><text x="137" y="56" class="ts">전처리</text><rect x="160" y="40" width="104" height="52" rx="5" class="boxg"/><text x="212" y="62" class="t tc" style="font-family:var(--mono)">main.i</text><text x="212" y="80" class="ts">전처리 결과</text><line x1="266" y1="66" x2="308" y2="66" class="ln" marker-end="url(#m4)"/><text x="287" y="56" class="ts">컴파일</text><rect x="310" y="40" width="104" height="52" rx="5" class="boxg"/><text x="362" y="62" class="t tc" style="font-family:var(--mono)">main.s</text><text x="362" y="80" class="ts">어셈블리</text><line x1="416" y1="66" x2="458" y2="66" class="ln" marker-end="url(#m4)"/><text x="437" y="56" class="ts">어셈블</text><rect x="460" y="40" width="104" height="52" rx="5" class="boxg"/><text x="512" y="62" class="t tc" style="font-family:var(--mono)">main.o</text><text x="512" y="80" class="ts">오브젝트</text><line x1="566" y1="66" x2="608" y2="66" class="ln" marker-end="url(#m4)"/><text x="587" y="56" class="ts">링크</text><rect x="610" y="40" width="104" height="52" rx="5" class="boxn"/><text x="662" y="62" class="tg" style="font-family:var(--mono)">app.elf</text><text x="662" y="80" class="ts">실행파일</text><rect x="395" y="140" width="100" height="40" rx="4" class="boxg"/><text x="445" y="165" class="t tc" style="font-family:var(--mono);font-size:12px">uart.o</text><rect x="505" y="140" width="100" height="40" rx="4" class="boxg"/><text x="555" y="165" class="t tc" style="font-family:var(--mono);font-size:12px">timer.o</text><rect x="615" y="140" width="100" height="40" rx="4" class="boxb"/><text x="665" y="158" class="tb" style="font-family:var(--mono);font-size:12px">lscript.ld</text><text x="665" y="173" class="ts">링커 스크립트</text><line x1="445" y1="140" x2="625" y2="96" class="ln" marker-end="url(#m4)"/><line x1="555" y1="140" x2="645" y2="96" class="ln" marker-end="url(#m4)"/><line x1="665" y1="140" x2="665" y2="96" class="lb" marker-end="url(#m4)"/><text x="200" y="165" class="ts">다른 소스파일도 각자 .o 가 된다</text><text x="360" y="215" class="ts">빌드 내부의 논리적 단계이며 모든 중간 파일이 디스크에 남는 것은 아니다</text></svg></div><figcaption>그림 3-3 · 빌드의 네 단계<span class="src">참고: AMD <a href="https://docs.amd.com/r/en-US/ug1400-vitis-embedded/Linker-Scripts" target="_blank" rel="noopener noreferrer">UG1400 · Linker Scripts</a> · 일반적인 C 빌드 과정</span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>단계</th><th>입력 → 출력</th><th>하는 일</th></tr>
+    <tr><td>전처리</td><td><code>.c</code> → <code>.i</code></td><td><code>#include</code> 파일을 끼워 넣고 <code>#define</code>을 글자 그대로 바꾼다</td></tr>
+    <tr><td>컴파일</td><td><code>.i</code> → <code>.s</code></td><td>C를 RISC-V 어셈블리어로 번역한다</td></tr>
+    <tr><td>어셈블</td><td><code>.s</code> → <code>.o</code></td><td>어셈블리어를 기계어로 바꾼다. 외부 심볼 참조는 재배치 정보로 남을 수 있다</td></tr>
+    <tr><td>링크</td><td><code>.o</code> 여러 개 → <code>.elf</code></td><td>파일들을 합치고, 링커 스크립트대로 주소를 정하고, 빈 주소를 채운다</td></tr>
+  </table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>어셈블리어 — 명령어를 글자로</h2><span class="pg-no">3장 · 5 / 10</span></div>
+  <p>어셈블리어는 CPU 명령어를 사람이 읽도록 표현한 것이다. 앞의 단어가 무슨 일을 할지(<strong>연산</strong>), 뒤의 이름과 숫자가 무엇을 가지고 할지(<strong>오퍼랜드</strong>)를 나타낸다. 아래는 C 함수와 RV32IMC 대상으로 컴파일한 어셈블리어를 나란히 놓은 것이다. 의사 명령어는 실제 기계어로 바뀌며, 최적화 설정에 따라 표현이 달라질 수 있다.</p>
+  <div class="cols">
+    <div class="stack"><h3>C 소스</h3><pre><code>void led_on(void)
+{
+    REG32(0x40000000u) = 0xFF;   /* 예시 주소의 LED 하위 8개 켜기 */
+}</code></pre></div>
+    <div class="stack"><h3>어셈블리어</h3><pre><code>led_on:
+    lui  a0, 0x40000      # a0 = 0x4000_0000 (상위 20비트)
+    li   a1, 0xff         # a1 = 0xFF
+    sw   a1, 0(a0)        # 메모리[a0 + 0] ← a1  (32비트 쓰기)
+    ret                   # 호출한 곳으로 돌아가기</code></pre></div>
+  </div>
+  <div class="scroll"><table>
+    <tr><th>명령어</th><th>뜻</th><th>왜 필요한가</th></tr>
+    <tr><td><code>lui</code></td><td>Load Upper Immediate — 상위 20비트에 값 넣기</td><td>이 예시 주소는 하위 12비트가 0이므로 LUI 한 명령어로 만든다</td></tr>
+    <tr><td><code>li</code></td><td>Load Immediate — 상수 적재 의사 명령어</td><td>이 값은 실제로 <code>addi a1, zero, 255</code>로 인코딩된다</td></tr>
+    <tr><td><code>sw</code></td><td>Store Word — 32비트를 메모리에 쓰기</td><td>주소 0x4000_0000에 쓰면 메모리가 아니라 GPIO가 받는다</td></tr>
+    <tr><td><code>ret</code></td><td>Return — 함수에서 돌아가기</td><td>의사 명령어로, RV32IMC에서는 <code>c.jr ra</code>로 압축될 수 있다</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">SoC 연결</span><code>REG32()</code>로 주변장치를 읽거나 쓰는 기본 코드는 <code>lw</code>(읽기)와 <code>sw</code>(쓰기) 등으로 구현된다. 주변장치 제어에 전용 I/O 명령어가 필요하지 않다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>기계어 — 메모리에 놓인 숫자</h2><span class="pg-no">3장 · 6 / 10</span></div>
+  <p>어셈블러는 각 명령어를 정해진 비트 형식의 숫자로 바꾼다. RISC-V의 <strong>C</strong> 확장은 압축(Compressed) 명령어로, 자주 쓰는 명령어를 16비트로 줄여 프로그램 크기를 줄인다. C 확장이 활성화되면 코드에 4바이트·2바이트 명령어가 섞일 수 있다. C 확장을 비활성화한 RV32I 구성에서는 아래 압축 명령어를 사용하지 않는다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 680 160" style="min-width:540px" role="img" aria-label="메모리 속 기계어"><text x="45" y="26" class="ts">0</text><rect x="20" y="34" width="50" height="40" rx="3" class="boxn"/><text x="45" y="60" class="t tc" style="font:600 15px var(--mono)">37</text><text x="99" y="26" class="ts">1</text><rect x="74" y="34" width="50" height="40" rx="3" class="boxn"/><text x="99" y="60" class="t tc" style="font:600 15px var(--mono)">05</text><text x="153" y="26" class="ts">2</text><rect x="128" y="34" width="50" height="40" rx="3" class="boxn"/><text x="153" y="60" class="t tc" style="font:600 15px var(--mono)">00</text><text x="207" y="26" class="ts">3</text><rect x="182" y="34" width="50" height="40" rx="3" class="boxn"/><text x="207" y="60" class="t tc" style="font:600 15px var(--mono)">40</text><text x="261" y="26" class="ts">4</text><rect x="236" y="34" width="50" height="40" rx="3" class="boxn"/><text x="261" y="60" class="t tc" style="font:600 15px var(--mono)">93</text><text x="315" y="26" class="ts">5</text><rect x="290" y="34" width="50" height="40" rx="3" class="boxn"/><text x="315" y="60" class="t tc" style="font:600 15px var(--mono)">05</text><text x="369" y="26" class="ts">6</text><rect x="344" y="34" width="50" height="40" rx="3" class="boxn"/><text x="369" y="60" class="t tc" style="font:600 15px var(--mono)">f0</text><text x="423" y="26" class="ts">7</text><rect x="398" y="34" width="50" height="40" rx="3" class="boxn"/><text x="423" y="60" class="t tc" style="font:600 15px var(--mono)">0f</text><text x="477" y="26" class="ts">8</text><rect x="452" y="34" width="50" height="40" rx="3" class="boxb"/><text x="477" y="60" class="t tc" style="font:600 15px var(--mono)">0c</text><text x="531" y="26" class="ts">9</text><rect x="506" y="34" width="50" height="40" rx="3" class="boxb"/><text x="531" y="60" class="t tc" style="font:600 15px var(--mono)">c1</text><text x="585" y="26" class="ts">A</text><rect x="560" y="34" width="50" height="40" rx="3" class="boxb"/><text x="585" y="60" class="t tc" style="font:600 15px var(--mono)">82</text><text x="639" y="26" class="ts">B</text><rect x="614" y="34" width="50" height="40" rx="3" class="boxb"/><text x="639" y="60" class="t tc" style="font:600 15px var(--mono)">80</text><path d="M20 84 V92 H232 V84" class="ln"/><text x="126.0" y="112" class="t tc" style="font:500 12px var(--mono)">lui a0, 0x40000</text><text x="126.0" y="130" class="ts">32비트</text><path d="M236 84 V92 H448 V84" class="ln"/><text x="342.0" y="112" class="t tc" style="font:500 12px var(--mono)">li a1, 0xff</text><text x="342.0" y="130" class="ts">32비트</text><path d="M452 84 V92 H556 V84" class="ln"/><text x="504.0" y="112" class="t tc" style="font:500 12px var(--mono)">sw a1, 0(a0)</text><text x="504.0" y="130" class="ts">16비트 압축</text><path d="M560 84 V92 H664 V84" class="ln"/><text x="612.0" y="112" class="t tc" style="font:500 12px var(--mono)">ret</text><text x="612.0" y="130" class="ts">16비트 압축</text><text x="10" y="26" class="ts" style="text-anchor:start">주소</text><text x="340" y="154" class="ts">리틀 엔디안: 37 05 00 40 → 워드 값 0x4000_0537</text></svg></div><figcaption>그림 3-4 · RV32IMC로 컴파일한 led_on 함수의 기계어 12바이트<span class="src">재현 확인: Clang 17 교차 컴파일 + llvm-objdump · RV32IMC · -O2</span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th colspan="4"><code>lui a0, 0x40000</code>의 기계어 <code>0x4000_0537</code>을 비트로 나누면</th></tr>
+    <tr><td>비트 31~12</td><td><code>0x40000</code></td><td>즉시값(Immediate)</td><td>넣을 상위 20비트</td></tr>
+    <tr><td>비트 11~7</td><td><code>01010</code> = 10</td><td>rd (목적지 레지스터)</td><td>x10 = a0</td></tr>
+    <tr><td>비트 6~0</td><td><code>0110111</code></td><td>opcode (연산 코드)</td><td>LUI</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>메모리 바이트 <code>37 05 00 40</code>은 리틀 엔디안으로 조합하면 <code>0x4000_0537</code>이다. <code>li</code>와 <code>ret</code>은 의사 명령어이고, <code>c.sw</code>와 <code>c.jr</code>은 C 확장에 속한다. 명령어의 비트 구조는 4장에서 자세히 본다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>링커 — 파일들을 하나로 잇기</h2><span class="pg-no">3장 · 7 / 10</span></div>
+  <p>소스파일을 여러 개로 나누면, 한 파일에서 다른 파일의 함수를 부를 때 해당 함수의 최종 배치 주소가 아직 결정되지 않을 수 있다. 그래서 오브젝트 파일에는 <code>uart_putc</code>를 참조하는 명령어와 재배치 정보(Relocation)를 남길 수 있다. <strong>링커</strong>가 모든 오브젝트 파일을 모아 주소를 정한 뒤 이 자리를 채운다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 700 230" style="min-width:540px" role="img" aria-label="링커가 하는 일"><defs><marker id="m7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="20" width="210" height="88" rx="5" class="box"/><text x="125" y="42" class="t tc" style="font-family:var(--mono)">main.o</text><text x="36" y="66" class="ts" style="text-anchor:start">main       정의됨</text><text x="36" y="88" class="ts" style="text-anchor:start;fill:var(--amber)">uart_putc  주소 모름 (U)</text><rect x="20" y="122" width="210" height="70" rx="5" class="box"/><text x="125" y="144" class="t tc" style="font-family:var(--mono)">uart.o</text><text x="36" y="170" class="ts" style="text-anchor:start">uart_putc  정의됨 (T)</text><rect x="290" y="70" width="120" height="76" rx="5" class="boxn"/><text x="350" y="104" class="tg">링커</text><text x="350" y="124" class="ts">ld</text><line x1="232" y1="64" x2="288" y2="96" class="ln" marker-end="url(#m7)"/><line x1="232" y1="157" x2="288" y2="124" class="ln" marker-end="url(#m7)"/><rect x="460" y="20" width="220" height="172" rx="5" class="boxn"/><text x="570" y="42" class="tg" style="font-family:var(--mono)">app.elf</text><text x="478" y="72" class="ts" style="text-anchor:start">main · 주소 확정</text><text x="478" y="94" class="ts" style="text-anchor:start">_start · 배치 예시</text><text x="478" y="116" class="ts" style="text-anchor:start">uart_putc · 주소 확정</text><line x1="476" y1="140" x2="664" y2="140" class="lm"/><text x="478" y="164" class="ts" style="text-anchor:start;fill:var(--green)">main 안의 호출 →</text><text x="478" y="182" class="ts" style="text-anchor:start;fill:var(--green)">호출 대상 재배치 완료</text><line x1="412" y1="108" x2="458" y2="108" class="ln" marker-end="url(#m7)"/><text x="350" y="220" class="ts">이름(심볼)으로 남겨 둔 주소를 링커가 실제 숫자로 채운다</text></svg></div><figcaption>그림 3-5 · 링커가 외부 함수 참조를 해결하는 개념도<span class="src">참고: RISC-V ELF 재배치 원리 · 아래 코드는 별도 최소 함수로 재현</span></figcaption></figure>
+  <div class="cols">
+    <div class="stack"><h3>링크 전 (main.o)</h3><pre><code>li    a0, 0x41        # 'A'
+auipc t1, 0x0         # R_RISCV_CALL_PLT uart_putc
+jr    t1              #   ← 링크 전 외부 심볼 참조</code></pre></div>
+    <div class="stack"><h3>링크 후 (app.elf)</h3><pre><code>li    a0, 0x41        # 'A'
+j     0x6 &lt;uart_putc&gt; #   ← 링크 후 대상 주소가 확정</code></pre></div>
+  </div>
+  <div class="tip"><span class="lbl">SoC 연결</span><code>main.o</code>에서 <code>uart_putc</code>를 참조하고 <code>uart.o</code>에서 구현하면 링커가 연결한다. 위 코드의 <code>j 0x6</code>은 Clang 17·LLD로 만든 별도 최소 예제를 실제 확인한 값이다. 주변장치 드라이버를 파일별로 분리할 때도 같은 원리를 쓴다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>실행파일 ELF — 기계어와 설명서</h2><span class="pg-no">3장 · 8 / 10</span></div>
+  <p>링커의 결과물은 <strong>ELF(Executable and Linkable Format)</strong> 파일이다. 기계어만 들어 있는 것이 아니라 "어떤 CPU용인지, 어느 주소에 놓을지, 함수 이름은 무엇인지" 같은 설명이 함께 들어 있다. 아래 그림은 ELF의 주요 정보와 섹션을 개념적으로 나타낸 것이다. <code>.text</code> 등의 정확한 주소·크기·시작 주소는 빌드 옵션, 시작 코드, 링커 스크립트에 따라 달라진다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 680 262" style="min-width:540px" role="img" aria-label="ELF 파일 구조"><rect x="20" y="16" width="250" height="34" rx="3" class="boxb"/><text x="145" y="38" class="t tc" style="font-size:13px">ELF 헤더</text><line x1="270" y1="33" x2="296" y2="33" class="lm"/><text x="304" y="37" class="ts" style="text-anchor:start;font-size:12px">ELF32 · RISC-V · 리틀 엔디안 · 진입 주소</text><rect x="20" y="56" width="250" height="34" rx="3" class="boxg"/><text x="145" y="78" class="t tc" style="font-size:13px">프로그램 헤더</text><line x1="270" y1="73" x2="296" y2="73" class="lm"/><text x="304" y="77" class="ts" style="text-anchor:start;font-size:12px">어느 주소에 적재할지</text><rect x="20" y="96" width="250" height="34" rx="3" class="boxn"/><text x="145" y="118" class="tg" style="font-size:13px">.text</text><line x1="270" y1="113" x2="296" y2="113" class="lm"/><text x="304" y="117" class="ts" style="text-anchor:start;font-size:12px">명령어 · 시작 코드 (정확한 크기는 빌드 결과 확인)</text><rect x="20" y="136" width="250" height="34" rx="3" class="box"/><text x="145" y="158" class="t tc" style="font-size:13px">.data</text><line x1="270" y1="153" x2="296" y2="153" class="lm"/><text x="304" y="157" class="ts" style="text-anchor:start;font-size:12px">초기값 있는 전역변수 pattern (예: 4바이트)</text><rect x="20" y="176" width="250" height="34" rx="3" class="boxd"/><text x="145" y="198" class="t tc" style="font-size:13px">.bss</text><line x1="270" y1="193" x2="296" y2="193" class="lm"/><text x="304" y="197" class="ts" style="text-anchor:start;font-size:12px">초기값 없는 전역변수 count (예: 4바이트) · NOBITS</text><rect x="20" y="216" width="250" height="34" rx="3" class="boxg"/><text x="145" y="238" class="t tc" style="font-size:13px">심볼 · 디버그 정보</text><line x1="270" y1="233" x2="296" y2="233" class="lm"/><text x="304" y="237" class="ts" style="text-anchor:start;font-size:12px">함수·변수 이름과 주소 (디버거가 사용)</text></svg></div><figcaption>그림 3-6 · ELF 헤더·섹션의 역할 (개념도)<span class="src">참고: ELF 파일 형식 · AMD Vitis UG1400 · 섹션 수치·주소는 프로젝트별 상이</span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>섹션</th><th>주소</th><th>크기</th><th>들어 있는 것</th><th>파일에 내용이 있나</th></tr>
+    <tr><td><code>.text</code></td><td>링커 결정</td><td>빌드별 상이</td><td><code>main</code>, <code>_start</code>(시작 코드)</td><td>있음</td></tr>
+    <tr><td><code>.data</code></td><td>링커 결정</td><td>예: 4 B</td><td><code>pattern</code> = 0x01</td><td>있음</td></tr>
+    <tr><td><code>.bss</code></td><td>링커 결정</td><td>예: 4 B</td><td><code>count</code></td><td>없음 — 크기만 기록, 시작할 때 0으로 채움</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>소스 코드 위치에 중단점을 연결하려면 보통 <code>-g</code>로 생성한 디버그 정보가 필요하다. 심볼과 디버그 정보는 ELF에 포함될 수 있지만 일반적으로 CPU가 실행할 BRAM 초기화 데이터에는 포함되지 않는다. <code>.bss</code>는 실행 초기화 과정에서 0으로 설정한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>메모리 배치 — 링커 스크립트</h2><span class="pg-no">3장 · 9 / 10</span></div>
+  <p>각 섹션을 메모리 어디에 둘지는 <strong>링커 스크립트</strong>가 정한다. Vitis에서는 하드웨어 플랫폼의 메모리 맵을 토대로 <code>lscript.ld</code>를 생성·편집할 수 있다. 아래는 BRAM을 <code>0x0000_0000</code>부터 64 KB로 설정한 <strong>교육용 메모리 배치</strong>다. 실제 주소·크기는 Vivado Address Editor와 Vitis 링커 설정을 기준으로 확인한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 680 300" style="min-width:520px" role="img" aria-label="BRAM 안의 배치"><rect x="200" y="20" width="200" height="60" class="boxn"/><text x="300" y="55.0" class="tg" style="font-size:12px">.text — 기계어</text><rect x="200" y="80" width="200" height="24" class="box"/><text x="300" y="97.0" class="t tc" style="font-size:12px">.data</text><rect x="200" y="104" width="200" height="24" class="boxd"/><text x="300" y="121.0" class="t tc" style="font-size:12px">.bss</text><rect x="200" y="128" width="200" height="40" class="boxg"/><text x="300" y="153.0" class="t tc" style="font-size:12px">힙 · 높은 주소로 ↓</text><rect x="200" y="168" width="200" height="60" class="box"/><text x="300" y="203.0" class="t tc" style="font-size:12px">빈 공간</text><rect x="200" y="228" width="200" height="52" class="boxb"/><text x="300" y="259.0" class="tb" style="font-size:12px">스택 · 낮은 주소로 ↑</text><text x="190" y="24" class="ts" style="text-anchor:end">0x0000_0000</text><text x="190" y="84" class="ts" style="text-anchor:end">.text 끝</text><text x="190" y="108" class="ts" style="text-anchor:end">.data 끝</text><text x="190" y="132" class="ts" style="text-anchor:end">.bss 끝</text><text x="190" y="284" class="ts" style="text-anchor:end">0x0001_0000</text><text x="412" y="54" class="ts" style="text-anchor:start">시작 코드와 함수들</text><text x="412" y="96" class="ts" style="text-anchor:start">pattern = 0x01</text><text x="412" y="120" class="ts" style="text-anchor:start">count — 시작 코드가 0으로 채움</text><text x="412" y="152" class="ts" style="text-anchor:start">동적 할당 영역</text><text x="412" y="258" class="ts" style="text-anchor:start">함수 호출 · 지역 변수</text><text x="412" y="284" class="ts" style="text-anchor:start">_stack_top (sp 시작값)</text><text x="300" y="14" class="ts">BRAM 64 KB</text></svg></div><figcaption>그림 3-7 · 64 KB BRAM을 가정한 섹션·스택·힙 배치 예시<span class="src">참고: AMD <a href="https://docs.amd.com/r/en-US/ug1400-vitis-embedded/User-and-Program-Memory" target="_blank" rel="noopener noreferrer">UG1400 · User and Program Memory</a> · 주소는 교육용 배치 예시</span></figcaption></figure>
+  <h3>메모리 배치를 설명하는 축약 링커 스크립트 (실행용 원본 대체 불가)</h3><pre><code>MEMORY {
+    lmb : ORIGIN = 0x00000000, LENGTH = 64K     /* BRAM 64 KB */
+}
+SECTIONS {
+    .text : { *(.text*) *(.rodata*) } &gt; lmb      /* 기계어 · 상수 */
+    .data : { *(.data*) *(.sdata*)  } &gt; lmb      /* 초기값 있는 변수 */
+    .bss  : { *(.bss*)  *(.sbss*) *(COMMON) } &gt; lmb  /* 초기값 없는 변수 */
+    _stack_top = ORIGIN(lmb) + LENGTH(lmb);      /* 스택 시작 위치 심볼만 정의 */
+}</code></pre>
+  <div class="warn"><span class="lbl">주의</span>링커는 <code>.text</code>·<code>.data</code>·<code>.bss</code> 등의 <strong>정적으로 배정된 섹션</strong>이 메모리 영역을 초과하면 오류를 낼 수 있다. 그러나 이 축약 스크립트에는 스택·힙의 실제 공간 예약과 시작 코드가 빠져 있어, 실행 중 스택·힙 충돌까지 검사하지 못한다. 실제 Vitis 프로젝트에서는 스택·힙 크기와 리셋 시작 주소도 함께 설정해야 한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>적재와 실행 · 3장 정리</h2><span class="pg-no">3장 · 10 / 10</span></div>
+  <p>ELF의 실행 대상 세그먼트를 BRAM 등 실행 메모리에 적재하면 CPU가 명령어를 인출할 수 있다. 개발할 때는 JTAG 디버거가 소프트웨어를 내려받고, 독립 부팅에서는 <strong>UpdateMEM으로 ELF의 BRAM 초기화 내용을 FPGA 비트스트림에 반영</strong>한 뒤 QSPI에 기록한다. 실제 적용 여부는 Vivado 구현·메모리 구성에 따라 달라진다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 700 210" style="min-width:540px" role="img" aria-label="적재와 실행"><defs><marker id="m10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="30" width="140" height="54" rx="5" class="box"/><text x="90" y="54" class="t tc" style="font-family:var(--mono)">app.elf</text><text x="90" y="72" class="ts">PC의 Vitis</text><rect x="280" y="30" width="170" height="54" rx="5" class="boxn"/><text x="365" y="54" class="tg">BRAM</text><text x="365" y="72" class="ts">0x0000_0000~</text><rect x="550" y="30" width="130" height="54" rx="5" class="box"/><text x="615" y="54" class="t tc">MicroBlaze V</text><text x="615" y="72" class="ts">PC → 인출 → 실행</text><line x1="162" y1="57" x2="278" y2="57" class="ln" marker-end="url(#m10)"/><text x="220" y="48" class="ts">JTAG 다운로드</text><line x1="452" y1="57" x2="548" y2="57" class="ln" marker-end="url(#m10)"/><text x="500" y="48" class="ts">명령어 인출</text><rect x="20" y="130" width="140" height="54" rx="5" class="boxg"/><text x="90" y="153" class="t tc" style="font-size:12px">UpdateMEM 반영 BIT</text><text x="90" y="171" class="ts">BRAM 초기화 데이터 포함</text><rect x="280" y="130" width="170" height="54" rx="5" class="boxb"/><text x="365" y="153" class="tb">QSPI 플래시</text><text x="365" y="171" class="ts">전원을 꺼도 유지</text><line x1="162" y1="157" x2="278" y2="157" class="ln" marker-end="url(#m10)"/><text x="220" y="148" class="ts">MCS로 변환·기록</text><line x1="365" y1="128" x2="365" y2="87" class="lb" marker-end="url(#m10)"/><text x="375" y="112" class="ts" style="text-anchor:start">전원 켜기 → FPGA 구성 → BRAM 초기값 설정</text></svg></div><figcaption>그림 3-8 · JTAG 개발 실행과 QSPI 독립 부팅의 차이</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>이번 장 개념</th><th>한 줄 정리</th><th>우리 SoC에서</th></tr>
+    <tr><td>명령어 · ISA</td><td>CPU가 한 번에 하는 일 · 그 약속</td><td>RV32I 기반 (M/C 확장 선택 가능)</td></tr>
+    <tr><td>소스파일</td><td>사람이 쓰는 <code>.c</code> · <code>.h</code></td><td><code>main.c</code>, <code>soc_map.h</code></td></tr>
+    <tr><td>빌드</td><td>전처리 → 컴파일 → 어셈블 → 링크</td><td>Vitis Build</td></tr>
+    <tr><td>기계어</td><td>32비트 · 16비트(압축) 숫자</td><td><code>37 05 00 40</code> = <code>lui</code></td></tr>
+    <tr><td>링커</td><td>파일을 합치고 주소를 채움</td><td><code>lscript.ld</code></td></tr>
+    <tr><td>ELF</td><td>기계어 + 적재 정보 + 심볼</td><td><code>.text</code> · <code>.data</code> · <code>.bss</code></td></tr>
+    <tr><td>적재</td><td>ELF를 메모리에 옮김</td><td>JTAG 다운로드 · UpdateMEM + QSPI (구성 시)</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">공식 절차</span><a href="https://docs.amd.com/r/2025.2-English/ug1580-updatemem/Introduction" target="_blank" rel="noopener noreferrer">AMD UG1580 · UpdateMEM</a> — ELF 데이터와 BRAM 위치 정보를 이용해 FPGA 구성 이미지의 초기값을 갱신한다. QSPI에 ELF 파일만 복사한다고 CPU가 자동 실행하는 것은 아니다.</div>
+   <div class="note"><span class="lbl">다음 장</span>4장 명령어의 구조 — 32비트 명령어 안의 연산 코드와 오퍼랜드, 주소를 가리키는 방법, 그리고 스택과 큐.</div>
+</section>
+
+</div>
+<nav class="pager"><div class="pager-in"><button id="prev">← 이전</button><div class="dots"></div><span class="pos"></span><button id="next">다음 →</button></div></nav>
+<script>
+(function(){
+  var pages=[].slice.call(document.querySelectorAll('.pg'));
+  var dots=document.querySelector('.dots'), prev=document.getElementById('prev'), next=document.getElementById('next');
+  pages.forEach(function(_,i){var b=document.createElement('button');b.textContent=i+1;b.setAttribute('aria-label',(i+1)+'페이지');b.onclick=function(){go(i)};dots.appendChild(b)});
+  var cur=0;
+  function go(i){
+    cur=Math.max(0,Math.min(pages.length-1,i));
+    pages.forEach(function(p,k){p.hidden=k!==cur});
+    [].forEach.call(dots.children,function(b,k){b.classList.toggle('on',k===cur)});
+    var pos=document.querySelector('.pos'); if(pos) pos.textContent=(cur+1)+' / '+pages.length;
+    prev.disabled=cur===0; next.disabled=cur===pages.length-1;
+    try{history.replaceState(null,'','#p'+(cur+1))}catch(e){}
+    window.scrollTo(0,0);
+  }
+  prev.onclick=function(){go(cur-1)}; next.onclick=function(){go(cur+1)};
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+  var m=/^#p(\d+)$/.exec(location.hash||''); go(m?parseInt(m[1],10)-1:0);
+  document.getElementById('theme').onclick=function(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d?d==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.setAttribute('data-theme',dark?'light':'dark')};
+})();
+</script>
+
+</body></html>

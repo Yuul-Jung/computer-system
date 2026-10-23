@@ -1,0 +1,335 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>10장 입출력장치</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F6FB; --surface:#FFFFFF; --ink:#17263C; --muted:#50637C; --line:#CBD8E8;
+  --green:#1456A0; --greenbg:#E8F1FE; --blue:#087C88; --bluebg:#E2F6F5;
+  --amber:#915710; --amberbg:#FFF3DF; --head:#EAF0F9; --grayfill:#DFE9F5;
+  --sans:"IBM Plex Sans KR","Noto Sans KR",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans);word-break:keep-all;overflow-wrap:break-word;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 96px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+/* 상단 */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.series{font:500 11px var(--mono);letter-spacing:.09em;color:var(--green);text-transform:uppercase}
+.theme-btn{font:500 11px var(--mono);padding:4px 10px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--muted);cursor:pointer}
+.chaps{display:flex;flex-wrap:wrap;gap:4px}
+.chaps a{font:500 11px var(--mono);padding:3px 8px;border-radius:3px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.chaps a.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+
+
+.chaps a{text-decoration:none}.chaps a:hover{border-color:var(--green);color:var(--green);background:var(--greenbg)}
+.chaps a.on:hover{background:var(--green);color:var(--surface)}
+.chaps a.back-index{font-weight:700;color:var(--green);border-color:var(--green)}
+/* 페이지 */
+.pg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px clamp(16px,4vw,40px) 32px;display:flex;flex-direction:column;gap:18px;min-height:600px}
+.pg[hidden]{display:none!important}
+.pg-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+.pg-no{font:600 11px var(--mono);color:var(--green);letter-spacing:.06em;white-space:nowrap}
+h1{margin:0;font-size:clamp(26px,5vw,40px);line-height:1.2;text-wrap:balance}
+h2{margin:0;font-size:clamp(19px,3vw,24px);line-height:1.3;text-wrap:balance}
+h3{margin:4px 0 0;font-size:14px}
+p{margin:0}
+.lead{color:var(--muted);font-size:15.5px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;align-items:start}
+.cols>*{min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+ul.pts{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+
+/* 카드·표 */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--surface)}
+.card b{color:var(--green);font-size:13px}
+.card span{font-size:13px;color:var(--muted)}
+.card .num{font:600 22px/1.3 var(--mono);color:var(--ink)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--head);font-weight:500;font-size:11.5px;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+code{font-family:var(--mono);font-size:12px;background:var(--head);padding:1px 4px;border-radius:3px}
+
+pre{margin:0;padding:14px 16px;overflow-x:auto;background:var(--head);border:1px solid var(--line);border-radius:6px;font:400 12.5px/1.6 var(--mono);min-width:0;word-break:normal}
+pre code{background:none;padding:0;font-size:inherit}
+/* 콜아웃 */
+.note,.tip,.warn{padding:10px 14px;border-radius:4px;font-size:13.5px}
+.note{background:var(--greenbg)}
+.tip{background:var(--bluebg);border-left:3px solid var(--blue)}
+.warn{background:var(--amberbg);border-left:3px solid var(--amber)}
+.lbl{font:600 10.5px var(--mono);letter-spacing:.05em;margin-right:6px}
+.note .lbl{color:var(--green)} .tip .lbl{color:var(--blue)} .warn .lbl{color:var(--amber)}
+
+/* 그림 */
+figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.fig{overflow-x:auto;border:1px solid var(--line);border-radius:6px;padding:16px;background:var(--surface)}
+.fig svg{display:block;width:100%;height:auto}
+figcaption{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+figcaption .src{font:400 11px var(--mono)}
+figcaption a{color:var(--blue)}
+.redraw{display:inline-block;font:600 10px var(--mono);color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:0 4px;margin-right:6px;vertical-align:1px}
+
+/* SVG */
+.box{fill:var(--surface);stroke:var(--ink);stroke-width:1.4}
+.boxg{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.2}
+.boxn{fill:var(--greenbg);stroke:var(--green);stroke-width:1.6}
+.boxb{fill:var(--bluebg);stroke:var(--blue);stroke-width:1.4}
+.boxd{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+.ln{fill:none;stroke:var(--ink);stroke-width:1.4}
+.lg{fill:none;stroke:var(--green);stroke-width:1.6}
+.lb{fill:none;stroke:var(--blue);stroke-width:1.6}
+.lm{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 3}
+.t{fill:var(--ink);font:500 13px var(--sans)}
+.tc{text-anchor:middle}
+.ts{fill:var(--muted);font:400 11px var(--mono);text-anchor:middle}
+.tg{fill:var(--green);font:600 13px var(--sans);text-anchor:middle}
+.tb{fill:var(--blue);font:600 12px var(--sans);text-anchor:middle}
+.chipc{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.4}
+.pin rect{fill:var(--amber)}
+.trace{stroke:var(--muted);stroke-width:2;opacity:.6}
+.die{fill:#20262E;stroke:var(--muted);stroke-width:1.2} .mem{fill:#4B545F;stroke:var(--muted);stroke-width:1}
+.dt{fill:#F1F3F6;font:700 16px var(--sans);text-anchor:middle}
+.dts{fill:#D9DEE4;font:500 12px var(--sans);text-anchor:middle}
+.ah{fill:var(--ink)} .ag{fill:var(--green)} .ab{fill:var(--blue)}
+
+/* 넘김 */
+.pager{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.pager-in{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pager button{font:500 13px var(--sans);padding:7px 14px;border-radius:5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pager button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.dots button{width:26px;height:26px;padding:0;font:500 11px var(--mono);border-radius:50%}
+.dots button.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+.pos{display:none;font:600 13px var(--mono);color:var(--ink)}
+@media (max-width:600px){.dots{display:none}.pos{display:block}.pager button{padding:6px 12px;white-space:nowrap}.pg-head{flex-wrap:wrap}.chaps{gap:3px}.chaps a{font-size:10px;padding:2px 6px}}
+</style>
+<div class="wrap">
+  <div class="top"><span class="series">컴퓨터시스템구조 · MicroBlaze V SoC 도입 이론</span><button class="theme-btn" id="theme">다크 / 라이트</button></div>
+  <div class="chaps"><a class="back-index" href="index.html">⌂ 전체 목차</a><a class="" href="01%EC%9E%A5%20%EC%BB%B4%ED%93%A8%ED%84%B0%EA%B5%AC%EC%A1%B0%EC%9D%98%20%ED%81%B0%EA%B7%B8%EB%A6%BC.html" >1 큰그림</a><a class="" href="02%EC%9E%A5%20%EB%8D%B0%EC%9D%B4%ED%84%B0.html" >2 데이터</a><a class="" href="03%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4.html" >3 명령어</a><a class="" href="04%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%EC%9D%98%20%EA%B5%AC%EC%A1%B0.html" >4 명령어 구조</a><a class="" href="05%EC%9E%A5%20CPU%20%EA%B5%AC%EC%84%B1.html" >5 CPU 구성</a><a class="" href="06%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%20%EC%82%AC%EC%9D%B4%ED%81%B4%EA%B3%BC%20%EC%9D%B8%ED%84%B0%EB%9F%BD%ED%8A%B8.html" >6 명령어 사이클</a><a class="" href="07%EC%9E%A5%20CPU%20%EC%84%B1%EB%8A%A5%20%ED%96%A5%EC%83%81.html" >7 성능 향상</a><a class="" href="08%EC%9E%A5%20%EB%A9%94%EB%AA%A8%EB%A6%AC.html" >8 메모리</a><a class="" href="09%EC%9E%A5%20%EB%B3%B4%EC%A1%B0%EA%B8%B0%EC%96%B5%EC%9E%A5%EC%B9%98.html" >9 보조기억</a><a class="on" href="10%EC%9E%A5%20%EC%9E%85%EC%B6%9C%EB%A0%A5%EC%9E%A5%EC%B9%98.html" aria-current="page">10 입출력</a></div>
+<!-- 10장 입출력장치 : 10페이지 -->
+<section class="pg">
+  <div class="pg-head"><span class="pg-no">10장 · 1 / 10</span><span class="pg-no">표지</span></div>
+  <h1>입출력장치</h1>
+  <p class="lead">CPU와 메모리만으로는 바깥 세계와 만날 수 없다. 입출력 모듈의 구조, 세 가지 입출력 제어 방식(폴링 · 인터럽트 · DMA), 그리고 Basys3용 MicroBlaze V SoC를 예로 들어 GPIO · UART · I²C · 타이머 · 사용자 IP를 레지스터 수준에서 정리하며 이론편을 마친다.</p>
+  <div class="cards"><div class="card"><b>학습 목표 1</b><span>입출력 모듈의 데이터 · 상태 · 제어 레지스터를 구분할 수 있다.</span></div><div class="card"><b>학습 목표 2</b><span>폴링 · 인터럽트 · DMA의 차이를 설명할 수 있다.</span></div><div class="card"><b>학습 목표 3</b><span>우리 SoC 주변장치의 신호와 레지스터를 읽을 수 있다.</span></div></div>
+  <figure><div class="fig"><svg viewBox="0 0 720 165" style="min-width:560px" role="img" aria-label="10개 장 테크트리">
+<defs><marker id="at" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+<rect x="10" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="72" y="42" class="t tc">1 큰그림</text><text x="72" y="60" class="ts">CPU·메모리·I/O</text>
+<rect x="152" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="214" y="42" class="t tc">2 데이터</text><text x="214" y="60" class="ts">2진수·16진수</text>
+<rect x="294" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="356" y="42" class="t tc">3 명령어</text><text x="356" y="60" class="ts">소스→실행파일</text>
+<rect x="436" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="498" y="42" class="t tc">4 명령어 구조</text><text x="498" y="60" class="ts">오퍼랜드·스택</text>
+<rect x="578" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="640" y="42" class="t tc">5 CPU 구성</text><text x="640" y="60" class="ts">ALU·레지스터</text>
+<rect x="10" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="72" y="127" class="t tc">6 명령어 사이클</text><text x="72" y="145" class="ts">인출·인터럽트</text>
+<rect x="152" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="214" y="127" class="t tc">7 성능 향상</text><text x="214" y="145" class="ts">파이프라인·RISC</text>
+<rect x="294" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="356" y="127" class="t tc">8 메모리</text><text x="356" y="145" class="ts">주소공간·캐시</text>
+<rect x="436" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="498" y="127" class="t tc">9 보조기억</text><text x="498" y="145" class="ts">플래시·부팅</text>
+<rect x="578" y="105" width="124" height="52" rx="5" class="boxn"/>
+<text x="640" y="127" class="tg">10 입출력</text><text x="640" y="145" class="ts">폴링·인터럽트</text>
+<line x1="134" y1="46" x2="151" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="46" x2="293" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="46" x2="435" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="46" x2="577" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="134" y1="131" x2="151" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="131" x2="293" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="131" x2="435" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="131" x2="577" y2="131" class="ln" marker-end="url(#at)"/>
+<path d="M640 72 V88 H72 V104" class="ln" marker-end="url(#at)"/></svg></div><figcaption>그림 10-1 · 10개 장 테크트리</figcaption></figure>
+  <div class="scroll"><table><tr><th>페이지</th><th>내용</th><th>페이지</th><th>내용</th></tr><tr><td>1</td><td>표지 · 학습 목표</td><td>6</td><td>UART</td></tr><tr><td>2</td><td>입출력 모듈</td><td>7</td><td>I²C</td></tr><tr><td>3</td><td>입출력 제어 방식</td><td>8</td><td>타이머</td></tr><tr><td>4</td><td>DMA</td><td>9</td><td>AXI4-Lite와 사용자 IP</td></tr><tr><td>5</td><td>GPIO</td><td>10</td><td>SoC 연결 · 이론편 정리</td></tr></table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>입출력 모듈 — CPU와 장치 사이의 통역</h2><span class="pg-no">10장 · 2 / 10</span></div>
+  <p>LED · 센서 · 터미널 같은 장치는 전압 · 속도 · 신호 형식이 제각각이라 CPU 버스에 바로 붙일 수 없다. 그 사이에서 버스 쪽은 레지스터로, 장치 쪽은 장치의 신호로 바꿔 주는 회로가 <strong>입출력 모듈(I/O 모듈, 주변장치 제어기)</strong>이다. 예시 SoC에서는 AXI GPIO · UART Lite · AXI IIC 같은 IP가 이 역할을 한다. 실제 연결과 주소는 Vivado Block Design 및 Address Editor에서 확인한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 240" style="min-width:560px" role="img" aria-label="입출력 모듈"><defs><marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="70" width="120" height="70" rx="5" class="boxn"/><text x="80" y="110" class="tg">CPU</text><rect x="170" y="20" width="26" height="190" rx="3" class="boxb"/><text x="183" y="226" class="tb" style="font-size:11px">버스</text><line x1="140" y1="105" x2="170" y2="105" class="lb" style="stroke-width:3"/><rect x="240" y="20" width="270" height="190" rx="6" class="box"/><text x="375" y="42" class="t tc" style="font-weight:600">입출력 모듈 (주변장치 IP)</text><rect x="256" y="56" width="160" height="40" rx="3" class="boxg"/><text x="336" y="73" class="t tc" style="font-size:12px">데이터 레지스터</text><text x="336" y="88" class="ts" style="font-size:10px">주고받을 값</text><line x1="196" y1="76" x2="254" y2="76" class="lb"/><rect x="256" y="104" width="160" height="40" rx="3" class="boxg"/><text x="336" y="121" class="t tc" style="font-size:12px">상태 레지스터</text><text x="336" y="136" class="ts" style="font-size:10px">준비됨? 가득 참? 오류?</text><line x1="196" y1="124" x2="254" y2="124" class="lb"/><rect x="256" y="152" width="160" height="40" rx="3" class="boxg"/><text x="336" y="169" class="t tc" style="font-size:12px">제어 레지스터</text><text x="336" y="184" class="ts" style="font-size:10px">켜기 · 방식 · 인터럽트 허용</text><line x1="196" y1="172" x2="254" y2="172" class="lb"/><rect x="430" y="56" width="66" height="136" rx="3" class="boxg"/><text x="463" y="120" class="ts">장치 쪽</text><text x="463" y="136" class="ts">논리</text><line x1="498" y1="124" x2="568" y2="124" class="ln" marker-start="url(#m2)" marker-end="url(#m2)"/><rect x="570" y="80" width="130" height="88" rx="5" class="box"/><text x="635" y="116" class="t tc">장치</text><text x="635" y="134" class="ts">LED · 센서 · 터미널</text><text x="440" y="232" class="ts">인터럽트선은 상태가 바뀔 때 CPU(INTC)에 알린다</text></svg></div><figcaption>그림 10-2 · 입출력 모듈의 세 가지 레지스터</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>레지스터</th><th>CPU가 하는 일</th><th>AXI UART Lite 예 (베이스 0x4002_0000 가정)</th></tr>
+    <tr><td>데이터</td><td>보낼 값을 쓰고, 받은 값을 읽는다</td><td>RX FIFO 0x0 · TX FIFO 0x4</td></tr>
+    <tr><td>상태</td><td>장치가 준비됐는지 읽는다</td><td>STAT +0x08 — bit0 RX 데이터 있음 · bit2 TX FIFO 비었음 · bit3 TX FIFO 가득 참</td></tr>
+    <tr><td>제어</td><td>동작 방식을 쓴다</td><td>CTRL +0x0C — FIFO 초기화, 인터럽트 허용</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>CPU 입장에서 모든 장치는 "주소가 붙은 레지스터 몇 개"다(메모리 맵 I/O, 8장). 장치마다 다른 것은 레지스터의 개수와 비트의 뜻뿐이다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>입출력 제어 방식 — 폴링 · 인터럽트 · DMA</h2><span class="pg-no">10장 · 3 / 10</span></div>
+  <p>장치와 데이터를 주고받는 방법은 CPU가 얼마나 관여하느냐에 따라 세 가지로 나뉜다. 6장의 폴링과 인터럽트에 더해, CPU 대신 데이터를 옮겨 주는 전용 회로를 쓰는 <strong>DMA(Direct Memory Access)</strong>가 있다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 200" style="min-width:560px" role="img" aria-label="세 방식의 CPU 사용 시간"><text x="430" y="18" class="ts">시간 → (100바이트 받기) · 녹색 = CPU가 입출력에 쓰는 시간</text><text x="100" y="56" class="t" style="text-anchor:end;font-size:13px">폴링</text><rect x="110" y="38" width="600" height="28" rx="3" class="box"/><rect x="110" y="38" width="600" height="28" rx="2" class="boxn"/><text x="100" y="108" class="t" style="text-anchor:end;font-size:13px">인터럽트</text><rect x="110" y="90" width="600" height="28" rx="3" class="box"/><rect x="110" y="90" width="12" height="28" rx="2" class="boxn"/><rect x="170" y="90" width="12" height="28" rx="2" class="boxn"/><rect x="230" y="90" width="12" height="28" rx="2" class="boxn"/><rect x="290" y="90" width="12" height="28" rx="2" class="boxn"/><rect x="350" y="90" width="12" height="28" rx="2" class="boxn"/><rect x="410" y="90" width="12" height="28" rx="2" class="boxn"/><rect x="470" y="90" width="12" height="28" rx="2" class="boxn"/><rect x="530" y="90" width="12" height="28" rx="2" class="boxn"/><rect x="590" y="90" width="12" height="28" rx="2" class="boxn"/><rect x="650" y="90" width="12" height="28" rx="2" class="boxn"/><text x="100" y="160" class="t" style="text-anchor:end;font-size:13px">DMA</text><rect x="110" y="142" width="600" height="28" rx="3" class="box"/><rect x="110" y="142" width="24" height="28" rx="2" class="boxn"/><rect x="686" y="142" width="24" height="28" rx="2" class="boxn"/><text x="410" y="194" class="ts">DMA는 시작할 때 설정하고 끝날 때 완료 인터럽트만 받는다</text></svg></div><figcaption>그림 10-3 · 같은 일을 할 때 CPU가 쓰는 시간 (개념도)</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th></th><th>폴링</th><th>인터럽트</th><th>DMA</th></tr>
+    <tr><td>누가 데이터를 옮기나</td><td>CPU</td><td>CPU (처리 함수에서)</td><td>DMA 제어기</td></tr>
+    <tr><td>CPU가 기다리나</td><td>바쁜 대기에서는 계속 확인</td><td>대기 대신 다른 작업 가능</td><td>설정 후 다른 작업 가능 (버스 경합은 존재)</td></tr>
+    <tr><td>잘 맞는 일</td><td>단순하고 짧은 일</td><td>가끔 오는 일 (버튼 · 시간)</td><td>많은 데이터 (영상 · 소리 · 디스크)</td></tr>
+    <tr><td>우리 실습</td><td>L04 UART · L05 타이머 · L08 I²C</td><td>L06 타이머 · 버튼</td><td>쓰지 않음</td></tr>
+  </table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>DMA — CPU 대신 옮기는 회로</h2><span class="pg-no">10장 · 4 / 10</span></div>
+  <p>장치에서 1000바이트를 메모리로 옮긴다면, 인터럽트 방식에서 CPU가 데이터를 한 바이트씩 복사한다면, 1000번 읽고 1000번 써야 한다. 다만 FIFO·버퍼에 따라 한 번에 여러 바이트씩 처리할 수도 있다. <strong>DMA 제어기</strong>는 CPU처럼 버스를 직접 쓸 수 있는(버스 마스터) 회로로, CPU가 "어디서 · 어디로 · 몇 바이트"인지 설정하면, DMA가 버스 마스터로서 읽기·쓰기를 수행한다. 완료 통지는 인터럽트나 상태 레지스터 확인 방식으로 할 수 있다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 250" style="min-width:560px" role="img" aria-label="DMA 동작"><defs><marker id="m4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="110" width="680" height="24" rx="3" class="boxb"/><text x="360" y="126" class="tb" style="font-size:11px">시스템 버스</text><rect x="30" y="30" width="130" height="50" rx="5" class="boxn"/><text x="95" y="60" class="tg" style="font-size:13px">CPU</text><line x1="95" y1="80" x2="95" y2="110" class="ln"/><circle cx="95" cy="110" r="3.5" class="ah"/><rect x="210" y="30" width="130" height="50" rx="5" class="box"/><text x="275" y="60" class="t tc" style="font-size:13px">메모리</text><line x1="275" y1="80" x2="275" y2="110" class="ln"/><circle cx="275" cy="110" r="3.5" class="ah"/><rect x="390" y="30" width="130" height="50" rx="5" class="boxb"/><text x="455" y="60" class="tb" style="font-size:13px">DMA 제어기</text><line x1="455" y1="80" x2="455" y2="110" class="ln"/><circle cx="455" cy="110" r="3.5" class="ah"/><rect x="570" y="30" width="130" height="50" rx="5" class="box"/><text x="635" y="60" class="t tc" style="font-size:13px">장치 (예: ADC)</text><line x1="635" y1="80" x2="635" y2="110" class="ln"/><circle cx="635" cy="110" r="3.5" class="ah"/><path d="M95 134 V170 H455 V138" class="lm" marker-end="url(#m4)"/><text x="104" y="164" class="ts" style="text-anchor:start">① 설정 (주소 · 길이)</text><path d="M635 134 V196 H455 V138" class="lg" style="stroke-width:2" marker-end="url(#m4)"/><path d="M455 134 V184 H275 V138" class="lg" style="stroke-width:2" marker-end="url(#m4)"/><text x="455" y="212" class="tg" style="font-size:11px">② 장치 → DMA 읽기 · DMA → 메모리 쓰기 (CPU는 다른 일)</text><path d="M470 134 V232 H60 V138" class="lb" style="stroke-dasharray:5 3" marker-end="url(#m4)"/><text x="160" y="246" class="tb" style="font-size:11px">③ 다 끝나면 완료 인터럽트</text></svg></div><figcaption>그림 10-4 · DMA로 장치 데이터를 메모리에 옮기는 순서</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>순서</th><th>CPU</th><th>DMA 제어기</th></tr>
+    <tr><td>① 설정</td><td>원천 주소 · 목적 주소 · 길이를 DMA 레지스터에 쓴다</td><td>대기</td></tr>
+    <tr><td>② 전송</td><td>다른 일을 한다</td><td>버스를 써서 한 블록씩 옮긴다</td></tr>
+    <tr><td>③ 완료</td><td>완료 인터럽트를 받아 결과를 쓴다</td><td>멈춘다</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">SoC 연결</span>DMA는 AXI4-Lite 레지스터 접근과 달리 대량 전송에 적합한 메모리·스트림 인터페이스 구성이 필요하다. CPU와 DMA가 같은 버스·메모리를 사용하면 중재로 인해 서로 지연될 수 있다. 이 교재의 기본 구성 예시에는 DMA를 두지 않는다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>GPIO — 비트 하나가 핀 하나</h2><span class="pg-no">10장 · 5 / 10</span></div>
+  <p><strong>GPIO(General Purpose Input/Output)</strong>는 가장 단순한 입출력이다. 데이터 레지스터의 비트 하나가 FPGA 핀 하나와 이어져, 출력으로 설정된 핀에 1/0을 쓰면 해당 논리 레벨이 출력된다(예: LVCMOS33에서 High는 3.3 V 계열). 실제 전압은 I/O 표준과 부하에 따라 달라진다. 입력으로 쓰면 핀의 전압을 비트로 읽는다. AXI GPIO는 채널을 두 개까지 가질 수 있다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 230" style="min-width:560px" role="img" aria-label="AXI GPIO 두 채널"><defs><marker id="m5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="90" width="110" height="50" rx="5" class="boxn"/><text x="75" y="120" class="tg">CPU</text><line x1="130" y1="115" x2="196" y2="115" class="lb" marker-end="url(#m5)"/><text x="163" y="106" class="ts" style="font-size:10px">AXI4-Lite</text><rect x="200" y="20" width="270" height="190" rx="6" class="box"/><text x="335" y="40" class="t tc" style="font-weight:600">AXI GPIO · 주소 예시</text><rect x="216" y="54" width="238" height="30" rx="3" class="boxn"/><text x="228" y="74" class="t" style="text-anchor:start;font-size:11px;font-family:var(--mono)">0x00 GPIO_DATA</text><text x="444" y="74" class="ts" style="text-anchor:end;font-size:10px">채널 1 값</text><rect x="216" y="92" width="238" height="30" rx="3" class="boxg"/><text x="228" y="112" class="t" style="text-anchor:start;font-size:11px;font-family:var(--mono)">0x04 GPIO_TRI</text><text x="444" y="112" class="ts" style="text-anchor:end;font-size:10px">채널 1 방향</text><rect x="216" y="130" width="238" height="30" rx="3" class="boxn"/><text x="228" y="150" class="t" style="text-anchor:start;font-size:11px;font-family:var(--mono)">0x08 GPIO2_DATA</text><text x="444" y="150" class="ts" style="text-anchor:end;font-size:10px">채널 2 값</text><rect x="216" y="168" width="238" height="30" rx="3" class="boxg"/><text x="228" y="188" class="t" style="text-anchor:start;font-size:11px;font-family:var(--mono)">0x0C GPIO2_TRI</text><text x="444" y="188" class="ts" style="text-anchor:end;font-size:10px">채널 2 방향</text><line x1="470" y1="69" x2="548" y2="69" class="lg" marker-end="url(#m5)"/><rect x="550" y="44" width="150" height="50" rx="5" class="box"/><text x="625" y="66" class="t tc">LED 16개</text><text x="625" y="84" class="ts">출력 · led[15:0]</text><line x1="548" y1="145" x2="470" y2="145" class="lg" marker-end="url(#m5)"/><rect x="550" y="120" width="150" height="50" rx="5" class="box"/><text x="625" y="142" class="t tc">스위치 16개</text><text x="625" y="160" class="ts">입력 · sw[15:0]</text><text x="460" y="222" class="ts">교육용 연결: Ch1 → LED, Ch2 ← SW · 실제 핀은 Vivado/XDC 확인</text></svg></div><figcaption>그림 10-5 · LED/SW용 AXI GPIO — 채널 1은 출력, 채널 2는 입력</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>오프셋</th><th>이름</th><th>뜻</th><th>우리 SoC</th></tr>
+    <tr><td><code>0x00</code></td><td>GPIO_DATA</td><td>채널 1 값</td><td><code>GPIO_LED</code></td></tr>
+    <tr><td><code>0x04</code></td><td>GPIO_TRI</td><td>채널 1 방향 (1 = 입력)</td><td>출력으로 쓸 비트에 0 기록</td></tr>
+    <tr><td><code>0x08</code></td><td>GPIO2_DATA</td><td>채널 2 값</td><td><code>GPIO_SW</code></td></tr>
+    <tr><td><code>0x0C</code></td><td>GPIO2_TRI</td><td>채널 2 방향</td><td>입력으로 쓸 비트에 1 기록</td></tr>
+    <tr><td><code>0x11C · 0x128 · 0x120</code></td><td>GIER · IP IER · IP ISR</td><td>전체 허용 · 채널별 허용 · 상태(1을 쓰면 해당 상태 비트 토글)</td><td>Enable Interrupt를 설정한 IP에만 존재</td></tr>
+  </table></div>
+  <pre><code>#include &lt;stdint.h&gt;
+#define REG32(addr) (*(volatile uint32_t *)(uintptr_t)(addr))
+#define GPIO_BASE   0x40000000u  /* 주소 예시: Vivado에서 확인 */
+
+REG32(GPIO_BASE + 0x04u) = 0x0000u;  /* 채널 1: LED 출력 */
+REG32(GPIO_BASE + 0x0Cu) = 0xFFFFu;  /* 채널 2: SW 입력  */
+REG32(GPIO_BASE + 0x00u) = REG32(GPIO_BASE + 0x08u) &amp; 0xFFFFu;
+/* 채널 2 SW[15:0] 읽기 → 채널 1 LED[15:0] 출력 */</code></pre>
+  <div class="tip"><span class="lbl">주소/구성</span>한 AXI GPIO IP에 두 채널이 활성화된 예시다. 레지스터 기준 주소, GPIO 폭, TRI 초기값은 Vivado 설정과 일치시킨다. GPIO 인터럽트의 IP ISR은 상태 비트에 1을 쓰면 토글되어 해제된다. <a href="https://docs.amd.com/r/en-US/pg144-axi-gpio/Register-Space" target="_blank" rel="noopener">AMD PG144</a>.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>UART — 선 하나로 글자 보내기</h2><span class="pg-no">10장 · 6 / 10</span></div>
+  <p><strong>UART(Universal Asynchronous Receiver/Transmitter)</strong>는 클록선 없이 정해진 속도로 비트를 차례로 보내는 직렬 통신이다. 평소에는 선이 1(쉼)이고, 0으로 떨어지는 <strong>시작 비트</strong>로 글자의 시작을 알린 뒤, 데이터 8비트를 아래 비트부터 보내고, 1인 <strong>정지 비트</strong>로 끝낸다. 이 형식을 8N1(데이터 8, 패리티 없음, 정지 1)이라 한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 190" style="min-width:560px" role="img" aria-label="UART 프레임"><path d="M40 60 V60 H98 V100 H156 V60 H214 V100 H272 V100 H330 V100 H388 V100 H446 V100 H504 V60 H562 V100 H620 V60 H678" class="lg" style="stroke-width:2.5"/><rect x="42" y="116" width="54" height="26" rx="3" class="boxg"/><text x="69.0" y="133" class="t tc" style="font-size:11px">쉼</text><text x="69.0" y="52" class="ts" style="font-size:11px">1</text><line x1="40" y1="56" x2="40" y2="106" class="lm" style="stroke-dasharray:2 3"/><rect x="100" y="116" width="54" height="26" rx="3" class="boxb"/><text x="127.0" y="133" class="tb" style="font-size:11px">시작</text><text x="127.0" y="52" class="ts" style="font-size:11px">0</text><line x1="98" y1="56" x2="98" y2="106" class="lm" style="stroke-dasharray:2 3"/><rect x="158" y="116" width="54" height="26" rx="3" class="box"/><text x="185.0" y="133" class="t tc" style="font-size:11px">D0</text><text x="185.0" y="52" class="ts" style="font-size:11px">1</text><line x1="156" y1="56" x2="156" y2="106" class="lm" style="stroke-dasharray:2 3"/><rect x="216" y="116" width="54" height="26" rx="3" class="box"/><text x="243.0" y="133" class="t tc" style="font-size:11px">D1</text><text x="243.0" y="52" class="ts" style="font-size:11px">0</text><line x1="214" y1="56" x2="214" y2="106" class="lm" style="stroke-dasharray:2 3"/><rect x="274" y="116" width="54" height="26" rx="3" class="box"/><text x="301.0" y="133" class="t tc" style="font-size:11px">D2</text><text x="301.0" y="52" class="ts" style="font-size:11px">0</text><line x1="272" y1="56" x2="272" y2="106" class="lm" style="stroke-dasharray:2 3"/><rect x="332" y="116" width="54" height="26" rx="3" class="box"/><text x="359.0" y="133" class="t tc" style="font-size:11px">D3</text><text x="359.0" y="52" class="ts" style="font-size:11px">0</text><line x1="330" y1="56" x2="330" y2="106" class="lm" style="stroke-dasharray:2 3"/><rect x="390" y="116" width="54" height="26" rx="3" class="box"/><text x="417.0" y="133" class="t tc" style="font-size:11px">D4</text><text x="417.0" y="52" class="ts" style="font-size:11px">0</text><line x1="388" y1="56" x2="388" y2="106" class="lm" style="stroke-dasharray:2 3"/><rect x="448" y="116" width="54" height="26" rx="3" class="box"/><text x="475.0" y="133" class="t tc" style="font-size:11px">D5</text><text x="475.0" y="52" class="ts" style="font-size:11px">0</text><line x1="446" y1="56" x2="446" y2="106" class="lm" style="stroke-dasharray:2 3"/><rect x="506" y="116" width="54" height="26" rx="3" class="box"/><text x="533.0" y="133" class="t tc" style="font-size:11px">D6</text><text x="533.0" y="52" class="ts" style="font-size:11px">1</text><line x1="504" y1="56" x2="504" y2="106" class="lm" style="stroke-dasharray:2 3"/><rect x="564" y="116" width="54" height="26" rx="3" class="box"/><text x="591.0" y="133" class="t tc" style="font-size:11px">D7</text><text x="591.0" y="52" class="ts" style="font-size:11px">0</text><line x1="562" y1="56" x2="562" y2="106" class="lm" style="stroke-dasharray:2 3"/><rect x="622" y="116" width="54" height="26" rx="3" class="boxb"/><text x="649.0" y="133" class="tb" style="font-size:11px">정지</text><text x="649.0" y="52" class="ts" style="font-size:11px">1</text><line x1="620" y1="56" x2="620" y2="106" class="lm" style="stroke-dasharray:2 3"/><text x="34" y="64" class="ts" style="text-anchor:end;font-size:10px">1</text><text x="34" y="104" class="ts" style="text-anchor:end;font-size:10px">0</text><text x="360" y="166" class="ts">글자 'A' = 0x41 = 0100_0001 → 아래 비트(D0)부터 보낸다</text><text x="360" y="184" class="ts">115200 bps: 한 비트 약 8.68 µs · 한 글자(10비트) 약 86.8 µs</text></svg></div><figcaption>그림 10-6 · 115200 bps · 8N1로 'A'를 보낼 때의 선 모양</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>항목</th><th>값 (우리 SoC)</th><th>왜 중요한가</th></tr>
+    <tr><td>속도</td><td>115200 bps (설정 예시)</td><td>송신·수신 양측 속도를 맞춰야 한다</td></tr>
+    <tr><td>형식</td><td>8N1 (설정 예시)</td><td>데이터 길이·패리티·정지 비트를 일치시킨다</td></tr>
+    <tr><td>FIFO</td><td>RX/TX 각각 16바이트 (표준 AXI UART Lite)</td><td>버퍼 용량까지 흡수하며, 가득 차면 데이터 손실 또는 송신 대기가 발생할 수 있다</td></tr>
+    <tr><td>연결</td><td>보드 내 USB-UART 브리지를 거쳐 PC로</td><td>실제 통신 경로와 포트는 보드 매뉴얼·OS에서 확인한다</td></tr>
+  </table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>I²C — 선 두 개로 여러 장치</h2><span class="pg-no">10장 · 7 / 10</span></div>
+  <p><strong>I²C(Inter-Integrated Circuit)</strong>는 클록선 <strong>SCL</strong>과 데이터선 <strong>SDA</strong> 두 개에 여러 장치를 함께 매다는 직렬 버스다. 장치마다 7비트 주소가 있어, 마스터가 주소를 먼저 보내면 그 주소의 장치만 대답한다. 선은 저항으로 3.3 V에 당겨 두고(풀업), 각 장치는 선을 0으로 끌어내리기만 한다(오픈 드레인).</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 270" style="min-width:560px" role="img" aria-label="I2C 버스와 전송 순서"><line x1="60" y1="50" x2="680" y2="50" class="lb" style="stroke-width:2.5"/><text x="690" y="54" class="tb" style="text-anchor:start;font-size:11px">SCL</text><line x1="60" y1="80" x2="680" y2="80" class="lg" style="stroke-width:2.5"/><text x="690" y="84" class="tg" style="text-anchor:start;font-size:11px">SDA</text><path d="M97 14 V7 H127 V14" class="ln"/><text x="83" y="11" class="ts" style="text-anchor:end;font-size:10px">3.3 V</text><rect x="90" y="14" width="14" height="24" class="boxg"/><rect x="120" y="14" width="14" height="24" class="boxg"/><text x="160" y="28" class="ts" style="text-anchor:start;font-size:10px">풀업 저항 → 3.3 V</text><line x1="97" y1="38" x2="97" y2="50" class="ln"/><circle cx="97" cy="50" r="3.5" class="ab"/><line x1="127" y1="38" x2="127" y2="80" class="ln"/><circle cx="127" cy="80" r="3.5" class="ag"/><rect x="200" y="100" width="130" height="46" rx="5" class="boxn"/><text x="265" y="120" class="tg" style="font-size:12px">AXI IIC</text><text x="265" y="137" class="ts" style="font-size:10px">마스터 · FPGA</text><line x1="245" y1="50" x2="245" y2="100" class="lb"/><circle cx="245" cy="50" r="3.5" class="ab"/><line x1="285" y1="80" x2="285" y2="100" class="lg"/><circle cx="285" cy="80" r="3.5" class="ag"/><rect x="380" y="100" width="130" height="46" rx="5" class="box"/><text x="445" y="120" class="t tc" style="font-size:12px">Pmod TMP2</text><text x="445" y="137" class="ts" style="font-size:10px">ADT7420 · 0x48~0x4B</text><line x1="425" y1="50" x2="425" y2="100" class="lb"/><circle cx="425" cy="50" r="3.5" class="ab"/><line x1="465" y1="80" x2="465" y2="100" class="lg"/><circle cx="465" cy="80" r="3.5" class="ag"/><rect x="560" y="100" width="130" height="46" rx="5" class="boxd"/><text x="625" y="120" class="t tc" style="font-size:12px">다른 장치</text><text x="625" y="137" class="ts" style="font-size:10px">다른 주소</text><line x1="605" y1="50" x2="605" y2="100" class="lb"/><circle cx="605" cy="50" r="3.5" class="ab"/><line x1="645" y1="80" x2="645" y2="100" class="lg"/><circle cx="645" cy="80" r="3.5" class="ag"/><text x="60" y="186" class="ts" style="text-anchor:start">한 번의 전송</text><rect x="60" y="196" width="28" height="30" rx="3" class="boxb"/><text x="74.0" y="216" class="tb" style="font-size:11px">S</text><rect x="92" y="196" width="110" height="30" rx="3" class="box"/><text x="147.0" y="216" class="t tc" style="font-size:11px">주소 7비트</text><rect x="206" y="196" width="40" height="30" rx="3" class="boxg"/><text x="226.0" y="216" class="t tc" style="font-size:11px">R/W</text><rect x="250" y="196" width="40" height="30" rx="3" class="boxn"/><text x="270.0" y="216" class="tg" style="font-size:11px">ACK</text><rect x="294" y="196" width="110" height="30" rx="3" class="box"/><text x="349.0" y="216" class="t tc" style="font-size:11px">데이터 8비트</text><rect x="408" y="196" width="40" height="30" rx="3" class="boxn"/><text x="428.0" y="216" class="tg" style="font-size:11px">ACK</text><rect x="452" y="196" width="40" height="30" rx="3" class="boxg"/><text x="472.0" y="216" class="t tc" style="font-size:11px">…</text><rect x="496" y="196" width="28" height="30" rx="3" class="boxb"/><text x="510.0" y="216" class="tb" style="font-size:11px">P</text><text x="360" y="252" class="ts">S = 시작 · ACK = 받는 쪽이 SDA를 0으로 당겨 "받았다" · P = 정지</text></svg></div><figcaption>그림 10-7 · I²C 버스와 한 번의 전송 (외부 온도 센서 예시)</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th></th><th>UART</th><th>SPI (9장)</th><th>I²C</th></tr>
+    <tr><td>선</td><td>2 (TX · RX)</td><td>4 이상</td><td>2 (SCL · SDA)</td></tr>
+    <tr><td>클록선</td><td>없음 (속도 약속)</td><td>있음</td><td>있음</td></tr>
+    <tr><td>장치 고르기</td><td>1:1</td><td>장치마다 CS선</td><td>주소</td></tr>
+    <tr><td>우리 SoC</td><td>PC 콘솔</td><td>QSPI 플래시 (FPGA가 직접)</td><td>외부 Pmod TMP2(ADT7420) 예시</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">SoC 연결</span>Basys3에 ADT7420은 내장되어 있지 않다. 그림은 별도 Pmod TMP2 모듈을 연결하는 예시다. SDA는 양방향 오픈 드레인 신호이므로 FPGA 쪽 <code>IOBUF</code> 등의 삼상 제어가 필요하며, SCL/SDA에는 적절한 풀업 저항이 필요하다. XDC의 약한 내부 <code>PULLUP</code>만으로 항상 통신 타이밍을 만족한다고 가정하지 않는다. 실제 Pmod 연결 핀·전압은 XDC와 모듈 매뉴얼로 확인한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>타이머 — 시간을 세는 장치</h2><span class="pg-no">10장 · 8 / 10</span></div>
+  <p><strong>타이머</strong>는 클록을 세는 카운터다. 다운카운트·자동 적재·인터럽트 허용으로 설정한 경우, TLR0를 적재해 카운트다운하고 종료 조건에서 상태 비트를 설정하며 다음 주기를 위해 다시 적재한다. 타이머는 업카운트 등 다른 모드로도 설정할 수 있다. 프로그램이 반복문으로 시간을 재면 CPU가 그동안 아무것도 못 하지만, 타이머를 쓰면 시간은 하드웨어가 재고 CPU는 다른 일을 한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 210" style="min-width:560px" role="img" aria-label="다운 카운터 타이머"><defs><marker id="m8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><line x1="60" y1="140" x2="700" y2="140" class="ln"/><line x1="60" y1="30" x2="60" y2="140" class="ln"/><text x="52" y="44" class="ts" style="text-anchor:end;font-size:10px">TLR0</text><text x="52" y="144" class="ts" style="text-anchor:end;font-size:10px">0</text><path d="M60 40 L256 140 V40 L452 140 V40 L648 140 V40" class="lg" style="stroke-width:2"/><line x1="256" y1="170" x2="256" y2="146" class="lb" marker-end="url(#m8)"/><line x1="452" y1="170" x2="452" y2="146" class="lb" marker-end="url(#m8)"/><line x1="648" y1="170" x2="648" y2="146" class="lb" marker-end="url(#m8)"/><text x="250" y="22" class="ts">TCR0가 클록마다 1씩 줄어든다</text><text x="360" y="188" class="tb" style="font-size:11px">0에 닿을 때마다 인터럽트 + TLR0 값으로 다시 적재 (자동 적재)</text><text x="360" y="204" class="ts">100 MHz 가정: TLR0 = 49,999,998 → 0.50000000초 (다운카운트)</text></svg></div><figcaption>그림 10-8 · 자동 적재 다운 카운터</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>레지스터</th><th>오프셋</th><th>뜻</th></tr>
+    <tr><td><code>TCSR0</code></td><td>0x00</td><td>제어 · 상태 — 다운 카운트, 자동 적재, 인터럽트 허용, 시작, 인터럽트 발생 표시</td></tr>
+    <tr><td><code>TLR0</code></td><td>0x04</td><td>다시 적재할 값</td></tr>
+    <tr><td><code>TCR0</code></td><td>0x08</td><td>지금 카운터 값</td></tr>
+  </table></div>
+  <pre><code>#define TIMER_LOAD_500MS  49999998u  /* 100 MHz 가정, (TLR0 + 2)클록 = 0.5초 (PG079) */</code></pre>
+  <div class="note"><span class="lbl">계산</span>타이머 입력 클록이 100 MHz라면 한 클록은 10 ns이다. (49,999,998 + 2) × 10 ns → 정확히 0.5초(명목값). LED를 0.5초마다 반전하면 완전한 점멸 주기는 1초다. 실제 타이머 클록·다운카운트·자동 적재 설정은 Vivado에서 확인한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>AXI4-Lite와 사용자 IP</h2><span class="pg-no">10장 · 9 / 10</span></div>
+  <p>이 장의 예시 SoC에서는 주변장치의 제어 레지스터를 <strong>AXI4-Lite</strong> 버스로 연결한다. AXI4-Lite는 쓰기 주소 · 쓰기 데이터 · 쓰기 응답 · 읽기 주소 · 읽기 데이터의 다섯 <strong>채널</strong>로 나뉘고, 각 채널에서 <code>VALID &amp;&amp; READY</code>가 클록 상승 에지에 동시에 1일 때 한 번의 전송이 성립한다. 쓰기 주소(AW)와 데이터(W)는 독립적으로 수락될 수 있으며, 두 정보가 모두 처리된 뒤 쓰기 응답(B)을 보낸다. 예제에서는 이 규칙을 지키는 슬레이브를 Verilog로 만들어 7세그먼트 IP로 연결할 수 있다. 실제 레지스터 맵과 7세그먼트 주사 주파수는 구현 RTL 기준으로 확인한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 720 260" style="min-width:560px" role="img" aria-label="AXI4-Lite 다섯 채널"><defs><marker id="m9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="30" width="170" height="200" rx="6" class="boxn"/><text x="105" y="120" class="tg">마스터</text><text x="105" y="140" class="ts">CPU · 인터커넥트</text><rect x="530" y="30" width="170" height="200" rx="6" class="boxb"/><text x="615" y="120" class="tb">슬레이브</text><text x="615" y="140" class="ts">SEG7 사용자 IP</text><line x1="190" y1="50" x2="526" y2="50" class="ln" marker-end="url(#m9)"/><text x="360" y="44" class="t tc" style="font-size:12px"><tspan style="font-family:var(--mono);font-weight:700">AW</tspan>  쓸 주소</text><line x1="190" y1="88" x2="526" y2="88" class="ln" marker-end="url(#m9)"/><text x="360" y="82" class="t tc" style="font-size:12px"><tspan style="font-family:var(--mono);font-weight:700">W</tspan>  쓸 데이터</text><line x1="530" y1="126" x2="194" y2="126" class="lg" marker-end="url(#m9)"/><text x="360" y="120" class="t tc" style="font-size:12px"><tspan style="font-family:var(--mono);font-weight:700">B</tspan>  쓰기 응답</text><line x1="190" y1="164" x2="526" y2="164" class="ln" marker-end="url(#m9)"/><text x="360" y="158" class="t tc" style="font-size:12px"><tspan style="font-family:var(--mono);font-weight:700">AR</tspan>  읽을 주소</text><line x1="530" y1="202" x2="194" y2="202" class="lg" marker-end="url(#m9)"/><text x="360" y="196" class="t tc" style="font-size:12px"><tspan style="font-family:var(--mono);font-weight:700">R</tspan>  읽은 데이터 + 응답</text><text x="360" y="248" class="ts">각 채널은 VALID · READY 독립 핸드셰이크 / AW와 W의 수락 순서는 고정되지 않음</text></svg></div><figcaption>그림 10-9 · AXI4-Lite의 다섯 채널</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>CPU 명령어</th><th>쓰이는 채널</th><th>SEG7 IP에서 일어나는 일</th></tr>
+    <tr><td><code>sw</code> → <code>SEG7_VALUE = 0x1234</code></td><td>AW·W(독립 수락) → B</td><td>설정된 예시 주소 0x4006_0000과 값 0x1234를 수락해 저장하고 B 채널로 응답</td></tr>
+    <tr><td><code>lw</code> → <code>x = SEG7_VALUE</code></td><td>AR → R</td><td>RDATA와 RRESP를 함께 돌려준다</td></tr>
+  </table></div>
+  <div class="cards">
+    <div class="card"><b>버스 쪽</b><span>AXI4-Lite 슬레이브 — AW/W/B/AR/R과 WSTRB, 응답, 리셋 조건을 정확히 구현해야 CPU에 안전하게 연결된다.</span></div>
+    <div class="card"><b>장치 쪽</b><span>자리 전환(예: 약 1.5 kHz)과 숫자 → 세그먼트 패턴 변환을 RTL 회로가 처리한다.</span></div>
+    <div class="card"><b>CPU 쪽</b><span>값 하나만 쓰면 끝 — 소프트웨어가 자리 전환을 할 필요가 없다.</span></div>
+  </div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>SoC 연결 · 이론편 정리</h2><span class="pg-no">10장 · 10 / 10</span></div>
+  <p>10개 장에서 본 개념을 연결하면 MicroBlaze V 중심 SoC를 구성할 수 있다. 아래 그림은 실습을 위한 교육용 블록·주소·인터럽트 배치 예시이며, 실제 완성 여부와 설정은 Vivado 프로젝트로 확인한다. 각 블록 옆에 그 블록을 이해하는 데 필요한 장을 적었다. 실습을 하다 막히면 해당 장으로 돌아와 원리를 다시 확인한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 740 330" style="min-width:580px" role="img" aria-label="완성된 SoC와 장 연결"><defs><marker id="m10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="30" width="160" height="80" rx="5" class="boxn"/><text x="100" y="60" class="tg">MicroBlaze V</text><text x="100" y="78" class="ts">5 · 6 · 7장</text><text x="100" y="94" class="ts">mstatus · mie · mtvec</text><rect x="20" y="200" width="160" height="70" rx="5" class="box"/><text x="100" y="228" class="t tc">BRAM 64 KB 예시</text><text x="100" y="246" class="ts">3 · 8장 · LMB</text><line x1="80" y1="110" x2="80" y2="200" class="lg"/><line x1="120" y1="110" x2="120" y2="200" class="lg"/><rect x="20" y="286" width="160" height="34" rx="4" class="boxg"/><text x="100" y="308" class="ts">QSPI 플래시 · 9장</text><rect x="230" y="30" width="56" height="290" rx="5" class="boxb"/><text x="258" y="170" class="tb">AXI</text><text x="258" y="188" class="ts" style="font-size:10px">1 · 8장</text><line x1="180" y1="70" x2="228" y2="70" class="lb" marker-end="url(#m10)"/><line x1="286" y1="51" x2="330" y2="51" class="lb"/><rect x="330" y="34" width="190" height="34" rx="4" class="box"/><text x="342" y="49" class="t" style="text-anchor:start;font-size:12px">GPIO · LED/SW</text><text x="342" y="63" class="ts" style="text-anchor:start;font-size:10px">0x4000_0000</text><text x="530" y="56" class="ts" style="text-anchor:start;font-size:11px">10장 5쪽</text><line x1="286" y1="92" x2="330" y2="92" class="lb"/><rect x="330" y="75" width="190" height="34" rx="4" class="box"/><text x="342" y="90" class="t" style="text-anchor:start;font-size:12px">GPIO · BTN</text><text x="342" y="104" class="ts" style="text-anchor:start;font-size:10px">0x4001_0000</text><text x="530" y="97" class="ts" style="text-anchor:start;font-size:11px">In3</text><line x1="286" y1="133" x2="330" y2="133" class="lb"/><rect x="330" y="116" width="190" height="34" rx="4" class="box"/><text x="342" y="131" class="t" style="text-anchor:start;font-size:12px">UART Lite</text><text x="342" y="145" class="ts" style="text-anchor:start;font-size:10px">0x4002_0000</text><text x="530" y="138" class="ts" style="text-anchor:start;font-size:11px">10장 6쪽 · In1</text><line x1="286" y1="174" x2="330" y2="174" class="lb"/><rect x="330" y="157" width="190" height="34" rx="4" class="box"/><text x="342" y="172" class="t" style="text-anchor:start;font-size:12px">Timer</text><text x="342" y="186" class="ts" style="text-anchor:start;font-size:10px">0x4003_0000</text><text x="530" y="179" class="ts" style="text-anchor:start;font-size:11px">10장 8쪽 · In0</text><line x1="286" y1="215" x2="330" y2="215" class="lb"/><rect x="330" y="198" width="190" height="34" rx="4" class="box"/><text x="342" y="213" class="t" style="text-anchor:start;font-size:12px">INTC</text><text x="342" y="227" class="ts" style="text-anchor:start;font-size:10px">0x4004_0000</text><text x="530" y="220" class="ts" style="text-anchor:start;font-size:11px">6장</text><line x1="286" y1="256" x2="330" y2="256" class="lb"/><rect x="330" y="239" width="190" height="34" rx="4" class="box"/><text x="342" y="254" class="t" style="text-anchor:start;font-size:12px">IIC</text><text x="342" y="268" class="ts" style="text-anchor:start;font-size:10px">0x4005_0000</text><text x="530" y="261" class="ts" style="text-anchor:start;font-size:11px">10장 7쪽 · In2</text><line x1="286" y1="297" x2="330" y2="297" class="lb"/><rect x="330" y="280" width="190" height="34" rx="4" class="boxg"/><text x="342" y="295" class="t" style="text-anchor:start;font-size:12px">SEG7 (사용자 IP)</text><text x="342" y="309" class="ts" style="text-anchor:start;font-size:10px">0x4006_0000</text><text x="530" y="302" class="ts" style="text-anchor:start;font-size:11px">10장 9쪽</text><text x="660" y="20" class="ts">이론 장</text></svg></div><figcaption>그림 10-10 · 교육용 SoC 구성과 이론 장의 연결 (주소 · 인터럽트는 예시)<span class="src">도식에는 AXI 레지스터 접속만 표현했다. 인터럽트 신호는 별도 AXI INTC 입력에 연결해야 하며, 실제 연결 순서는 Vivado Block Design에서 확인한다.</span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>장</th><th>핵심</th><th>이어지는 실습</th></tr>
+    <tr><td>1 큰그림</td><td>CPU · 메모리 · I/O · 버스 · SoC</td><td>L01</td></tr>
+    <tr><td>2 데이터</td><td>2진수 · 16진수 · 2의 보수 · 비트 연산 · 엔디안</td><td>전 실습</td></tr>
+    <tr><td>3 명령어</td><td>소스 → 기계어 → ELF → BRAM</td><td>L02 · L10</td></tr>
+    <tr><td>4 명령어 구조</td><td>형식 · 주소지정 · 스택 · 큐</td><td>L04 · L06</td></tr>
+    <tr><td>5 CPU 구성</td><td>데이터패스 · ALU · 레지스터 · PC · 제어장치</td><td>L01 · L02</td></tr>
+    <tr><td>6 명령어 사이클</td><td>5단계 · 인터럽트 · CSR · INTC</td><td>L06</td></tr>
+    <tr><td>7 성능 향상</td><td>파이프라인 · 해저드 · CISC/RISC</td><td>L01 CPU 설정</td></tr>
+    <tr><td>8 메모리</td><td>SRAM · BRAM · 주소맵 · 캐시</td><td>L01 · L11</td></tr>
+    <tr><td>9 보조기억</td><td>플래시 · FPGA 구성 · 부팅</td><td>L10</td></tr>
+    <tr><td>10 입출력</td><td>폴링 · 인터럽트 · DMA · GPIO · UART · I²C · 타이머 · AXI</td><td>L03~L09</td></tr>
+  </table></div>
+  <p class="src" style="font:400 11px var(--mono);color:var(--muted)">공식 참고: <a href="https://docs.amd.com/r/en-US/pg144-axi-gpio/Register-Space" target="_blank" rel="noopener">AMD PG144 AXI GPIO</a> · <a href="https://docs.amd.com/r/en-US/pg079-axi-timer/Generate-Mode" target="_blank" rel="noopener">AMD PG079 AXI Timer</a> · <a href="https://docs.amd.com/api/khub/documents/dB1MAeh~uLG7FE62a5_QbA/content" target="_blank" rel="noopener">AMD PG142 AXI UART Lite</a> · <a href="https://docs.amd.com/r/en-US/pg138-axi-ethernet/AXI4-Lite-Interface" target="_blank" rel="noopener">AMD AXI4-Lite 신호 표(PG138)</a></p>
+  <div class="note"><span class="lbl">이론편 끝</span>MicroBlaze V SoC 실습은 L00(환경 준비)부터 이어진다. CPU 직접 설계나 PicoRV32 비교는 이 과정의 필수 후속 단계가 아닌 별도 확장 학습이다. 실제 구현에서는 메모리 인터페이스, 버스, 인터럽트, 소프트웨어 환경도 CPU별로 재검증해야 한다.</div>
+</section>
+
+</div>
+<nav class="pager"><div class="pager-in"><button id="prev">← 이전</button><div class="dots"></div><span class="pos"></span><button id="next">다음 →</button></div></nav>
+<script>
+(function(){
+  var pages=[].slice.call(document.querySelectorAll('.pg'));
+  var dots=document.querySelector('.dots'), prev=document.getElementById('prev'), next=document.getElementById('next');
+  pages.forEach(function(_,i){var b=document.createElement('button');b.textContent=i+1;b.setAttribute('aria-label',(i+1)+'페이지');b.onclick=function(){go(i)};dots.appendChild(b)});
+  var cur=0;
+  function go(i){
+    cur=Math.max(0,Math.min(pages.length-1,i));
+    pages.forEach(function(p,k){p.hidden=k!==cur});
+    [].forEach.call(dots.children,function(b,k){b.classList.toggle('on',k===cur)});
+    var pos=document.querySelector('.pos'); if(pos) pos.textContent=(cur+1)+' / '+pages.length;
+    prev.disabled=cur===0; next.disabled=cur===pages.length-1;
+    try{history.replaceState(null,'','#p'+(cur+1))}catch(e){}
+    window.scrollTo(0,0);
+  }
+  prev.onclick=function(){go(cur-1)}; next.onclick=function(){go(cur+1)};
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+  var m=/^#p(\d+)$/.exec(location.hash||''); go(m?parseInt(m[1],10)-1:0);
+  document.getElementById('theme').onclick=function(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d?d==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.setAttribute('data-theme',dark?'light':'dark')};
+})();
+</script>
+
+</body></html>

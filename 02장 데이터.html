@@ -1,0 +1,387 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>2장 데이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F6FB; --surface:#FFFFFF; --ink:#17263C; --muted:#50637C; --line:#CBD8E8;
+  --green:#1456A0; --greenbg:#E8F1FE; --blue:#087C88; --bluebg:#E2F6F5;
+  --amber:#915710; --amberbg:#FFF3DF; --head:#EAF0F9; --grayfill:#DFE9F5;
+  --sans:"IBM Plex Sans KR","Noto Sans KR",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans);word-break:keep-all;overflow-wrap:break-word;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 96px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+/* 상단 */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.series{font:500 11px var(--mono);letter-spacing:.09em;color:var(--green);text-transform:uppercase}
+.theme-btn{font:500 11px var(--mono);padding:4px 10px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--muted);cursor:pointer}
+.chaps{display:flex;flex-wrap:wrap;gap:4px}
+.chaps a{font:500 11px var(--mono);padding:3px 8px;border-radius:3px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.chaps a.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+
+
+.chaps a{text-decoration:none}.chaps a:hover{border-color:var(--green);color:var(--green);background:var(--greenbg)}
+.chaps a.on:hover{background:var(--green);color:var(--surface)}
+.chaps a.back-index{font-weight:700;color:var(--green);border-color:var(--green)}
+/* 페이지 */
+.pg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px clamp(16px,4vw,40px) 32px;display:flex;flex-direction:column;gap:18px;min-height:600px}
+.pg[hidden]{display:none!important}
+.pg-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+.pg-no{font:600 11px var(--mono);color:var(--green);letter-spacing:.06em;white-space:nowrap}
+h1{margin:0;font-size:clamp(26px,5vw,40px);line-height:1.2;text-wrap:balance}
+h2{margin:0;font-size:clamp(19px,3vw,24px);line-height:1.3;text-wrap:balance}
+h3{margin:4px 0 0;font-size:14px}
+p{margin:0}
+.lead{color:var(--muted);font-size:15.5px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;align-items:start}
+.cols>*{min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+ul.pts{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+
+/* 카드·표 */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--surface)}
+.card b{color:var(--green);font-size:13px}
+.card span{font-size:13px;color:var(--muted)}
+.card .num{font:600 22px/1.3 var(--mono);color:var(--ink)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--head);font-weight:500;font-size:11.5px;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+code{font-family:var(--mono);font-size:12px;background:var(--head);padding:1px 4px;border-radius:3px}
+
+pre{margin:0;padding:14px 16px;overflow-x:auto;background:var(--head);border:1px solid var(--line);border-radius:6px;font:400 12.5px/1.6 var(--mono);min-width:0;word-break:normal}
+pre code{background:none;padding:0;font-size:inherit}
+/* 콜아웃 */
+.note,.tip,.warn{padding:10px 14px;border-radius:4px;font-size:13.5px}
+.note{background:var(--greenbg)}
+.tip{background:var(--bluebg);border-left:3px solid var(--blue)}
+.warn{background:var(--amberbg);border-left:3px solid var(--amber)}
+.lbl{font:600 10.5px var(--mono);letter-spacing:.05em;margin-right:6px}
+.note .lbl{color:var(--green)} .tip .lbl{color:var(--blue)} .warn .lbl{color:var(--amber)}
+
+/* 그림 */
+figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.fig{overflow-x:auto;border:1px solid var(--line);border-radius:6px;padding:16px;background:var(--surface)}
+.fig svg{display:block;width:100%;height:auto}
+figcaption{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+figcaption .src{font:400 11px var(--mono)}
+figcaption a{color:var(--blue)}
+.redraw{display:inline-block;font:600 10px var(--mono);color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:0 4px;margin-right:6px;vertical-align:1px}
+
+/* SVG */
+.box{fill:var(--surface);stroke:var(--ink);stroke-width:1.4}
+.boxg{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.2}
+.boxn{fill:var(--greenbg);stroke:var(--green);stroke-width:1.6}
+.boxb{fill:var(--bluebg);stroke:var(--blue);stroke-width:1.4}
+.boxd{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+.ln{fill:none;stroke:var(--ink);stroke-width:1.4}
+.lg{fill:none;stroke:var(--green);stroke-width:1.6}
+.lb{fill:none;stroke:var(--blue);stroke-width:1.6}
+.lm{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 3}
+.t{fill:var(--ink);font:500 13px var(--sans)}
+.tc{text-anchor:middle}
+.ts{fill:var(--muted);font:400 11px var(--mono);text-anchor:middle}
+.tg{fill:var(--green);font:600 13px var(--sans);text-anchor:middle}
+.tb{fill:var(--blue);font:600 12px var(--sans);text-anchor:middle}
+.chipc{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.4}
+.pin rect{fill:var(--amber)}
+.trace{stroke:var(--muted);stroke-width:2;opacity:.6}
+.die{fill:#20262E;stroke:var(--muted);stroke-width:1.2} .mem{fill:#4B545F;stroke:var(--muted);stroke-width:1}
+.dt{fill:#F1F3F6;font:700 16px var(--sans);text-anchor:middle}
+.dts{fill:#D9DEE4;font:500 12px var(--sans);text-anchor:middle}
+.ah{fill:var(--ink)} .ag{fill:var(--green)} .ab{fill:var(--blue)}
+
+/* 넘김 */
+.pager{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.pager-in{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pager button{font:500 13px var(--sans);padding:7px 14px;border-radius:5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pager button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.dots button{width:26px;height:26px;padding:0;font:500 11px var(--mono);border-radius:50%}
+.dots button.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+.pos{display:none;font:600 13px var(--mono);color:var(--ink)}
+@media (max-width:600px){.dots{display:none}.pos{display:block}.pager button{padding:6px 12px;white-space:nowrap}}
+</style>
+<div class="wrap">
+  <div class="top"><span class="series">컴퓨터시스템구조 · MicroBlaze V SoC 도입 이론</span><button class="theme-btn" id="theme">다크 / 라이트</button></div>
+  <div class="chaps"><a class="back-index" href="index.html">⌂ 전체 목차</a><a class="" href="01%EC%9E%A5%20%EC%BB%B4%ED%93%A8%ED%84%B0%EA%B5%AC%EC%A1%B0%EC%9D%98%20%ED%81%B0%EA%B7%B8%EB%A6%BC.html" >1 큰그림</a><a class="on" href="02%EC%9E%A5%20%EB%8D%B0%EC%9D%B4%ED%84%B0.html" aria-current="page">2 데이터</a><a class="" href="03%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4.html" >3 명령어</a><a class="" href="04%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%EC%9D%98%20%EA%B5%AC%EC%A1%B0.html" >4 명령어 구조</a><a class="" href="05%EC%9E%A5%20CPU%20%EA%B5%AC%EC%84%B1.html" >5 CPU 구성</a><a class="" href="06%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%20%EC%82%AC%EC%9D%B4%ED%81%B4%EA%B3%BC%20%EC%9D%B8%ED%84%B0%EB%9F%BD%ED%8A%B8.html" >6 명령어 사이클</a><a class="" href="07%EC%9E%A5%20CPU%20%EC%84%B1%EB%8A%A5%20%ED%96%A5%EC%83%81.html" >7 성능 향상</a><a class="" href="08%EC%9E%A5%20%EB%A9%94%EB%AA%A8%EB%A6%AC.html" >8 메모리</a><a class="" href="09%EC%9E%A5%20%EB%B3%B4%EC%A1%B0%EA%B8%B0%EC%96%B5%EC%9E%A5%EC%B9%98.html" >9 보조기억</a><a class="" href="10%EC%9E%A5%20%EC%9E%85%EC%B6%9C%EB%A0%A5%EC%9E%A5%EC%B9%98.html" >10 입출력</a></div>
+<!-- 2장 데이터 : 10페이지 (gen_ch02.py로 생성) -->
+<section class="pg">
+  <div class="pg-head"><span class="pg-no">2장 · 1 / 10</span><span class="pg-no">표지</span></div>
+  <h1>데이터</h1>
+  <p class="lead">컴퓨터 안의 모든 것은 0과 1이다. 숫자·음수·글자가 비트로 어떻게 담기는지, 그리고 SoC 실습에서 매일 보게 될 <code>0x4000_0000</code> 같은 16진수를 읽는 법을 익힌다.</p>
+  <div class="cards">
+    <div class="card"><b>학습 목표 1</b><span>2진수·16진수·10진수를 서로 바꿀 수 있다.</span></div>
+    <div class="card"><b>학습 목표 2</b><span>2의 보수로 음수를 표현하고 C 자료형의 범위를 안다.</span></div>
+    <div class="card"><b>학습 목표 3</b><span>비트 연산으로 레지스터의 특정 비트를 켜고 끌 수 있다.</span></div>
+  </div>
+  <figure><div class="fig"><svg viewBox="0 0 720 165" style="min-width:560px" role="img" aria-label="10개 장 테크트리">
+<defs><marker id="at" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+<rect x="10" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="72" y="42" class="t tc">1 큰그림</text><text x="72" y="60" class="ts">CPU·메모리·I/O</text>
+<rect x="152" y="20" width="124" height="52" rx="5" class="boxn"/>
+<text x="214" y="42" class="tg">2 데이터</text><text x="214" y="60" class="ts">2진수·16진수</text>
+<rect x="294" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="356" y="42" class="t tc">3 명령어</text><text x="356" y="60" class="ts">소스→실행파일</text>
+<rect x="436" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="498" y="42" class="t tc">4 명령어 구조</text><text x="498" y="60" class="ts">오퍼랜드·스택</text>
+<rect x="578" y="20" width="124" height="52" rx="5" class="box"/>
+<text x="640" y="42" class="t tc">5 CPU 구성</text><text x="640" y="60" class="ts">ALU·레지스터</text>
+<rect x="10" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="72" y="127" class="t tc">6 명령어 사이클</text><text x="72" y="145" class="ts">인출·인터럽트</text>
+<rect x="152" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="214" y="127" class="t tc">7 성능 향상</text><text x="214" y="145" class="ts">파이프라인·RISC</text>
+<rect x="294" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="356" y="127" class="t tc">8 메모리</text><text x="356" y="145" class="ts">주소공간·캐시</text>
+<rect x="436" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="498" y="127" class="t tc">9 보조기억</text><text x="498" y="145" class="ts">플래시·부팅</text>
+<rect x="578" y="105" width="124" height="52" rx="5" class="box"/>
+<text x="640" y="127" class="t tc">10 입출력</text><text x="640" y="145" class="ts">폴링·인터럽트</text>
+<line x1="134" y1="46" x2="151" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="46" x2="293" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="46" x2="435" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="46" x2="577" y2="46" class="ln" marker-end="url(#at)"/>
+<line x1="134" y1="131" x2="151" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="276" y1="131" x2="293" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="418" y1="131" x2="435" y2="131" class="ln" marker-end="url(#at)"/>
+<line x1="560" y1="131" x2="577" y2="131" class="ln" marker-end="url(#at)"/>
+<path d="M640 72 V88 H72 V104" class="ln" marker-end="url(#at)"/></svg></div><figcaption>그림 2-1 · 10개 장 테크트리</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>페이지</th><th>내용</th><th>페이지</th><th>내용</th></tr>
+    <tr><td>1</td><td>표지 · 학습 목표</td><td>6</td><td>C 자료형과 범위</td></tr>
+    <tr><td>2</td><td>비트 · 바이트 · 워드</td><td>7</td><td>비트 연산과 마스크</td></tr>
+    <tr><td>3</td><td>2진수</td><td>8</td><td>문자 — ASCII</td></tr>
+    <tr><td>4</td><td>16진수</td><td>9</td><td>엔디안 — 바이트 순서</td></tr>
+    <tr><td>5</td><td>음수 — 2의 보수</td><td>10</td><td>SoC에서 보는 데이터 · 정리</td></tr>
+  </table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>비트 · 바이트 · 워드</h2><span class="pg-no">2장 · 2 / 10</span></div>
+  <p>디지털 회로는 정해진 전압 구간을 논리 0 또는 논리 1로 해석한다. 이 0/1 한 자리가 <strong>비트(bit)</strong>다. 비트 8개를 묶으면 <strong>바이트(byte)</strong>, 32개를 묶으면 RISC-V에서 말하는 <strong>워드(word)</strong>가 된다. 여기서 사용하는 MicroBlaze V는 RV32 구성으로, 일반 목적 레지스터와 주소의 폭이 32비트다. 메모리는 바이트 단위로 주소를 부여하고, 워드 접근은 연속된 4바이트를 다룬다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 700 190" style="min-width:540px" role="img" aria-label="워드 하프워드 바이트"><text x="22" y="16" class="ts" style="text-anchor:start">비트 31</text><text x="678" y="16" class="ts" style="text-anchor:end">비트 0</text><rect x="20" y="24" width="660" height="38" rx="4" class="boxn"/><text x="350" y="48" class="tg">워드(word) · 32 bit = 4바이트</text><rect x="20" y="76" width="330" height="38" rx="4" class="box"/><text x="185" y="100" class="t tc">하프워드(halfword) · 16 bit</text><rect x="350" y="76" width="330" height="38" rx="4" class="box"/><text x="515" y="100" class="t tc">하프워드(halfword) · 16 bit</text><rect x="20" y="128" width="165" height="38" rx="4" class="boxg"/><text x="102" y="152" class="t tc">바이트 · 8 bit</text><rect x="185" y="128" width="165" height="38" rx="4" class="boxg"/><text x="267" y="152" class="t tc">바이트 · 8 bit</text><rect x="350" y="128" width="165" height="38" rx="4" class="boxg"/><text x="432" y="152" class="t tc">바이트 · 8 bit</text><rect x="515" y="128" width="165" height="38" rx="4" class="boxg"/><text x="597" y="152" class="t tc">바이트 · 8 bit</text><text x="350" y="184" class="ts">바이트 1개 = 니블(nibble, 4 bit) 2개 = 16진수 2자리</text></svg></div><figcaption>그림 2-2 · 워드 · 하프워드 · 바이트<span class="src">개념 재구성 · 참조: <a href="https://docs.riscv.org/reference/isa/v20240411/_attachments/riscv-unprivileged.pdf" target="_blank" rel="noopener noreferrer">RISC-V Unprivileged ISA Specification</a></span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>단위</th><th>비트 수</th><th>나타낼 수 있는 값의 개수</th><th>RISC-V 명령어</th></tr>
+    <tr><td>비트</td><td>1</td><td>2</td><td>—</td></tr>
+    <tr><td>바이트</td><td>8</td><td>256</td><td><code>lb</code> · <code>sb</code></td></tr>
+    <tr><td>하프워드</td><td>16</td><td>65,536</td><td><code>lh</code> · <code>sh</code></td></tr>
+    <tr><td>워드</td><td>32</td><td>약 43억 (4,294,967,296)</td><td><code>lw</code> · <code>sw</code></td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>n비트로는 2<sup>n</sup>가지 값을 나타낼 수 있다. 32비트 바이트 주소는 이론적으로 2<sup>32</sup>바이트, 즉 4 GiB(약 4.29 GB)의 주소 공간을 표현한다. 실제 탑재된 RAM 용량과는 다르다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>2진수 — 자리마다 두 배</h2><span class="pg-no">2장 · 3 / 10</span></div>
+  <p>10진수는 자리가 하나 올라갈 때마다 10배가 되고, 2진수는 2배가 된다. 맨 오른쪽 비트(비트 0)가 1, 그 왼쪽이 2, 4, 8 … 순이다. 1인 자리의 값을 모두 더하면 10진수가 된다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 680 175" style="min-width:520px" role="img" aria-label="2진수 자리값"><text x="56" y="22" class="ts">2<tspan dy="-5" style="font-size:8px">7</tspan><tspan dy="5"> = 128</tspan></text><rect x="20" y="32" width="72" height="52" rx="4" class="boxn"/><text x="56" y="66" class="tg" style="font:600 22px var(--mono)">1</text><text x="56" y="106" class="ts">128</text><text x="138" y="22" class="ts">2<tspan dy="-5" style="font-size:8px">6</tspan><tspan dy="5"> = 64</tspan></text><rect x="102" y="32" width="72" height="52" rx="4" class="boxn"/><text x="138" y="66" class="tg" style="font:600 22px var(--mono)">1</text><text x="138" y="106" class="ts">64</text><text x="220" y="22" class="ts">2<tspan dy="-5" style="font-size:8px">5</tspan><tspan dy="5"> = 32</tspan></text><rect x="184" y="32" width="72" height="52" rx="4" class="box"/><text x="220" y="66" class="t tc" style="font:600 22px var(--mono)">0</text><text x="220" y="106" class="ts">0</text><text x="302" y="22" class="ts">2<tspan dy="-5" style="font-size:8px">4</tspan><tspan dy="5"> = 16</tspan></text><rect x="266" y="32" width="72" height="52" rx="4" class="boxn"/><text x="302" y="66" class="tg" style="font:600 22px var(--mono)">1</text><text x="302" y="106" class="ts">16</text><text x="384" y="22" class="ts">2<tspan dy="-5" style="font-size:8px">3</tspan><tspan dy="5"> = 8</tspan></text><rect x="348" y="32" width="72" height="52" rx="4" class="box"/><text x="384" y="66" class="t tc" style="font:600 22px var(--mono)">0</text><text x="384" y="106" class="ts">0</text><text x="466" y="22" class="ts">2<tspan dy="-5" style="font-size:8px">2</tspan><tspan dy="5"> = 4</tspan></text><rect x="430" y="32" width="72" height="52" rx="4" class="boxn"/><text x="466" y="66" class="tg" style="font:600 22px var(--mono)">1</text><text x="466" y="106" class="ts">4</text><text x="548" y="22" class="ts">2<tspan dy="-5" style="font-size:8px">1</tspan><tspan dy="5"> = 2</tspan></text><rect x="512" y="32" width="72" height="52" rx="4" class="boxn"/><text x="548" y="66" class="tg" style="font:600 22px var(--mono)">1</text><text x="548" y="106" class="ts">2</text><text x="630" y="22" class="ts">2<tspan dy="-5" style="font-size:8px">0</tspan><tspan dy="5"> = 1</tspan></text><rect x="594" y="32" width="72" height="52" rx="4" class="box"/><text x="630" y="66" class="t tc" style="font:600 22px var(--mono)">0</text><text x="630" y="106" class="ts">0</text><line x1="20" y1="120" x2="660" y2="120" class="lm"/><text x="340" y="148" class="t tc">128 + 64 + 16 + 4 + 2 = <tspan style="font-weight:700">214</tspan></text><text x="340" y="168" class="ts">2진수 1101_0110 = 10진수 214</text></svg></div><figcaption>그림 2-3 · 2진수 1101_0110의 자리값</figcaption></figure>
+  <div class="cols">
+    <div class="scroll"><table>
+      <tr><th colspan="3">10진수 → 2진수: 2로 계속 나누고 나머지를 거꾸로 읽기 (예: 13)</th></tr>
+      <tr><td>13 ÷ 2</td><td>6</td><td>나머지 1</td></tr>
+      <tr><td>6 ÷ 2</td><td>3</td><td>나머지 0</td></tr>
+      <tr><td>3 ÷ 2</td><td>1</td><td>나머지 1</td></tr>
+      <tr><td>1 ÷ 2</td><td>0</td><td>나머지 1</td></tr>
+      <tr><td colspan="3">아래에서 위로 읽으면 <code>1101</code> = 13</td></tr>
+    </table></div>
+    <div class="scroll"><table>
+      <tr><th>2진수</th><th>10진수</th><th>특징</th></tr>
+      <tr><td><code>0000_0001</code></td><td>1</td><td>비트 0만 1</td></tr>
+      <tr><td><code>0000_1000</code></td><td>8</td><td>비트 3만 1 = 2<sup>3</sup></td></tr>
+      <tr><td><code>1000_0000</code></td><td>128</td><td>비트 7만 1 = 2<sup>7</sup></td></tr>
+      <tr><td><code>1111_1111</code></td><td>255</td><td>8비트 최댓값 = 2<sup>8</sup>−1</td></tr>
+    </table></div>
+  </div>
+  <div class="tip"><span class="lbl">SoC 연결</span>스위치 SW3 하나만 올리면 GPIO가 읽는 값은 <code>0000_1000</code> = 8이다. 스위치 번호가 곧 비트 번호다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>16진수 — 4비트를 한 글자로</h2><span class="pg-no">2장 · 4 / 10</span></div>
+  <p>32비트를 2진수로 쓰면 32자리라 읽기 힘들다. 4비트(니블)는 0~15의 16가지 값이므로 16진수 한 글자(0~9, A~F)에 딱 맞는다. 그래서 32비트는 16진수 8자리로 쓴다. C 언어의 16진 정수는 <code>0x40000000</code>처럼 <code>0x</code>로 시작한다. 이 교재의 <code>0x4000_0000</code>에서 밑줄은 그림·주소표의 가독성용 표기이며, C 소스의 정수 리터럴에는 그대로 쓸 수 없다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 690 160" style="min-width:540px" role="img" aria-label="16진수와 2진수"><rect x="20" y="20" width="76" height="46" rx="4" class="boxn"/><text x="58" y="51" class="tg" style="font:600 22px var(--mono)">4</text><text x="58" y="92" class="ts" style="font-size:13px">0100</text><text x="58" y="112" class="ts">비트 31~28</text><rect x="102" y="20" width="76" height="46" rx="4" class="box"/><text x="140" y="51" class="t tc" style="font:600 22px var(--mono)">0</text><text x="140" y="92" class="ts" style="font-size:13px">0000</text><text x="140" y="112" class="ts">비트 27~24</text><rect x="184" y="20" width="76" height="46" rx="4" class="box"/><text x="222" y="51" class="t tc" style="font:600 22px var(--mono)">0</text><text x="222" y="92" class="ts" style="font-size:13px">0000</text><text x="222" y="112" class="ts">비트 23~20</text><rect x="266" y="20" width="76" height="46" rx="4" class="box"/><text x="304" y="51" class="t tc" style="font:600 22px var(--mono)">0</text><text x="304" y="92" class="ts" style="font-size:13px">0000</text><text x="304" y="112" class="ts">비트 19~16</text><rect x="348" y="20" width="76" height="46" rx="4" class="box"/><text x="386" y="51" class="t tc" style="font:600 22px var(--mono)">0</text><text x="386" y="92" class="ts" style="font-size:13px">0000</text><text x="386" y="112" class="ts">비트 15~12</text><rect x="430" y="20" width="76" height="46" rx="4" class="box"/><text x="468" y="51" class="t tc" style="font:600 22px var(--mono)">0</text><text x="468" y="92" class="ts" style="font-size:13px">0000</text><text x="468" y="112" class="ts">비트 11~8</text><rect x="512" y="20" width="76" height="46" rx="4" class="box"/><text x="550" y="51" class="t tc" style="font:600 22px var(--mono)">0</text><text x="550" y="92" class="ts" style="font-size:13px">0000</text><text x="550" y="112" class="ts">비트 7~4</text><rect x="594" y="20" width="76" height="46" rx="4" class="box"/><text x="632" y="51" class="t tc" style="font:600 22px var(--mono)">0</text><text x="632" y="92" class="ts" style="font-size:13px">0000</text><text x="632" y="112" class="ts">비트 3~0</text><line x1="348" y1="14" x2="348" y2="120" class="lm"/><text x="345" y="146" class="t tc">0x4000_0000 = 0100 0000 0000 0000 0000 0000 0000 0000</text></svg></div><figcaption>그림 2-4 · 0x4000_0000을 2진수로 풀기 — 16진수 한 자리가 비트 4개</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>16진</th><th>2진</th><th>10진</th><th>16진</th><th>2진</th><th>10진</th><th>16진</th><th>2진</th><th>10진</th><th>16진</th><th>2진</th><th>10진</th></tr>
+    <tr><td><code>0</code></td><td>0000</td><td>0</td><td><code>4</code></td><td>0100</td><td>4</td><td><code>8</code></td><td>1000</td><td>8</td><td><code>C</code></td><td>1100</td><td>12</td></tr>
+    <tr><td><code>1</code></td><td>0001</td><td>1</td><td><code>5</code></td><td>0101</td><td>5</td><td><code>9</code></td><td>1001</td><td>9</td><td><code>D</code></td><td>1101</td><td>13</td></tr>
+    <tr><td><code>2</code></td><td>0010</td><td>2</td><td><code>6</code></td><td>0110</td><td>6</td><td><code>A</code></td><td>1010</td><td>10</td><td><code>E</code></td><td>1110</td><td>14</td></tr>
+    <tr><td><code>3</code></td><td>0011</td><td>3</td><td><code>7</code></td><td>0111</td><td>7</td><td><code>B</code></td><td>1011</td><td>11</td><td><code>F</code></td><td>1111</td><td>15</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">SoC 연결</span>주소맵의 장치들은 <code>0x4000_0000</code>, <code>0x4001_0000</code>, <code>0x4002_0000</code> … 으로 <code>0x1_0000</code>(= 65,536 = 64 KB)씩 떨어져 있다. 16진수로 보면 다섯째 자리만 바뀌어 한눈에 구분된다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>음수 — 2의 보수</h2><span class="pg-no">2장 · 5 / 10</span></div>
+  <p>비트에는 빼기 기호가 없다. 컴퓨터는 <strong>2의 보수(Two's complement)</strong>로 음수를 나타낸다. 비트열을 <strong>부호 있는 2의 보수 정수</strong>로 해석할 때 최상위 비트가 1이면 음수다. 같은 비트열을 부호 없는 정수로 읽으면 값이 달라진다. 이 방식의 장점은 덧셈 회로 하나로 뺄셈까지 할 수 있다는 것이다: <code>a − b</code> = <code>a + (−b)</code>.</p>
+  <figure><div class="fig"><svg viewBox="0 0 680 320" style="min-width:520px" role="img" aria-label="4비트 2의 보수 바퀴"><circle cx="200" cy="160" r="98" class="boxd"/><text x="200.0" y="46.0" class="ts" style="font-size:11px">0000</text><text x="200.0" y="92.0" class="tg" style="font-size:13px">0</text><text x="245.2" y="55.0" class="ts" style="font-size:11px">0001</text><text x="227.6" y="97.5" class="tg" style="font-size:13px">1</text><text x="283.4" y="80.6" class="ts" style="font-size:11px">0010</text><text x="250.9" y="113.1" class="tg" style="font-size:13px">2</text><text x="309.0" y="118.8" class="ts" style="font-size:11px">0011</text><text x="266.5" y="136.4" class="tg" style="font-size:13px">3</text><text x="318.0" y="164.0" class="ts" style="font-size:11px">0100</text><text x="272.0" y="164.0" class="tg" style="font-size:13px">4</text><text x="309.0" y="209.2" class="ts" style="font-size:11px">0101</text><text x="266.5" y="191.6" class="tg" style="font-size:13px">5</text><text x="283.4" y="247.4" class="ts" style="font-size:11px">0110</text><text x="250.9" y="214.9" class="tg" style="font-size:13px">6</text><text x="245.2" y="273.0" class="ts" style="font-size:11px">0111</text><text x="227.6" y="230.5" class="tg" style="font-size:13px">7</text><text x="200.0" y="282.0" class="ts" style="font-size:11px">1000</text><text x="200.0" y="236.0" class="tb" style="font-size:13px">−8</text><text x="154.8" y="273.0" class="ts" style="font-size:11px">1001</text><text x="172.4" y="230.5" class="tb" style="font-size:13px">−7</text><text x="116.6" y="247.4" class="ts" style="font-size:11px">1010</text><text x="149.1" y="214.9" class="tb" style="font-size:13px">−6</text><text x="91.0" y="209.2" class="ts" style="font-size:11px">1011</text><text x="133.5" y="191.6" class="tb" style="font-size:13px">−5</text><text x="82.0" y="164.0" class="ts" style="font-size:11px">1100</text><text x="128.0" y="164.0" class="tb" style="font-size:13px">−4</text><text x="91.0" y="118.8" class="ts" style="font-size:11px">1101</text><text x="133.5" y="136.4" class="tb" style="font-size:13px">−3</text><text x="116.6" y="80.6" class="ts" style="font-size:11px">1110</text><text x="149.1" y="113.1" class="tb" style="font-size:13px">−2</text><text x="154.8" y="55.0" class="ts" style="font-size:11px">1111</text><text x="172.4" y="97.5" class="tb" style="font-size:13px">−1</text><text x="200" y="156" class="ts">바깥: 비트</text><text x="200" y="174" class="ts">안쪽: 값</text><rect x="400" y="70" width="260" height="66" rx="5" class="boxn"/><text x="530" y="96" class="tg">0000~0111 = 0 ~ 7</text><text x="530" y="118" class="ts">맨 앞 비트 0 → 양수</text><rect x="400" y="160" width="260" height="66" rx="5" class="boxb"/><text x="530" y="186" class="tb">1000~1111 = −8 ~ −1</text><text x="530" y="208" class="ts">맨 앞 비트 1 → 음수</text><text x="530" y="268" class="ts">0111(7)에서 1 더하면 1000(−8)으로 넘어간다</text></svg></div><figcaption>그림 2-5 · 4비트 2의 보수 — 같은 비트 패턴을 부호 있는 값으로 읽기</figcaption></figure>
+  <div class="cols">
+    <div class="scroll"><table>
+      <tr><th colspan="2">−5 만들기 (8비트)</th></tr>
+      <tr><td>① 5</td><td><code>0000_0101</code></td></tr>
+      <tr><td>② 비트 전부 뒤집기</td><td><code>1111_1010</code></td></tr>
+      <tr><td>③ 1 더하기</td><td><code>1111_1011</code> = −5</td></tr>
+      <tr><td>확인: 5 + (−5)</td><td><code>1_0000_0000</code> → 8비트만 남기면 0</td></tr>
+    </table></div>
+    <div class="scroll"><table>
+      <tr><th>비트 수</th><th>부호 있는 범위</th></tr>
+      <tr><td>4</td><td>−8 ~ 7</td></tr>
+      <tr><td>8</td><td>−128 ~ 127</td></tr>
+      <tr><td>16</td><td>−32,768 ~ 32,767</td></tr>
+      <tr><td>32</td><td>−2,147,483,648 ~ 2,147,483,647</td></tr>
+    </table></div>
+  </div>
+  <div class="note"><span class="lbl">핵심</span>같은 비트 <code>1111_1011</code>도 부호 없이 읽으면 251, 부호 있게 읽으면 −5다. 비트는 그대로이고 <strong>읽는 약속</strong>만 다르다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>C 자료형과 범위</h2><span class="pg-no">2장 · 6 / 10</span></div>
+  <p>C 프로그램에서 변수의 자료형은 "몇 비트를, 부호 있게 읽을지"를 정한다. 임베디드 코드에서는 크기가 분명한 <code>stdint.h</code>의 자료형을 쓴다. 부호 없는 정수로의 변환은 비트 폭에 따른 나머지 연산처럼 동작한다. 반면, 부호 있는 정수의 범위 초과·변환은 같은 결과를 보장하지 않으므로 구분해야 한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 680 150" style="min-width:520px" role="img" aria-label="8비트 범위"><text x="20" y="34" class="t" style="text-anchor:start">uint8_t</text><rect x="120" y="18" width="512" height="24" rx="3" class="boxn"/><text x="120" y="60" class="ts" style="text-anchor:start">0</text><text x="632" y="60" class="ts" style="text-anchor:end">255</text><text x="20" y="104" class="t" style="text-anchor:start">int8_t</text><rect x="120" y="88" width="256" height="24" rx="3" class="boxb"/><rect x="376" y="88" width="256" height="24" rx="3" class="boxn"/><text x="120" y="130" class="ts" style="text-anchor:start">−128</text><text x="376" y="130" class="ts">0</text><text x="632" y="130" class="ts" style="text-anchor:end">127</text><text x="248" y="105" class="ts" style="fill:var(--blue)">음수 128개</text><text x="504" y="105" class="ts" style="fill:var(--green)">0과 양수 128개</text><text x="376" y="35" class="ts" style="fill:var(--green)">256개 값 (2<tspan dy="-5" style="font-size:8px">8</tspan><tspan dy="5">)</tspan></text></svg></div><figcaption>그림 2-6 · 8비트 하나로 표현하는 두 가지 범위</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>자료형</th><th>비트</th><th>범위</th><th>SoC 코드에서 쓰임</th></tr>
+    <tr><td><code>uint8_t</code></td><td>8</td><td>0 ~ 255</td><td>UART로 주고받는 1바이트</td></tr>
+    <tr><td><code>int8_t</code></td><td>8</td><td>−128 ~ 127</td><td>—</td></tr>
+    <tr><td><code>uint16_t</code></td><td>16</td><td>0 ~ 65,535</td><td>스위치 16개 값, SEG7 표시값</td></tr>
+    <tr><td><code>int16_t</code></td><td>16</td><td>−32,768 ~ 32,767</td><td>온도 센서 원시값(음수 온도)</td></tr>
+    <tr><td><code>uint32_t</code></td><td>32</td><td>0 ~ 4,294,967,295</td><td>레지스터 · 주소 · 타이머 카운트</td></tr>
+    <tr><td><code>int32_t</code></td><td>32</td><td>약 ±21억</td><td>일반 계산</td></tr>
+  </table></div>
+  <div class="cols">
+<pre><code>#include &lt;stdint.h&gt;
+
+uint8_t a = 255;
+a = a + 1;           /* 8비트 부호 없는 형에 저장 → 0 */
+
+int8_t b = 127;
+int16_t next = b + 1; /* 128: int8_t 범위 밖 */</code></pre>
+    <div class="note"><span class="lbl">RV32 기준</span>일반적인 MicroBlaze V RV32 툴체인에서 <code>int</code>와 포인터는 32비트다. <code>int8_t</code>에 128을 다시 대입하는 결과는 C 구현에 따라 달라질 수 있다. RV32IMC처럼 FPU가 없는 설정의 <code>float</code> 연산은 소프트웨어에 의존한다.</div>
+  </div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>비트 연산과 마스크</h2><span class="pg-no">2장 · 7 / 10</span></div>
+  <p>레지스터는 32비트 한 덩어리지만, 실제로는 비트 하나하나가 LED 하나, 스위치 하나, 설정 하나를 뜻한다. 그래서 다른 비트는 건드리지 않고 원하는 비트만 바꾸는 <strong>비트 연산</strong>을 쓴다. 바꿀 위치만 1로 만든 값을 <strong>마스크(mask)</strong>라 한다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 680 200" style="min-width:520px" role="img" aria-label="OR 마스크"><text x="176" y="18" class="ts">7</text><text x="238" y="18" class="ts">6</text><text x="300" y="18" class="ts">5</text><text x="362" y="18" class="ts">4</text><text x="424" y="18" class="ts">3</text><text x="486" y="18" class="ts">2</text><text x="548" y="18" class="ts">1</text><text x="610" y="18" class="ts">0</text><text x="20" y="58" class="t" style="text-anchor:start">LED 값</text><rect x="150" y="28" width="52" height="42" rx="4" class="boxg"/><text x="176" y="56" class="t tc" style="font:600 18px var(--mono)">1</text><rect x="212" y="28" width="52" height="42" rx="4" class="box"/><text x="238" y="56" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="274" y="28" width="52" height="42" rx="4" class="boxg"/><text x="300" y="56" class="t tc" style="font:600 18px var(--mono)">1</text><rect x="336" y="28" width="52" height="42" rx="4" class="box"/><text x="362" y="56" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="398" y="28" width="52" height="42" rx="4" class="box"/><text x="424" y="56" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="460" y="28" width="52" height="42" rx="4" class="box"/><text x="486" y="56" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="522" y="28" width="52" height="42" rx="4" class="box"/><text x="548" y="56" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="584" y="28" width="52" height="42" rx="4" class="box"/><text x="610" y="56" class="t tc" style="font:600 18px var(--mono)">0</text><text x="20" y="114" class="t" style="text-anchor:start">| 마스크</text><rect x="150" y="84" width="52" height="42" rx="4" class="box"/><text x="176" y="112" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="212" y="84" width="52" height="42" rx="4" class="box"/><text x="238" y="112" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="274" y="84" width="52" height="42" rx="4" class="box"/><text x="300" y="112" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="336" y="84" width="52" height="42" rx="4" class="box"/><text x="362" y="112" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="398" y="84" width="52" height="42" rx="4" class="boxn"/><text x="424" y="112" class="t tc" style="font:600 18px var(--mono)">1</text><rect x="460" y="84" width="52" height="42" rx="4" class="box"/><text x="486" y="112" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="522" y="84" width="52" height="42" rx="4" class="box"/><text x="548" y="112" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="584" y="84" width="52" height="42" rx="4" class="box"/><text x="610" y="112" class="t tc" style="font:600 18px var(--mono)">0</text><line x1="150" y1="133" x2="640" y2="133" class="ln"/><text x="20" y="170" class="t" style="text-anchor:start">= 결과</text><rect x="150" y="140" width="52" height="42" rx="4" class="boxg"/><text x="176" y="168" class="t tc" style="font:600 18px var(--mono)">1</text><rect x="212" y="140" width="52" height="42" rx="4" class="box"/><text x="238" y="168" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="274" y="140" width="52" height="42" rx="4" class="boxg"/><text x="300" y="168" class="t tc" style="font:600 18px var(--mono)">1</text><rect x="336" y="140" width="52" height="42" rx="4" class="box"/><text x="362" y="168" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="398" y="140" width="52" height="42" rx="4" class="boxn"/><text x="424" y="168" class="t tc" style="font:600 18px var(--mono)">1</text><rect x="460" y="140" width="52" height="42" rx="4" class="box"/><text x="486" y="168" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="522" y="140" width="52" height="42" rx="4" class="box"/><text x="548" y="168" class="t tc" style="font:600 18px var(--mono)">0</text><rect x="584" y="140" width="52" height="42" rx="4" class="box"/><text x="610" y="168" class="t tc" style="font:600 18px var(--mono)">0</text></svg></div><figcaption>그림 2-7 · OR 마스크로 비트 3만 켜기 — 나머지 비트는 그대로</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>연산</th><th>C</th><th>예 (8비트)</th><th>쓰는 곳</th></tr>
+    <tr><td>AND</td><td><code>a &amp; b</code></td><td><code>1010_1100 &amp; 0000_1111 = 0000_1100</code></td><td>특정 비트만 남기기(읽기)</td></tr>
+    <tr><td>OR</td><td><code>a | b</code></td><td><code>1010_0000 | 0000_1000 = 1010_1000</code></td><td>특정 비트 켜기</td></tr>
+    <tr><td>XOR</td><td><code>a ^ b</code></td><td><code>1010_1000 ^ 0000_1000 = 1010_0000</code></td><td>특정 비트 뒤집기</td></tr>
+    <tr><td>NOT</td><td><code>~a</code></td><td><code>~0000_1000 = 1111_0111</code></td><td>비트 반전(8비트로 표시한 예)</td></tr>
+    <tr><td>시프트</td><td><code>a &lt;&lt; n</code>, <code>a &gt;&gt; n</code></td><td><code>1 &lt;&lt; 3 = 0000_1000</code></td><td>n번 비트 마스크 만들기</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">표기</span>표의 밑줄 친 0·1은 8비트 계산 예시이며 C 정수 리터럴이 아니다. C 코드에서는 <code>0xA0</code>처럼 16진수를 사용한다. <code>~</code>는 정수 승격과 형의 비트 폭에 주의한다.</div>
+ <pre><code>#include &lt;stdint.h&gt;
+
+uint32_t led = 0xA0;          /* 1010_0000 */
+led |=  (1u &lt;&lt; 3);            /* LED3 켜기   → 1010_1000 */
+led &amp;= ~(1u &lt;&lt; 7);            /* LED7 끄기   → 0010_1000 */
+led ^=  (1u &lt;&lt; 5);            /* LED5 뒤집기 → 0000_1000 */
+uint32_t sw = 0x10;            /* SW4만 켜진 GPIO 입력값 예시 */
+int sw4 = (sw &gt;&gt; 4) &amp; 1u;     /* 스위치 SW4 값은 1 */</code></pre>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>문자 — ASCII 코드</h2><span class="pg-no">2장 · 8 / 10</span></div>
+  <p>글자도 숫자로 저장된다. 영문자·숫자·기호에 0~127 번호를 붙인 표가 <strong>ASCII</strong>다. 키보드로 친 <code>A</code>는 UART를 통해 숫자 <code>0x41</code> 하나로 전달되고, 프로그램은 프로그램은 이 바이트 값들을 해석해 명령을 알아낸다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 680 160" style="min-width:520px" role="img" aria-label="문자열 바이트"><defs><marker id="m8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="20" y="22" class="ts" style="text-anchor:start">C 문자열 "OK\r\n"</text><rect x="20" y="32" width="82" height="44" rx="4" class="box"/><text x="61" y="60" class="t tc" style="font:600 18px var(--mono)">O</text><rect x="20" y="84" width="82" height="34" rx="4" class="boxn"/><text x="61" y="106" class="tg" style="font-family:var(--mono)">0x4F</text><rect x="112" y="32" width="82" height="44" rx="4" class="box"/><text x="153" y="60" class="t tc" style="font:600 18px var(--mono)">K</text><rect x="112" y="84" width="82" height="34" rx="4" class="boxn"/><text x="153" y="106" class="tg" style="font-family:var(--mono)">0x4B</text><rect x="204" y="32" width="82" height="44" rx="4" class="box"/><text x="245" y="60" class="t tc" style="font:600 18px var(--mono)">\r</text><rect x="204" y="84" width="82" height="34" rx="4" class="boxn"/><text x="245" y="106" class="tg" style="font-family:var(--mono)">0x0D</text><rect x="296" y="32" width="82" height="44" rx="4" class="box"/><text x="337" y="60" class="t tc" style="font:600 18px var(--mono)">\n</text><rect x="296" y="84" width="82" height="34" rx="4" class="boxn"/><text x="337" y="106" class="tg" style="font-family:var(--mono)">0x0A</text><line x1="390" y1="101" x2="500" y2="101" class="ln" marker-end="url(#m8)"/><rect x="510" y="78" width="150" height="46" rx="5" class="boxb"/><text x="585" y="98" class="tb">UART TX</text><text x="585" y="115" class="ts">1바이트씩 전송</text><text x="205" y="150" class="ts">메모리에는 글자가 아니라 숫자(코드)가 저장된다</text></svg></div><figcaption>그림 2-8 · 문자열 "OK\r\n"이 UART로 나가는 모습</figcaption></figure>
+  <div class="cols">
+    <div class="scroll"><table>
+      <tr><th>문자</th><th>16진</th><th>10진</th><th>비고</th></tr>
+      <tr><td><code>' '</code></td><td>0x20</td><td>32</td><td>공백</td></tr>
+      <tr><td><code>'0'</code>~<code>'9'</code></td><td>0x30~0x39</td><td>48~57</td><td>숫자 글자</td></tr>
+      <tr><td><code>'A'</code>~<code>'F'</code></td><td>0x41~0x46</td><td>65~70</td><td>대문자</td></tr>
+      <tr><td><code>'a'</code>~<code>'f'</code></td><td>0x61~0x66</td><td>97~102</td><td>소문자 = 대문자 + 0x20</td></tr>
+      <tr><td><code>'\r'</code></td><td>0x0D</td><td>13</td><td>줄 맨 앞으로(Enter)</td></tr>
+      <tr><td><code>'\n'</code></td><td>0x0A</td><td>10</td><td>다음 줄</td></tr>
+    </table></div>
+    <div class="stack">
+<pre><code>/* 16진수 글자 하나 → 값 (0~15) */
+int hex_val(char c) {
+  if (c &gt;= '0' &amp;&amp; c &lt;= '9') return c - '0';
+  if (c &gt;= 'A' &amp;&amp; c &lt;= 'F') return c - 'A' + 10;
+  if (c &gt;= 'a' &amp;&amp; c &lt;= 'f') return c - 'a' + 10;
+  return -1;   /* 16진수 글자가 아님 */
+}</code></pre>
+      <div class="note"><span class="lbl">한글</span>ASCII에는 한글이 없다. UTF-8에서 한글 완성형 음절은 보통 3바이트다(예: '가' → <code>EA B0 80</code>). 조합 자모 등은 바이트 수가 달라질 수 있다. 실습 콘솔은 영문 명령만 쓴다.</div>
+    </div>
+  </div>
+  <div class="tip"><span class="lbl">SoC 연결</span>UART 콘솔에서 <code>disp 1234</code>의 숫자 문자열을 10진수로 해석하면 값은 1234(<code>0x04D2</code>)다. 16진수로 해석하도록 작성한 파서라면 <code>0x1234</code>가 된다. 명령 파서의 진법 규칙을 먼저 정해야 한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>엔디안 — 바이트를 놓는 순서</h2><span class="pg-no">2장 · 9 / 10</span></div>
+  <p>메모리는 주소 하나에 1바이트씩 저장한다. 4바이트짜리 워드를 저장하려면 주소 4개를 쓰는데, 어느 바이트를 낮은 주소에 놓을지 두 가지 약속이 있다. 낮은 주소에 <strong>낮은 자리 바이트</strong>를 놓으면 <strong>리틀 엔디안(Little-endian)</strong>, <strong>높은 자리 바이트</strong>를 놓으면 <strong>빅 엔디안(Big-endian)</strong>이다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 680 250" style="min-width:520px" role="img" aria-label="엔디안 비교"><text x="340" y="22" class="t tc">32비트 값 0x1234_5678 을 주소 0x100 에 저장</text><text x="180" y="54" class="tg">리틀 엔디안 (MicroBlaze V)</text><text x="120" y="92" class="ts" style="text-anchor:end">0x100</text><rect x="130" y="66" width="120" height="36" rx="3" class="boxn"/><text x="190" y="90" class="t tc" style="font:600 16px var(--mono)">78</text><text x="120" y="134" class="ts" style="text-anchor:end">0x101</text><rect x="130" y="108" width="120" height="36" rx="3" class="boxn"/><text x="190" y="132" class="t tc" style="font:600 16px var(--mono)">56</text><text x="120" y="176" class="ts" style="text-anchor:end">0x102</text><rect x="130" y="150" width="120" height="36" rx="3" class="boxn"/><text x="190" y="174" class="t tc" style="font:600 16px var(--mono)">34</text><text x="120" y="218" class="ts" style="text-anchor:end">0x103</text><rect x="130" y="192" width="120" height="36" rx="3" class="boxn"/><text x="190" y="216" class="t tc" style="font:600 16px var(--mono)">12</text><text x="500" y="54" class="t tc">빅 엔디안</text><text x="440" y="92" class="ts" style="text-anchor:end">0x100</text><rect x="450" y="66" width="120" height="36" rx="3" class="box"/><text x="510" y="90" class="t tc" style="font:600 16px var(--mono)">12</text><text x="440" y="134" class="ts" style="text-anchor:end">0x101</text><rect x="450" y="108" width="120" height="36" rx="3" class="box"/><text x="510" y="132" class="t tc" style="font:600 16px var(--mono)">34</text><text x="440" y="176" class="ts" style="text-anchor:end">0x102</text><rect x="450" y="150" width="120" height="36" rx="3" class="box"/><text x="510" y="174" class="t tc" style="font:600 16px var(--mono)">56</text><text x="440" y="218" class="ts" style="text-anchor:end">0x103</text><rect x="450" y="192" width="120" height="36" rx="3" class="box"/><text x="510" y="216" class="t tc" style="font:600 16px var(--mono)">78</text><line x1="340" y1="44" x2="340" y2="236" class="lm"/><text x="190" y="244" class="ts">낮은 주소에 낮은 바이트(78)</text><text x="510" y="244" class="ts">낮은 주소에 높은 바이트(12)</text></svg></div><figcaption>그림 2-9 · 같은 값을 두 방식으로 저장<span class="src">개념 재구성 · 참조: <a href="https://docs.amd.com/r/en-US/ug1629-microblaze-v-user-guide/Memory-Architecture" target="_blank" rel="noopener noreferrer">AMD UG1629, Memory Architecture</a> · <a href="https://docs.riscv.org/reference/isa/v20240411/_attachments/riscv-unprivileged.pdf" target="_blank" rel="noopener noreferrer">RISC-V ISA</a></span></figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th></th><th>리틀 엔디안</th><th>빅 엔디안</th></tr>
+    <tr><td>낮은 주소에</td><td>낮은 자리 바이트</td><td>높은 자리 바이트</td></tr>
+    <tr><td>예</td><td>MicroBlaze V, x86, 일반적인 ARM 설정</td><td>일부 아키텍처 설정, 네트워크 바이트 순서</td></tr>
+    <tr><td>문제가 되는 때</td><td colspan="2">워드를 바이트 단위로 쪼개 보낼 때, 메모리 덤프를 읽을 때</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>32비트 값을 동일한 시스템에서 워드 단위로 읽고 쓰는 동안에는 보통 엔디안 차이가 드러나지 않는다. 메모리 덤프·바이트 배열·파일·통신 프로토콜처럼 바이트 경계를 넘나들면 저장·전송 순서를 확인해야 한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>SoC에서 보는 데이터 · 2장 정리</h2><span class="pg-no">2장 · 10 / 10</span></div>
+  <p>SoC 실습에서 다루는 데이터는 대부분 32비트 레지스터 값이다. 레지스터 안의 비트 위치마다 뜻이 정해져 있고, 프로그램은 16진수와 비트 연산으로 그 비트들을 읽고 쓴다.</p>
+  <figure><div class="fig"><svg viewBox="0 0 700 220" style="min-width:540px" role="img" aria-label="레지스터 비트와 7세그먼트"><defs><marker id="m10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="20" y="18" class="ts" style="text-anchor:start">GPIO 데이터 레지스터 (32 bit) — 스위치 16개 읽기</text><rect x="20" y="26" width="330" height="40" rx="4" class="boxg"/><text x="185" y="51" class="ts">비트 31~16 : 예제에서 미사용</text><rect x="350" y="26" width="330" height="40" rx="4" class="boxn"/><text x="515" y="51" class="tg">비트 15~0 : SW15 … SW0</text><text x="20" y="104" class="ts" style="text-anchor:start">SEG7 16진 표시 예시: 0x1234 — 니블마다 한 글자</text><rect x="20" y="114" width="80" height="40" rx="4" class="boxb"/><text x="60" y="140" class="tb" style="font:600 16px var(--mono)">1</text><text x="60" y="170" class="ts">비트 15~12</text><rect x="110" y="114" width="80" height="40" rx="4" class="boxb"/><text x="150" y="140" class="tb" style="font:600 16px var(--mono)">2</text><text x="150" y="170" class="ts">비트 11~8</text><rect x="200" y="114" width="80" height="40" rx="4" class="boxb"/><text x="240" y="140" class="tb" style="font:600 16px var(--mono)">3</text><text x="240" y="170" class="ts">비트 7~4</text><rect x="290" y="114" width="80" height="40" rx="4" class="boxb"/><text x="330" y="140" class="tb" style="font:600 16px var(--mono)">4</text><text x="330" y="170" class="ts">비트 3~0</text><line x1="385" y1="134" x2="440" y2="134" class="ln" marker-end="url(#m10)"/><rect x="450" y="104" width="50" height="62" rx="4" class="die"/><text x="475" y="148" class="dt" style="font:600 34px var(--mono)">1</text><rect x="508" y="104" width="50" height="62" rx="4" class="die"/><text x="533" y="148" class="dt" style="font:600 34px var(--mono)">2</text><rect x="566" y="104" width="50" height="62" rx="4" class="die"/><text x="591" y="148" class="dt" style="font:600 34px var(--mono)">3</text><rect x="624" y="104" width="50" height="62" rx="4" class="die"/><text x="649" y="148" class="dt" style="font:600 34px var(--mono)">4</text><text x="565" y="186" class="ts">Basys3 7세그먼트</text><text x="350" y="212" class="ts">16진수 표시 기능을 구현한 사용자 IP라면 각 니블을 7세그먼트 패턴으로 변환한다</text></svg></div><figcaption>그림 2-10 · 레지스터의 비트가 실제 장치와 대응하는 모습</figcaption></figure>
+  <div class="scroll"><table>
+    <tr><th>이번 장 개념</th><th>한 줄 정리</th><th>우리 SoC에서</th></tr>
+    <tr><td>비트 · 바이트 · 워드</td><td>1 · 8 · 32 비트</td><td>레지스터·주소·버스 폭 32비트</td></tr>
+    <tr><td>2진수</td><td>자리마다 2배</td><td>스위치 번호 = 비트 번호</td></tr>
+    <tr><td>16진수</td><td>4비트 = 1자리</td><td>주소 표기 <code>0x4000_0000</code>, C 코드는 <code>0x40000000</code></td></tr>
+    <tr><td>2의 보수</td><td>부호 있는 해석에서 최상위 비트 1은 음수</td><td>음수로 표현되는 측정 데이터</td></tr>
+    <tr><td>비트 연산</td><td>마스크로 원하는 비트만</td><td>LED 켜기/끄기, 상태 비트 검사</td></tr>
+    <tr><td>ASCII</td><td>글자 = 숫자 코드</td><td>UART 콘솔 명령 해석</td></tr>
+    <tr><td>엔디안</td><td>다중 바이트 값의 저장 순서</td><td>MicroBlaze V는 리틀 엔디안</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">다음 장</span>3장 명령어 — C로 쓴 소스파일이 어떻게 CPU가 읽는 명령어(기계어)와 실행파일(ELF)이 되는가.</div>
+</section>
+
+</div>
+<nav class="pager"><div class="pager-in"><button id="prev">← 이전</button><div class="dots"></div><span class="pos"></span><button id="next">다음 →</button></div></nav>
+<script>
+(function(){
+  var pages=[].slice.call(document.querySelectorAll('.pg'));
+  var dots=document.querySelector('.dots'), prev=document.getElementById('prev'), next=document.getElementById('next');
+  pages.forEach(function(_,i){var b=document.createElement('button');b.textContent=i+1;b.setAttribute('aria-label',(i+1)+'페이지');b.onclick=function(){go(i)};dots.appendChild(b)});
+  var cur=0;
+  function go(i){
+    cur=Math.max(0,Math.min(pages.length-1,i));
+    pages.forEach(function(p,k){p.hidden=k!==cur});
+    [].forEach.call(dots.children,function(b,k){b.classList.toggle('on',k===cur)});
+    var pos=document.querySelector('.pos'); if(pos) pos.textContent=(cur+1)+' / '+pages.length;
+    prev.disabled=cur===0; next.disabled=cur===pages.length-1;
+    try{history.replaceState(null,'','#p'+(cur+1))}catch(e){}
+    window.scrollTo(0,0);
+  }
+  prev.onclick=function(){go(cur-1)}; next.onclick=function(){go(cur+1)};
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+  var m=/^#p(\d+)$/.exec(location.hash||''); go(m?parseInt(m[1],10)-1:0);
+  document.getElementById('theme').onclick=function(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d?d==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.setAttribute('data-theme',dark?'light':'dark')};
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,569 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>1장 컴퓨터구조의 큰그림</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F6FB; --surface:#FFFFFF; --ink:#17263C; --muted:#50637C; --line:#CBD8E8;
+  --green:#1456A0; --greenbg:#E8F1FE; --blue:#087C88; --bluebg:#E2F6F5;
+  --amber:#915710; --amberbg:#FFF3DF; --head:#EAF0F9; --grayfill:#DFE9F5;
+  --sans:"IBM Plex Sans KR","Noto Sans KR",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1523; --surface:#142338; --ink:#EFF5FE; --muted:#ACBCD0; --line:#34506D;
+  --green:#8DBBFF; --greenbg:#183754; --blue:#75D8D7; --bluebg:#133D49;
+  --amber:#F3C478; --amberbg:#493A25; --head:#243952; --grayfill:#304761;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans);word-break:keep-all;overflow-wrap:break-word;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 96px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+/* 상단 */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.series{font:500 11px var(--mono);letter-spacing:.09em;color:var(--green);text-transform:uppercase}
+.theme-btn{font:500 11px var(--mono);padding:4px 10px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--muted);cursor:pointer}
+.chaps{display:flex;flex-wrap:wrap;gap:4px}
+.chaps a{font:500 11px var(--mono);padding:3px 8px;border-radius:3px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.chaps a.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+
+
+.chaps a{text-decoration:none}.chaps a:hover{border-color:var(--green);color:var(--green);background:var(--greenbg)}
+.chaps a.on:hover{background:var(--green);color:var(--surface)}
+.chaps a.back-index{font-weight:700;color:var(--green);border-color:var(--green)}
+/* 페이지 */
+.pg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px clamp(16px,4vw,40px) 32px;display:flex;flex-direction:column;gap:18px;min-height:600px}
+.pg[hidden]{display:none!important}
+.pg-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+.pg-no{font:600 11px var(--mono);color:var(--green);letter-spacing:.06em;white-space:nowrap}
+h1{margin:0;font-size:clamp(26px,5vw,40px);line-height:1.2;text-wrap:balance}
+h2{margin:0;font-size:clamp(19px,3vw,24px);line-height:1.3;text-wrap:balance}
+h3{margin:4px 0 0;font-size:14px}
+p{margin:0}
+.lead{color:var(--muted);font-size:15.5px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;align-items:start}
+.cols>*{min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+ul.pts{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+
+/* 카드·표 */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--surface)}
+.card b{color:var(--green);font-size:13px}
+.card span{font-size:13px;color:var(--muted)}
+.card .num{font:600 22px/1.3 var(--mono);color:var(--ink)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--head);font-weight:500;font-size:11.5px;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+code{font-family:var(--mono);font-size:12px;background:var(--head);padding:1px 4px;border-radius:3px}
+
+/* 콜아웃 */
+.note,.tip,.warn{padding:10px 14px;border-radius:4px;font-size:13.5px}
+.note{background:var(--greenbg)}
+.tip{background:var(--bluebg);border-left:3px solid var(--blue)}
+.warn{background:var(--amberbg);border-left:3px solid var(--amber)}
+.lbl{font:600 10.5px var(--mono);letter-spacing:.05em;margin-right:6px}
+.note .lbl{color:var(--green)} .tip .lbl{color:var(--blue)} .warn .lbl{color:var(--amber)}
+
+/* 그림 */
+figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.fig{overflow-x:auto;border:1px solid var(--line);border-radius:6px;padding:16px;background:var(--surface)}
+.fig svg{display:block;width:100%;height:auto}
+figcaption{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+figcaption .src{font:400 11px var(--mono)}
+figcaption a{color:var(--blue)}
+.redraw{display:inline-block;font:600 10px var(--mono);color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:0 4px;margin-right:6px;vertical-align:1px}
+
+/* SVG */
+.box{fill:var(--surface);stroke:var(--ink);stroke-width:1.4}
+.boxg{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.2}
+.boxn{fill:var(--greenbg);stroke:var(--green);stroke-width:1.6}
+.boxb{fill:var(--bluebg);stroke:var(--blue);stroke-width:1.4}
+.boxd{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+.ln{fill:none;stroke:var(--ink);stroke-width:1.4}
+.lg{fill:none;stroke:var(--green);stroke-width:1.6}
+.lb{fill:none;stroke:var(--blue);stroke-width:1.6}
+.lm{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 3}
+.t{fill:var(--ink);font:500 13px var(--sans)}
+.tc{text-anchor:middle}
+.ts{fill:var(--muted);font:400 11px var(--mono);text-anchor:middle}
+.tg{fill:var(--green);font:600 13px var(--sans);text-anchor:middle}
+.tb{fill:var(--blue);font:600 12px var(--sans);text-anchor:middle}
+.chipc{fill:var(--grayfill);stroke:var(--muted);stroke-width:1.4}
+.pin rect{fill:var(--amber)}
+.trace{stroke:var(--muted);stroke-width:2;opacity:.6}
+.die{fill:#20262E;stroke:var(--muted);stroke-width:1.2} .mem{fill:#4B545F;stroke:var(--muted);stroke-width:1}
+.dt{fill:#F1F3F6;font:700 16px var(--sans);text-anchor:middle}
+.dts{fill:#D9DEE4;font:500 12px var(--sans);text-anchor:middle}
+.ah{fill:var(--ink)} .ag{fill:var(--green)} .ab{fill:var(--blue)}
+
+/* 넘김 */
+.pager{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.pager-in{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pager button{font:500 13px var(--sans);padding:7px 14px;border-radius:5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pager button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.dots button{width:26px;height:26px;padding:0;font:500 11px var(--mono);border-radius:50%}
+.dots button.on{background:var(--green);border-color:var(--green);color:var(--surface)}
+.pos{display:none;font:600 13px var(--mono);color:var(--ink)}
+@media (max-width:600px){.dots{display:none}.pos{display:block}.pager button{padding:6px 12px;white-space:nowrap}}
+</style>
+<div class="wrap">
+  <div class="top"><span class="series">컴퓨터시스템구조 · MicroBlaze V SoC 도입 이론</span><button class="theme-btn" id="theme">다크 / 라이트</button></div>
+  <div class="chaps"><a class="back-index" href="index.html">⌂ 전체 목차</a><a class="on" href="01%EC%9E%A5%20%EC%BB%B4%ED%93%A8%ED%84%B0%EA%B5%AC%EC%A1%B0%EC%9D%98%20%ED%81%B0%EA%B7%B8%EB%A6%BC.html" aria-current="page">1 큰그림</a><a class="" href="02%EC%9E%A5%20%EB%8D%B0%EC%9D%B4%ED%84%B0.html" >2 데이터</a><a class="" href="03%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4.html" >3 명령어</a><a class="" href="04%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%EC%9D%98%20%EA%B5%AC%EC%A1%B0.html" >4 명령어 구조</a><a class="" href="05%EC%9E%A5%20CPU%20%EA%B5%AC%EC%84%B1.html" >5 CPU 구성</a><a class="" href="06%EC%9E%A5%20%EB%AA%85%EB%A0%B9%EC%96%B4%20%EC%82%AC%EC%9D%B4%ED%81%B4%EA%B3%BC%20%EC%9D%B8%ED%84%B0%EB%9F%BD%ED%8A%B8.html" >6 명령어 사이클</a><a class="" href="07%EC%9E%A5%20CPU%20%EC%84%B1%EB%8A%A5%20%ED%96%A5%EC%83%81.html" >7 성능 향상</a><a class="" href="08%EC%9E%A5%20%EB%A9%94%EB%AA%A8%EB%A6%AC.html" >8 메모리</a><a class="" href="09%EC%9E%A5%20%EB%B3%B4%EC%A1%B0%EA%B8%B0%EC%96%B5%EC%9E%A5%EC%B9%98.html" >9 보조기억</a><a class="" href="10%EC%9E%A5%20%EC%9E%85%EC%B6%9C%EB%A0%A5%EC%9E%A5%EC%B9%98.html" >10 입출력</a></div>
+<!-- 1장 컴퓨터구조의 큰그림 : 10페이지 -->
+
+<section class="pg">
+  <div class="pg-head"><span class="pg-no">1장 · 1 / 10</span><span class="pg-no">표지</span></div>
+  <h1>컴퓨터구조의 큰그림</h1>
+  <p class="lead">CPU · 메모리 · 입출력장치, 그리고 이들을 잇는 버스. 이 네 가지가 어떻게 하나의 칩(SoC)으로 모이는지 보고, Basys3 위에 만들 MicroBlaze V SoC의 모습을 미리 그려 본다.</p>
+  <div class="cards">
+    <div class="card"><b>학습 목표 1</b><span>컴퓨터의 3대 구성요소와 버스의 역할을 말할 수 있다.</span></div>
+    <div class="card"><b>학습 목표 2</b><span>폰 노이만 구조와 하버드 구조의 차이를 설명할 수 있다.</span></div>
+    <div class="card"><b>학습 목표 3</b><span>SoC가 무엇이고 FPGA 위에 어떻게 만드는지 안다.</span></div>
+  </div>
+  <figure>
+    <div class="fig">
+    <svg viewBox="0 0 720 165" style="min-width:560px" role="img" aria-label="10개 장 테크트리">
+      <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+      <rect x="10"  y="20" width="124" height="52" rx="5" class="boxn"/><text x="72"  y="42" class="tg">1 큰그림</text><text x="72"  y="60" class="ts">CPU·메모리·I/O</text>
+      <rect x="152" y="20" width="124" height="52" rx="5" class="box"/><text x="214" y="42" class="t tc">2 데이터</text><text x="214" y="60" class="ts">2진수·16진수</text>
+      <rect x="294" y="20" width="124" height="52" rx="5" class="box"/><text x="356" y="42" class="t tc">3 명령어</text><text x="356" y="60" class="ts">소스→실행파일</text>
+      <rect x="436" y="20" width="124" height="52" rx="5" class="box"/><text x="498" y="42" class="t tc">4 명령어 구조</text><text x="498" y="60" class="ts">오퍼랜드·스택</text>
+      <rect x="578" y="20" width="124" height="52" rx="5" class="box"/><text x="640" y="42" class="t tc">5 CPU 구성</text><text x="640" y="60" class="ts">ALU·레지스터</text>
+      <rect x="10"  y="105" width="124" height="52" rx="5" class="box"/><text x="72"  y="127" class="t tc">6 명령어 사이클</text><text x="72"  y="145" class="ts">인출·인터럽트</text>
+      <rect x="152" y="105" width="124" height="52" rx="5" class="box"/><text x="214" y="127" class="t tc">7 성능 향상</text><text x="214" y="145" class="ts">파이프라인·RISC</text>
+      <rect x="294" y="105" width="124" height="52" rx="5" class="box"/><text x="356" y="127" class="t tc">8 메모리</text><text x="356" y="145" class="ts">주소공간·캐시</text>
+      <rect x="436" y="105" width="124" height="52" rx="5" class="box"/><text x="498" y="127" class="t tc">9 보조기억</text><text x="498" y="145" class="ts">플래시·부팅</text>
+      <rect x="578" y="105" width="124" height="52" rx="5" class="box"/><text x="640" y="127" class="t tc">10 입출력</text><text x="640" y="145" class="ts">폴링·인터럽트</text>
+      <line x1="134" y1="46" x2="151" y2="46" class="ln" marker-end="url(#a1)"/>
+      <line x1="276" y1="46" x2="293" y2="46" class="ln" marker-end="url(#a1)"/>
+      <line x1="418" y1="46" x2="435" y2="46" class="ln" marker-end="url(#a1)"/>
+      <line x1="560" y1="46" x2="577" y2="46" class="ln" marker-end="url(#a1)"/>
+      <path d="M640 72 V88 H72 V104" class="ln" marker-end="url(#a1)"/>
+      <line x1="134" y1="131" x2="151" y2="131" class="ln" marker-end="url(#a1)"/>
+      <line x1="276" y1="131" x2="293" y2="131" class="ln" marker-end="url(#a1)"/>
+      <line x1="418" y1="131" x2="435" y2="131" class="ln" marker-end="url(#a1)"/>
+      <line x1="560" y1="131" x2="577" y2="131" class="ln" marker-end="url(#a1)"/>
+    </svg>
+    </div>
+    <figcaption>그림 1-1 · 10개 장 테크트리</figcaption>
+  </figure>
+  <div class="scroll"><table>
+    <tr><th>페이지</th><th>내용</th><th>페이지</th><th>내용</th></tr>
+    <tr><td>1</td><td>표지 · 학습 목표</td><td>6</td><td>버스 — 주소·데이터·제어</td></tr>
+    <tr><td>2</td><td>컴퓨터가 하는 일</td><td>7</td><td>CPU가 칩 하나로 — Intel 4004</td></tr>
+    <tr><td>3</td><td>프로그램 내장 방식 — EDVAC 보고서</td><td>8</td><td>시스템이 칩 하나로 — Apple M1</td></tr>
+    <tr><td>4</td><td>폰 노이만 구조와 병목</td><td>9</td><td>FPGA 위의 SoC — Basys3</td></tr>
+    <tr><td>5</td><td>하버드 구조</td><td>10</td><td>우리가 만들 SoC · 정리</td></tr>
+  </table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>컴퓨터가 하는 일 — 입력 · 처리 · 저장 · 출력</h2><span class="pg-no">1장 · 2 / 10</span></div>
+  <p>컴퓨터가 하는 일은 네 가지로 요약된다. 바깥에서 값을 <strong>입력</strong>받고, 정해진 순서(프로그램)대로 <strong>처리</strong>하며, 처리 중의 값과 프로그램을 <strong>저장</strong>하고, 결과를 <strong>출력</strong>한다. 스마트폰이든 Basys3 위의 작은 SoC든 이 흐름은 같다.</p>
+  <figure>
+    <div class="fig">
+    <svg viewBox="0 0 680 220" style="min-width:520px" role="img" aria-label="입력 처리 저장 출력">
+      <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+      <rect x="20"  y="40" width="150" height="70" rx="5" class="box"/><text x="95"  y="70" class="t tc">입력</text><text x="95"  y="90" class="ts">스위치 16 · 버튼 5</text>
+      <rect x="265" y="40" width="150" height="70" rx="5" class="boxn"/><text x="340" y="70" class="tg">처리</text><text x="340" y="90" class="ts">CPU</text>
+      <rect x="510" y="40" width="150" height="70" rx="5" class="box"/><text x="585" y="70" class="t tc">출력</text><text x="585" y="90" class="ts">LED 16 · 7세그먼트</text>
+      <rect x="265" y="150" width="150" height="55" rx="5" class="box"/><text x="340" y="174" class="t tc">저장</text><text x="340" y="193" class="ts">메모리 (BRAM)</text>
+      <line x1="170" y1="75" x2="263" y2="75" class="ln" marker-end="url(#a2)"/>
+      <line x1="415" y1="75" x2="508" y2="75" class="ln" marker-end="url(#a2)"/>
+      <line x1="330" y1="110" x2="330" y2="148" class="ln" marker-end="url(#a2)"/>
+      <line x1="350" y1="150" x2="350" y2="112" class="ln" marker-end="url(#a2)"/>
+      <text x="217" y="66" class="ts">값 읽기</text><text x="462" y="66" class="ts">결과 쓰기</text>
+      <text x="300" y="134" class="ts" style="text-anchor:end">쓰기</text><text x="380" y="134" class="ts" style="text-anchor:start">읽기</text>
+    </svg>
+    </div>
+    <figcaption>그림 1-2 · 컴퓨터의 네 가지 일</figcaption>
+  </figure>
+  <div class="scroll"><table>
+    <tr><th>일</th><th>담당 장치</th><th>Basys3 SoC에서 보이는 모습</th></tr>
+    <tr><td>입력</td><td>입력장치</td><td>스위치를 올리면 GPIO 레지스터 값이 바뀐다</td></tr>
+    <tr><td>처리</td><td>CPU</td><td>MicroBlaze V가 명령어를 하나씩 실행한다</td></tr>
+    <tr><td>저장</td><td>메모리</td><td>프로그램과 변수를 BRAM에 저장한다(예시 구성: 64 KiB)</td></tr>
+    <tr><td>출력</td><td>출력장치</td><td>LED가 켜지고 7세그먼트에 숫자가 뜬다</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">핵심</span>CPU는 스위치나 LED를 "직접" 만지지 않는다. 장치마다 붙은 레지스터를 읽고 쓸 뿐이다. 이 방식은 10장 입출력에서 자세히 다룬다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>프로그램 내장 방식 — EDVAC 보고서(1945)</h2><span class="pg-no">1장 · 3 / 10</span></div>
+  <div class="stack">
+    <div class="stack">
+      <p>초기 전자식 계산기 가운데에는 배선·스위치 설정으로 계산 순서를 바꾸는 기계가 있었다. 1945년 폰 노이만(John von Neumann)의 EDVAC 설계 초안은 <strong>명령어도 데이터처럼 메모리에 저장하고 꺼내 실행하는 방식</strong>을 체계적으로 설명했다. 이 방식은 에커트·모클리 등 EDVAC 개발진과의 논의를 통해 발전했다.</p>
+      <p>보고서는 기계를 다섯 부분으로 나눈다. 오늘날 용어로 바꾸면 제어장치·ALU·메모리·입력·출력이다.</p>
+      <div class="scroll"><table>
+        <tr><th>보고서 표기</th><th>뜻</th><th>오늘날 이름</th></tr>
+        <tr><td><code>CA</code></td><td>Central Arithmetic, 중앙 산술부</td><td>ALU</td></tr>
+        <tr><td><code>CC</code></td><td>Central Control, 중앙 제어부</td><td>제어장치</td></tr>
+        <tr><td><code>M</code></td><td>Memory, 기억부</td><td>메모리</td></tr>
+        <tr><td><code>I</code> / <code>O</code></td><td>Input / Output</td><td>입출력장치</td></tr>
+      </table></div>
+    </div>
+    <figure>
+      <div class="fig">
+      <svg viewBox="0 0 680 260" style="min-width:420px" role="img" aria-label="EDVAC 다섯 부분">
+        <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+        <rect x="200" y="20" width="280" height="125" rx="6" class="boxd"/>
+        <text x="340" y="38" class="ts">CPU (오늘날의 이름)</text>
+        <rect x="215" y="55" width="120" height="72" rx="5" class="boxn"/><text x="275" y="85" class="tg">CC</text><text x="275" y="104" class="ts">제어장치</text>
+        <rect x="345" y="55" width="120" height="72" rx="5" class="boxn"/><text x="405" y="85" class="tg">CA</text><text x="405" y="104" class="ts">ALU</text>
+        <rect x="20"  y="58" width="130" height="64" rx="5" class="box"/><text x="85"  y="86" class="t tc">I</text><text x="85"  y="104" class="ts">입력</text>
+        <rect x="530" y="58" width="130" height="64" rx="5" class="box"/><text x="595" y="86" class="t tc">O</text><text x="595" y="104" class="ts">출력</text>
+        <rect x="200" y="185" width="280" height="60" rx="5" class="box"/><text x="340" y="210" class="t tc">M</text><text x="340" y="229" class="ts">메모리 — 명령어와 데이터를 함께 저장</text>
+        <line x1="150" y1="90" x2="198" y2="90" class="ln" marker-end="url(#a3)"/>
+        <line x1="482" y1="90" x2="528" y2="90" class="ln" marker-end="url(#a3)"/>
+        <line x1="340" y1="147" x2="340" y2="183" class="ln" marker-start="url(#a3)" marker-end="url(#a3)"/>
+      </svg>
+      </div>
+      <figcaption>그림 1-3 · EDVAC 보고서의 다섯 부분
+        <span class="src">개념 재구성 · 참조: <a href="https://library.si.edu/digital-library/book/firstdraftofrepo00vonn" target="_blank" rel="noopener noreferrer">J. von Neumann, First Draft of a Report on the EDVAC (1945)</a></span>
+      </figcaption>
+    </figure>
+  </div>
+  <div class="tip"><span class="lbl">SoC 연결</span>Vitis에서 만든 ELF의 명령어·데이터를 설계된 메모리 영역에 적재하면 MicroBlaze V가 명령어를 인출하여 실행한다. BRAM 초기화 및 다운로드 방법은 실습 설정에 따라 달라진다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>폰 노이만 구조와 병목</h2><span class="pg-no">1장 · 4 / 10</span></div>
+  <p>프로그램 내장 방식을 가장 단순하게 만들면, 명령어와 데이터가 <strong>하나의 메모리 공간</strong>에 함께 있고 CPU와 메모리 사이 <strong>공유 통로</strong>를 사용한다. 이는 폰 노이만 구조를 이해하기 위한 단순화 모델이다. 공유 자원을 동시에 요구하면 명령어 인출과 데이터 접근이 서로 기다릴 수 있다.</p>
+  <figure>
+    <div class="fig">
+    <svg viewBox="0 0 680 220" style="min-width:520px" role="img" aria-label="폰 노이만 구조 병목">
+      <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+      <rect x="20" y="60" width="140" height="90" rx="5" class="boxn"/><text x="90" y="100" class="tg">CPU</text><text x="90" y="120" class="ts">제어장치 + ALU</text>
+      <rect x="400" y="25" width="260" height="170" rx="6" class="box"/>
+      <text x="530" y="45" class="t tc">메모리 1개</text>
+      <rect x="420" y="58" width="220" height="55" rx="4" class="boxn"/><text x="530" y="82" class="tg">명령어</text><text x="530" y="100" class="ts">.text</text>
+      <rect x="420" y="125" width="220" height="55" rx="4" class="boxg"/><text x="530" y="149" class="t tc">데이터</text><text x="530" y="167" class="ts">.data · .bss · 스택</text>
+      <line x1="162" y1="105" x2="398" y2="105" class="ln" style="stroke-width:3" marker-start="url(#a4)" marker-end="url(#a4)"/>
+      <text x="280" y="92" class="ts">버스 1개</text>
+      <text x="280" y="128" class="ts" style="fill:var(--amber)">명령어·데이터가 번갈아 사용</text>
+    </svg>
+    </div>
+    <figcaption>그림 1-4 · 폰 노이만 구조</figcaption>
+  </figure>
+  <div class="scroll"><table>
+    <tr><th>접근 순서(개념 예)</th><th>공유 버스가 하는 일</th><th>의미</th></tr>
+    <tr><td>①</td><td>명령어 <code>lw x5, 0(x4)</code> 인출</td><td>명령어가 공유 통로를 사용</td></tr>
+    <tr><td>②</td><td>메모리 데이터 읽기</td><td>같은 통로라면 동시 인출이 제한됨</td></tr>
+    <tr><td>③</td><td>다음 명령어 인출</td><td>공유 통로를 다시 사용</td></tr>
+  </table></div>
+  <div class="warn"><span class="lbl">폰 노이만 병목</span>명령어와 데이터가 공유 통로의 대역폭을 놓고 경쟁할 수 있다. 이를 폰 노이만 병목이라고 한다. 표의 ①~③은 접근 순서 예시이며 실제 CPU의 클록 수를 나타내지 않는다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>하버드 구조 — 통로를 둘로</h2><span class="pg-no">1장 · 5 / 10</span></div>
+  <p>병목을 줄이는 가장 직접적인 방법은 통로를 나누는 것이다. <strong>명령어용 경로</strong>와 <strong>데이터용 경로</strong>를 따로 두면, 메모리 포트와 회로가 허용하는 경우 명령어 인출과 데이터 접근을 병렬로 진행할 수 있다. 이것이 하버드 구조의 핵심이다.</p>
+  <figure>
+    <div class="fig">
+    <svg viewBox="0 0 700 240" style="min-width:540px" role="img" aria-label="폰 노이만과 하버드 비교">
+      <defs><marker id="a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+      <text x="170" y="22" class="t tc">폰 노이만</text>
+      <rect x="20" y="60" width="100" height="60" rx="5" class="box"/><text x="70" y="95" class="t tc">CPU</text>
+      <rect x="210" y="60" width="115" height="60" rx="5" class="box"/><text x="267" y="86" class="t tc">메모리</text><text x="267" y="104" class="ts">명령어+데이터</text>
+      <line x1="122" y1="90" x2="208" y2="90" class="ln" marker-start="url(#a5)" marker-end="url(#a5)"/>
+      <text x="165" y="82" class="ts">버스 1개</text>
+      <line x1="350" y1="15" x2="350" y2="185" class="lm"/>
+      <text x="530" y="22" class="t tc">하버드</text>
+      <rect x="370" y="50" width="100" height="135" rx="5" class="boxn"/><text x="420" y="122" class="tg">CPU</text>
+      <rect x="580" y="45" width="110" height="58" rx="5" class="box"/><text x="635" y="70" class="t tc">명령어</text><text x="635" y="88" class="ts">메모리</text>
+      <rect x="580" y="128" width="110" height="58" rx="5" class="box"/><text x="635" y="153" class="t tc">데이터</text><text x="635" y="171" class="ts">메모리</text>
+      <line x1="472" y1="74" x2="578" y2="74" class="lg" marker-end="url(#a5)"/>
+      <text x="525" y="66" class="ts" style="fill:var(--green)">명령어 버스</text>
+      <line x1="472" y1="157" x2="578" y2="157" class="lg" marker-start="url(#a5)" marker-end="url(#a5)"/>
+      <text x="525" y="149" class="ts" style="fill:var(--green)">데이터 버스</text>
+      <text x="350" y="222" class="ts">MicroBlaze V: ILMB(명령어) · DLMB(데이터)를 듀얼 포트 BRAM에 연결한 구성 예</text>
+    </svg>
+    </div>
+    <figcaption>그림 1-5 · 폰 노이만과 하버드 비교
+      <span class="src">개념 재구성 · 참조: <a href="https://docs.amd.com/r/en-US/ug1629-microblaze-v-user-guide/Memory-Architecture" target="_blank" rel="noopener noreferrer">AMD UG1629, Memory Architecture</a></span>
+    </figcaption>
+  </figure>
+  <div class="scroll"><table>
+    <tr><th></th><th>폰 노이만</th><th>하버드</th></tr>
+    <tr><td>버스</td><td>1개 (명령어·데이터 공유)</td><td>2개 (명령어 / 데이터)</td></tr>
+    <tr><td>명령어·데이터 동시 접근</td><td>공유 통로에서 제한</td><td>독립 경로·포트가 허용하면 가능</td></tr>
+    <tr><td>회로 크기</td><td>작음</td><td>버스·포트가 더 필요</td></tr>
+    <tr><td>대표적인 예</td><td>공유 버스의 단순 컴퓨터 모델</td><td>DSP, MicroBlaze V의 분리된 인터페이스</td></tr>
+  </table></div>
+  <div class="tip"><span class="lbl">SoC 연결</span>ILMB와 DLMB를 하나의 듀얼 포트 BRAM에 연결할 수 있다. MicroBlaze V는 명령어·데이터 인터페이스가 분리된 하버드 구조이며, 이 예제에서는 물리 BRAM을 공유한다. 실제 연결은 Block Design에서 확인한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>버스 — 주소 · 데이터 · 제어</h2><span class="pg-no">1장 · 6 / 10</span></div>
+  <p>버스(Bus)는 여러 장치가 함께 쓰는 신호선 묶음이다. 신호의 성격에 따라 세 갈래로 나눈다. 버스는 일반적으로 접근할 위치(주소), 주고받을 값(데이터), 접근 종류·응답(제어)을 다룬다. 실제 AXI에서는 읽기·쓰기 주소와 데이터가 여러 독립 채널로 나뉘므로 아래 그림은 기능별 개념도이다.</p>
+  <figure>
+    <div class="fig">
+    <svg viewBox="0 0 680 185" style="min-width:520px" role="img" aria-label="주소 데이터 제어 버스">
+      <rect x="20" y="20" width="130" height="60" rx="5" class="boxn"/><text x="85" y="47" class="tg">CPU</text><text x="85" y="65" class="ts">MicroBlaze V</text>
+      <rect x="250" y="20" width="140" height="60" rx="5" class="box"/><text x="320" y="47" class="t tc">메모리</text><text x="320" y="65" class="ts">0x0000_0000~</text>
+      <rect x="470" y="20" width="170" height="60" rx="5" class="box"/><text x="555" y="47" class="t tc">입출력장치</text><text x="555" y="65" class="ts">0x4000_0000~</text>
+      <line x1="20" y1="112" x2="660" y2="112" class="lb" style="stroke-width:3"/>
+      <line x1="20" y1="138" x2="660" y2="138" class="ln" style="stroke-width:3"/>
+      <line x1="20" y1="164" x2="660" y2="164" class="lg" style="stroke-width:3"/>
+      <line x1="65" y1="80" x2="65" y2="112" class="lb"/><circle cx="65" cy="112" r="4" class="ab"/>
+      <path d="M85 80 V138" class="ln"/><circle cx="85" cy="138" r="4" class="ah"/>
+      <path d="M105 80   V164" class="lg"/><circle cx="105" cy="164" r="4" class="ag"/>
+      <line x1="300" y1="80" x2="300" y2="112" class="lb"/><circle cx="300" cy="112" r="4" class="ab"/>
+      <path d="M320 80 V138" class="ln"/><circle cx="320" cy="138" r="4" class="ah"/>
+      <path d="M340 80   V164" class="lg"/><circle cx="340" cy="164" r="4" class="ag"/>
+      <line x1="535" y1="80" x2="535" y2="112" class="lb"/><circle cx="535" cy="112" r="4" class="ab"/>
+      <path d="M555 80 V138" class="ln"/><circle cx="555" cy="138" r="4" class="ah"/>
+      <path d="M575 80   V164" class="lg"/><circle cx="575" cy="164" r="4" class="ag"/>
+      <text x="135" y="106" class="ts" style="text-anchor:start;fill:var(--blue)">주소 버스 · CPU → 장치</text>
+      <text x="135" y="132" class="ts" style="text-anchor:start">데이터 버스 · 양방향</text>
+      <text x="135" y="158" class="ts" style="text-anchor:start;fill:var(--green)">제어 버스 · 읽기/쓰기 · 응답</text>
+    </svg>
+    </div>
+    <figcaption>그림 1-6 · 버스의 세 갈래</figcaption>
+  </figure>
+  <div class="cols">
+    <div class="scroll"><table>
+      <tr><th>버스</th><th>싣는 것</th><th>폭 (우리 SoC)</th></tr>
+      <tr><td>주소</td><td>접근할 위치</td><td>32 bit</td></tr>
+      <tr><td>데이터</td><td>읽거나 쓸 값</td><td>32 bit</td></tr>
+      <tr><td>제어</td><td>읽기/쓰기 구분, 준비·완료 신호</td><td>여러 개</td></tr>
+    </table></div>
+    <div class="scroll"><table>
+      <tr><th colspan="2">쓰기 동작 예시: LED 8개 켜기 (가상 주소 <code>0x40000000</code>)</th></tr>
+      <tr><td>주소 버스</td><td><code>0x4000_0000</code></td></tr>
+      <tr><td>데이터 버스</td><td><code>0x0000_00FF</code></td></tr>
+      <tr><td>제어 버스</td><td>쓰기</td></tr>
+      <tr><td>응답하는 장치</td><td>AXI GPIO (LED/SW)</td></tr>
+    </table></div>
+  </div>
+  <div class="tip"><span class="lbl">SoC 연결</span>설계 예에서는 BRAM 접근에 LMB(로컬 메모리 버스), 주변장치 접근에 AXI4-Lite(경량 메모리 매핑 인터페이스)를 사용한다. 주소 예시는 확정된 하드웨어 주소가 아니며 Vivado Address Editor에서 확인해야 한다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>CPU가 칩 하나로 — Intel 4004 (1971)</h2><span class="pg-no">1장 · 7 / 10</span></div>
+  <p>1971년 Intel은 일본 계산기 회사 Busicom의 의뢰로 칩 네 개짜리 MCS-4 제품군을 내놓았다. 그중 <strong>4004</strong>는 CPU 전체를 칩 하나에 담은 최초의 상용 마이크로프로세서다. 프로그램 저장(ROM), 데이터 저장(RAM), 입출력 확장은 아직 다른 칩이 맡았다.</p>
+  <div class="cards">
+    <div class="card"><b>출시</b><span class="num">1971</span><span>Busicom 141-PF 계산기용</span></div>
+    <div class="card"><b>트랜지스터</b><span class="num">2,300</span><span>개</span></div>
+    <div class="card"><b>최소 선폭</b><span class="num">10 µm</span><span>10,000 nm · 2인치 웨이퍼</span></div>
+  </div>
+  <figure>
+    <div class="fig">
+    <svg viewBox="0 0 680 200" style="min-width:480px" role="img" aria-label="Intel C4004 칩 모양">
+      <g class="pin">
+        <rect x="222" y="18" width="12" height="26" rx="2"/><rect x="254" y="18" width="12" height="26" rx="2"/><rect x="286" y="18" width="12" height="26" rx="2"/><rect x="318" y="18" width="12" height="26" rx="2"/>
+        <rect x="350" y="18" width="12" height="26" rx="2"/><rect x="382" y="18" width="12" height="26" rx="2"/><rect x="414" y="18" width="12" height="26" rx="2"/><rect x="446" y="18" width="12" height="26" rx="2"/>
+        <rect x="222" y="146" width="12" height="26" rx="2"/><rect x="254" y="146" width="12" height="26" rx="2"/><rect x="286" y="146" width="12" height="26" rx="2"/><rect x="318" y="146" width="12" height="26" rx="2"/>
+        <rect x="350" y="146" width="12" height="26" rx="2"/><rect x="382" y="146" width="12" height="26" rx="2"/><rect x="414" y="146" width="12" height="26" rx="2"/><rect x="446" y="146" width="12" height="26" rx="2"/>
+      </g>
+      <rect x="200" y="40" width="280" height="110" rx="6" class="chipc"/>
+      <path d="M200 80 A15 15 0 0 1 200 110" class="ln" style="fill:var(--bg)"/>
+      <line x1="228" y1="52" x2="228" y2="68" class="trace"/><line x1="260" y1="52" x2="260" y2="64" class="trace"/><line x1="420" y1="52" x2="420" y2="66" class="trace"/><line x1="452" y1="52" x2="452" y2="70" class="trace"/>
+      <line x1="228" y1="124" x2="228" y2="138" class="trace"/><line x1="324" y1="126" x2="324" y2="138" class="trace"/><line x1="388" y1="122" x2="388" y2="138" class="trace"/><line x1="452" y1="128" x2="452" y2="138" class="trace"/>
+      <rect x="318" y="78" width="44" height="34" rx="2" class="boxg"/>
+      <text x="270" y="101" class="t tc" style="font-weight:700">intel</text>
+      <text x="420" y="101" class="t tc" style="font-family:var(--mono);font-weight:600">C4004</text>
+      <text x="340" y="192" class="ts">16핀 DIP(Dual In-line Package, 양쪽 줄 핀) 세라믹 패키지</text>
+      <text x="100" y="98" class="ts">핀 1 쪽 홈</text>
+      <line x1="140" y1="95" x2="190" y2="95" class="lm"/>
+    </svg>
+    </div>
+    <figcaption>그림 1-7 · Intel C4004
+      <span class="src">개념 재구성 · 참조: <a href="https://timeline.intel.com/1971/the-first-programmable-microprocessor%3A-the-4004" target="_blank" rel="noopener noreferrer">Intel 4004 역사 자료</a></span>
+    </figcaption>
+  </figure>
+  <figure>
+    <div class="fig">
+    <svg viewBox="0 0 680 190" style="min-width:520px" role="img" aria-label="MCS-4 칩 구성">
+      <rect x="20"  y="25" width="140" height="72" rx="5" class="boxn"/><text x="90"  y="55" class="tg">4004</text><text x="90"  y="75" class="ts">CPU</text>
+      <rect x="185" y="25" width="140" height="72" rx="5" class="box"/><text x="255" y="55" class="t tc">4001</text><text x="255" y="75" class="ts">ROM · 프로그램</text>
+      <rect x="350" y="25" width="140" height="72" rx="5" class="box"/><text x="420" y="55" class="t tc">4002</text><text x="420" y="75" class="ts">RAM · 데이터</text>
+      <rect x="515" y="25" width="145" height="72" rx="5" class="box"/><text x="587" y="55" class="t tc">4003</text><text x="587" y="75" class="ts">시프트 레지스터 · I/O</text>
+      <rect x="20" y="140" width="640" height="24" rx="4" class="boxg"/><text x="340" y="156" class="ts">4-bit 공유 버스</text>
+      <line x1="90" y1="97" x2="90" y2="140" class="ln"/><line x1="255" y1="97" x2="255" y2="140" class="ln"/>
+      <line x1="420" y1="97" x2="420" y2="140" class="ln"/><line x1="587" y1="97" x2="587" y2="140" class="ln"/>
+    </svg>
+    </div>
+    <figcaption>그림 1-8 · MCS-4 칩 구성
+      <span class="src">개념 재구성 · 참조: <a href="https://timeline.intel.com/1971/the-first-programmable-microprocessor%3A-the-4004" target="_blank" rel="noopener noreferrer">Intel 4004 역사 자료</a></span>
+    </figcaption>
+  </figure>
+  <div class="note"><span class="lbl">핵심</span>4004 시대에는 "CPU 칩 + 메모리 칩 + I/O 칩"을 기판 위에서 버스로 이었다. 이 칩들이 하나로 합쳐지는 것이 다음 페이지의 SoC다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>시스템이 칩 하나로 — SoC와 Apple M1 (2020)</h2><span class="pg-no">1장 · 8 / 10</span></div>
+  <p>SoC(System on Chip, 시스템 온 칩)는 CPU뿐 아니라 그래픽·신경망 가속기·보안·입출력 컨트롤러까지 <strong>주요 시스템 기능을 하나의 반도체 다이</strong>에 집적한 칩이다. Apple M1은 CPU·GPU·가속기·컨트롤러를 SoC 다이에 통합하고, DRAM은 같은 패키지의 별도 칩에 배치한다. 통합 메모리는 여러 처리 블록의 데이터 공유 시 불필요한 메모리 풀 간 복사를 줄인다.</p>
+  <div class="cards">
+    <div class="card"><b>트랜지스터</b><span class="num">160억</span><span>4004의 약 700만 배</span></div>
+    <div class="card"><b>공정</b><span class="num">5 nm</span><span>4004와 세대·측정 기준이 다른 공정 명칭</span></div>
+    <div class="card"><b>CPU</b><span class="num">8코어</span><span>고성능 4 + 고효율 4</span></div>
+    <div class="card"><b>가속기</b><span class="num">GPU 8 · NE 16</span><span>GPU 최대 8코어, Neural Engine 16코어</span></div>
+  </div>
+  <figure>
+    <div class="fig">
+    <svg viewBox="0 0 680 210" style="min-width:480px" role="img" aria-label="M1 패키지 모양">
+      <rect x="170" y="15" width="340" height="170" rx="10" class="chipc"/>
+      <rect x="192" y="38" width="190" height="124" rx="4" class="die"/>
+      <text x="287" y="96" class="dt" style="font-size:30px">M1</text>
+      <text x="287" y="120" class="dts">SoC 다이</text>
+      <rect x="400" y="38" width="90" height="56" rx="3" class="mem"/><text x="445" y="71" class="dts">메모리</text>
+      <rect x="400" y="106" width="90" height="56" rx="3" class="mem"/><text x="445" y="139" class="dts">메모리</text>
+      <text x="90" y="104" class="ts">패키지 기판</text><line x1="130" y1="100" x2="168" y2="100" class="lm"/>
+      <text x="340" y="203" class="ts">SoC와 메모리가 한 패키지 위에 — "통합 메모리"</text>
+    </svg>
+    </div>
+    <figcaption>그림 1-9 · Apple M1 패키지
+      <span class="src">개념 재구성 · 참조: <a href="https://www.apple.com/kr/newsroom/2020/11/apple-unleashes-m1/" target="_blank" rel="noopener noreferrer">Apple Newsroom, M1 발표(2020)</a></span>
+    </figcaption>
+  </figure>
+  <figure>
+    <div class="fig">
+    <svg viewBox="0 0 680 260" style="min-width:520px" role="img" aria-label="M1 SoC 개념도">
+      <rect x="10" y="10" width="660" height="240" rx="8" class="boxd"/>
+      <text x="22" y="28" class="ts" style="text-anchor:start">M1 패키지</text>
+      <rect x="30" y="38" width="440" height="200" rx="6" class="box"/>
+      <text x="250" y="58" class="ts">SoC 다이</text>
+      <rect x="45"  y="70" width="130" height="55" rx="4" class="boxn"/><text x="110" y="93"  class="tg">CPU 고성능</text><text x="110" y="112" class="ts">4코어</text>
+      <rect x="185" y="70" width="130" height="55" rx="4" class="boxn"/><text x="250" y="93"  class="tg">CPU 고효율</text><text x="250" y="112" class="ts">4코어</text>
+      <rect x="325" y="70" width="130" height="55" rx="4" class="box"/><text x="390" y="93"  class="t tc">GPU</text><text x="390" y="112" class="ts">최대 8코어</text>
+      <rect x="45"  y="135" width="130" height="55" rx="4" class="box"/><text x="110" y="158" class="t tc">Neural Engine</text><text x="110" y="177" class="ts">16코어</text>
+      <rect x="185" y="135" width="130" height="55" rx="4" class="box"/><text x="250" y="158" class="t tc">보안</text><text x="250" y="177" class="ts">보안 영역</text>
+      <rect x="325" y="135" width="130" height="55" rx="4" class="box"/><text x="390" y="158" class="t tc">I/O 컨트롤러</text><text x="390" y="177" class="ts">Thunderbolt · ISP</text>
+      <rect x="45" y="204" width="410" height="22" rx="3" class="boxg"/><text x="250" y="219" class="ts">내부 연결망 (버스)</text>
+      <rect x="495" y="50"  width="160" height="80" rx="5" class="boxb"/><text x="575" y="85"  class="tb">통합 메모리</text><text x="575" y="104" class="ts">같은 패키지</text>
+      <rect x="495" y="145" width="160" height="80" rx="5" class="boxb"/><text x="575" y="180" class="tb">통합 메모리</text><text x="575" y="199" class="ts">같은 패키지</text>
+      <line x1="470" y1="90" x2="495" y2="90" class="lb"/><line x1="470" y1="185" x2="495" y2="185" class="lb"/>
+    </svg>
+    </div>
+    <figcaption>그림 1-10 · M1 구성
+      <span class="src">개념 재구성 · 참조: <a href="https://www.apple.com/kr/newsroom/2020/11/apple-unleashes-m1/" target="_blank" rel="noopener noreferrer">Apple Newsroom, M1 발표(2020)</a></span>
+    </figcaption>
+  </figure>
+  <div class="scroll"><table>
+    <tr><th></th><th>전통적인 PC</th><th>SoC</th></tr>
+    <tr><td>구성</td><td>CPU · GPU · 주변 칩셋이 분리된 구성</td><td>주요 연산·제어 블록을 같은 다이에 통합</td></tr>
+    <tr><td>연결</td><td>칩 간에는 기판 연결 사용</td><td>다이 내부 연결망 + 패키지/외부 연결</td></tr>
+    <tr><td>특징</td><td>확장·교체의 유연성을 확보하기 쉬움</td><td>집적도·전력 효율·소형화에 유리</td></tr>
+  </table></div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>FPGA 위의 SoC — Basys3 보드</h2><span class="pg-no">1장 · 9 / 10</span></div>
+  <p>M1 같은 SoC는 공장에서 회로가 고정된다. FPGA(Field-Programmable Gate Array, 현장에서 프로그래밍하는 게이트 배열)는 칩 안의 논리 회로를 <strong>비트스트림 파일로 다시 짤 수 있는</strong> 칩이다. 그래서 CPU·버스·주변장치를 회로로 "그려 넣어" SoC를 직접 만들 수 있다. 우리가 쓰는 Basys3에는 AMD Artix-7 FPGA가 들어 있다.</p>
+  <div class="cards">
+    <div class="card"><b>FPGA</b><span class="num">XC7A35T</span><span>Artix-7, CPG236 패키지</span></div>
+    <div class="card"><b>논리 셀</b><span class="num">33,280</span><span>5,200 슬라이스</span></div>
+    <div class="card"><b>블록 RAM</b><span class="num">1,800 Kbit</span><span>SoC 메모리로 사용</span></div>
+    <div class="card"><b>클록</b><span class="num">100 MHz</span><span>보드 발진기, 핀 W5</span></div>
+  </div>
+  <figure>
+    <div class="fig">
+    <svg viewBox="0 0 700 275" style="min-width:540px" role="img" aria-label="Basys3 부품 연결">
+      <rect x="250" y="20" width="200" height="240" rx="6" class="boxn"/>
+      <text x="350" y="130" class="tg">XC7A35T</text><text x="350" y="150" class="ts">Artix-7 FPGA</text>
+      <rect x="30" y="28"  width="150" height="44" rx="4" class="box"/><text x="105" y="46"  class="t tc">슬라이드 스위치 16</text><text x="105" y="63"  class="ts">표 1 · 5번</text>
+      <rect x="30" y="88"  width="150" height="44" rx="4" class="box"/><text x="105" y="106" class="t tc">푸시 버튼 5</text><text x="105" y="123" class="ts">표 1 · 7번</text>
+      <rect x="30" y="148" width="150" height="44" rx="4" class="box"/><text x="105" y="166" class="t tc">Pmod 포트</text><text x="105" y="183" class="ts">표 1 · 2번</text>
+      <rect x="30" y="208" width="150" height="44" rx="4" class="boxg"/><text x="105" y="226" class="t tc">100 MHz 클록</text><text x="105" y="243" class="ts">핀 W5</text>
+      <rect x="520" y="28"  width="150" height="44" rx="4" class="box"/><text x="595" y="46"  class="t tc">LED 16</text><text x="595" y="63"  class="ts">표 1 · 6번</text>
+      <rect x="520" y="88"  width="150" height="44" rx="4" class="box"/><text x="595" y="106" class="t tc">7세그먼트 4자리</text><text x="595" y="123" class="ts">표 1 · 4번</text>
+      <rect x="520" y="148" width="150" height="44" rx="4" class="box"/><text x="595" y="166" class="t tc">USB-UART/JTAG</text><text x="595" y="183" class="ts">표 1 · 13번</text>
+      <rect x="520" y="208" width="150" height="44" rx="4" class="boxg"/><text x="595" y="226" class="t tc">QSPI 플래시</text><text x="595" y="243" class="ts">구성 메모리</text>
+      <line x1="180" y1="50" x2="250" y2="50" class="ln"/><line x1="180" y1="110" x2="250" y2="110" class="ln"/>
+      <line x1="180" y1="170" x2="250" y2="170" class="ln"/><line x1="180" y1="230" x2="250" y2="230" class="ln"/>
+      <line x1="450" y1="50" x2="520" y2="50" class="ln"/><line x1="450" y1="110" x2="520" y2="110" class="ln"/>
+      <line x1="450" y1="170" x2="520" y2="170" class="ln"/><line x1="450" y1="230" x2="520" y2="230" class="ln"/>
+    </svg>
+    </div>
+    <figcaption>그림 1-11 · Basys3에서 FPGA와 연결된 주요 부품
+      <span class="src">개념 재구성 · 참조: <a href="https://digilent.com/reference/programmable-logic/basys-3/reference-manual" target="_blank" rel="noopener noreferrer">Digilent, Basys 3 Reference Manual</a></span>
+    </figcaption>
+  </figure>
+  <div class="tip"><span class="lbl">SoC 연결</span>스위치·버튼·LED·7세그먼트는 사용자 SoC의 입출력으로 연결할 수 있다. USB-UART는 콘솔 통신에 활용한다. 보드의 QSPI 플래시는 FPGA 구성 비트스트림 저장용이며, CPU 프로그램의 자동 기동에는 별도의 초기화·부팅 설계가 필요하다.</div>
+</section>
+
+<section class="pg" hidden>
+  <div class="pg-head"><h2>우리가 만들 SoC · 1장 정리</h2><span class="pg-no">1장 · 10 / 10</span></div>
+  <p>지금까지의 개념을 모으면 Basys3 위에 만들 SoC가 된다. 구성 예에서는 AMD의 RISC-V 기반 소프트 프로세서 <strong>MicroBlaze V</strong>(RV32IMC 설정), BRAM 64 KiB, AXI4-Lite 주변장치 슬롯 7개를 사용한다. 블록 종류·메모리 크기·주소는 실제 프로젝트에서 설정하고 검증해야 한다.</p>
+  <figure>
+    <div class="fig">
+    <svg viewBox="0 0 720 300" style="min-width:560px" role="img" aria-label="MicroBlaze V SoC 블록도">
+      <defs><marker id="a10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ab"/></marker></defs>
+      <rect x="20" y="30" width="170" height="80" rx="5" class="boxn"/><text x="105" y="64" class="tg">MicroBlaze V</text><text x="105" y="84" class="ts">CPU · RV32IMC</text>
+      <rect x="20" y="190" width="170" height="70" rx="5" class="box"/><text x="105" y="220" class="t tc">BRAM</text><text x="105" y="240" class="ts">0x0000_0000 · 64 KiB 예시</text>
+      <line x1="75" y1="110" x2="75" y2="190" class="lg"/><line x1="135" y1="110" x2="135" y2="190" class="lg"/>
+      <text x="68" y="155" class="ts" style="text-anchor:end;fill:var(--green)">ILMB</text><text x="142" y="155" class="ts" style="text-anchor:start;fill:var(--green)">DLMB</text>
+      <rect x="240" y="30" width="70" height="246" rx="5" class="boxb"/>
+      <text x="275" y="140" class="tb">AXI</text><text x="275" y="158" class="ts">인터</text><text x="275" y="172" class="ts">커넥트</text>
+      <line x1="190" y1="70" x2="238" y2="70" class="lb" marker-end="url(#a10)"/>
+      <rect x="360" y="30"  width="200" height="30" rx="4" class="box"/><text x="460" y="50"  class="t tc" style="font-size:12px">GPIO · LED/SW</text><text x="575" y="50"  class="ts" style="text-anchor:start">0x4000_0000</text>
+      <rect x="360" y="66"  width="200" height="30" rx="4" class="box"/><text x="460" y="86"  class="t tc" style="font-size:12px">GPIO · BTN</text><text x="575" y="86"  class="ts" style="text-anchor:start">0x4001_0000</text>
+      <rect x="360" y="102" width="200" height="30" rx="4" class="box"/><text x="460" y="122" class="t tc" style="font-size:12px">UART Lite</text><text x="575" y="122" class="ts" style="text-anchor:start">0x4002_0000</text>
+      <rect x="360" y="138" width="200" height="30" rx="4" class="box"/><text x="460" y="158" class="t tc" style="font-size:12px">Timer</text><text x="575" y="158" class="ts" style="text-anchor:start">0x4003_0000</text>
+      <rect x="360" y="174" width="200" height="30" rx="4" class="box"/><text x="460" y="194" class="t tc" style="font-size:12px">INTC (인터럽트 제어기)</text><text x="575" y="194" class="ts" style="text-anchor:start">0x4004_0000</text>
+      <rect x="360" y="210" width="200" height="30" rx="4" class="box"/><text x="460" y="230" class="t tc" style="font-size:12px">확장 슬롯</text><text x="575" y="230" class="ts" style="text-anchor:start">0x4005_0000</text>
+      <rect x="360" y="246" width="200" height="30" rx="4" class="boxg"/><text x="460" y="266" class="t tc" style="font-size:12px">SEG7 (사용자 IP)</text><text x="575" y="266" class="ts" style="text-anchor:start">0x4006_0000</text>
+      <line x1="310" y1="45"  x2="360" y2="45"  class="lb"/><line x1="310" y1="81"  x2="360" y2="81"  class="lb"/>
+      <line x1="310" y1="117" x2="360" y2="117" class="lb"/><line x1="310" y1="153" x2="360" y2="153" class="lb"/>
+      <line x1="310" y1="189" x2="360" y2="189" class="lb"/><line x1="310" y1="225" x2="360" y2="225" class="lb"/>
+      <line x1="310" y1="261" x2="360" y2="261" class="lb"/>
+      <text x="215" y="62" class="ts" style="fill:var(--blue)">M_AXI</text>
+    </svg>
+    </div>
+    <figcaption>그림 1-12 · MicroBlaze V SoC 구성·주소 예시 (실제 구현값 아님)
+       <span class="src">참조: <a href="https://docs.amd.com/r/en-US/ug1629-microblaze-v-user-guide" target="_blank" rel="noopener noreferrer">AMD UG1629</a> · 주소와 확장 슬롯은 교육용 설계 예시</span>
+    </figcaption>
+  </figure>
+  <div class="scroll"><table>
+    <tr><th>이번 장 개념</th><th>한 줄 정리</th><th>우리 SoC에서</th></tr>
+    <tr><td>3대 구성요소</td><td>CPU · 메모리 · 입출력장치</td><td>MicroBlaze V · BRAM · AXI 주변장치</td></tr>
+    <tr><td>프로그램 내장</td><td>명령어를 메모리에서 인출·실행</td><td>ELF의 실행 정보를 이용해 BRAM 초기화·적재</td></tr>
+    <tr><td>폰 노이만 / 하버드</td><td>명령어·데이터 경로 공유 / 분리</td><td>ILMB · DLMB 분리, BRAM 공유 가능</td></tr>
+    <tr><td>버스</td><td>주소 · 데이터 · 제어</td><td>LMB, AXI4-Lite</td></tr>
+    <tr><td>SoC</td><td>주요 연산·제어 기능의 단일 칩 집적</td><td>XC7A35T 내부에 CPU·버스·주변장치 논리를 구성</td></tr>
+  </table></div>
+  <div class="note"><span class="lbl">다음 장</span>2장 데이터 — 주소맵에 나온 <code>0x4000_0000</code> 같은 16진수는 무엇이고, CPU는 숫자와 글자를 어떻게 비트로 담는가.</div>
+</section>
+
+</div>
+<nav class="pager"><div class="pager-in"><button id="prev">← 이전</button><div class="dots"></div><span class="pos"></span><button id="next">다음 →</button></div></nav>
+<script>
+(function(){
+  var pages=[].slice.call(document.querySelectorAll('.pg'));
+  var dots=document.querySelector('.dots'), prev=document.getElementById('prev'), next=document.getElementById('next');
+  pages.forEach(function(_,i){var b=document.createElement('button');b.textContent=i+1;b.setAttribute('aria-label',(i+1)+'페이지');b.onclick=function(){go(i)};dots.appendChild(b)});
+  var cur=0;
+  function go(i){
+    cur=Math.max(0,Math.min(pages.length-1,i));
+    pages.forEach(function(p,k){p.hidden=k!==cur});
+    [].forEach.call(dots.children,function(b,k){b.classList.toggle('on',k===cur)});
+    var pos=document.querySelector('.pos'); if(pos) pos.textContent=(cur+1)+' / '+pages.length;
+    prev.disabled=cur===0; next.disabled=cur===pages.length-1;
+    try{history.replaceState(null,'','#p'+(cur+1))}catch(e){}
+    window.scrollTo(0,0);
+  }
+  prev.onclick=function(){go(cur-1)}; next.onclick=function(){go(cur+1)};
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+  var m=/^#p(\d+)$/.exec(location.hash||''); go(m?parseInt(m[1],10)-1:0);
+  document.getElementById('theme').onclick=function(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d?d==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.setAttribute('data-theme',dark?'light':'dark')};
+})();
+</script>
+
+</body></html>
